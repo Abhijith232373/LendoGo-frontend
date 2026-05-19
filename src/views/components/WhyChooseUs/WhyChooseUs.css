@@ -1,0 +1,32 @@
+.why-choose-us {
+  padding: 4rem 0 6rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.why-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 2rem;
+}
+
+.why-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.why-text {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  max-width: 100%; /* Uses the full width available */
+}
+
+@media (max-width: 968px) {
+  .why-choose-us {
+    text-align: center;
+  }
+}

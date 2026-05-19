@@ -1,0 +1,39 @@
+:root {
+  --primary: #0066FF; /* Sleek vibrant blue */
+  --primary-hover: #0052CC;
+  --text-dark: #1F2937;
+  --text-light: #6B7280;
+  --bg-color: #FAFAFA;
+  --card-bg: #FFFFFF;
+  --success-bg: #E8F5E9;
+  --success-text: #2E7D32;
+  --border-color: #E5E7EB;
+  --whatsapp-green: #25D366;
+  
+  --font-main: 'Inter', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-main);
+}
