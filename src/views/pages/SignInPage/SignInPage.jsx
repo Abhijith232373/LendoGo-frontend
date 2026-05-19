@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import SignInForm from '../../components/SignInForm/SignInForm';
 import WhatWeOffer from '../../components/WhatWeOffer/WhatWeOffer';
+import Testimonials from '../../components/Testimonials/Testimonials';
 import Footer from '../../components/Footer/Footer';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
 import illustration from '../../../assets/loan_illustration.png';
@@ -42,10 +43,13 @@ const SignInPage = () => {
             <img src={illustration} alt="Loan Approval Illustration" className="hero-illustration" />
           </div>
         </section>
+      </main>
 
+      <div className="bottom-sections" style={{ width: '100%' }}>
         <WhyChooseUs />
         <WhatWeOffer />
-      </main>
+        <Testimonials />
+      </div>
       
       <Footer />
     </div>
