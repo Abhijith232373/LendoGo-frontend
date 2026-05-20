@@ -1,16 +1,40 @@
-:root {
-  --primary: #0066FF; /* Sleek vibrant blue */
-  --primary-hover: #0052CC;
-  --text-dark: #1F2937;
-  --text-light: #6B7280;
-  --bg-color: #FAFAFA;
-  --card-bg: #FFFFFF;
-  --success-bg: #E8F5E9;
-  --success-text: #2E7D32;
-  --border-color: #E5E7EB;
-  --whatsapp-green: #25D366;
-  
-  --font-main: 'Inter', sans-serif;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #0066FF; /* Sleek vibrant blue */
+    --primary-hover: #0052CC;
+    --text-dark: #1F2937;
+    --text-light: #6B7280;
+    --bg-color: #FAFAFA;
+    --card-bg: #FFFFFF;
+    --success-bg: #E8F5E9;
+    --success-text: #2E7D32;
+    --border-color: #E5E7EB;
+    --whatsapp-green: #25D366;
+    
+    --font-main: 'Inter', sans-serif;
+
+    /* Shadcn Variables */
+    --background: 0 0% 98%; /* FAFAFA */
+    --foreground: 215 28% 17%; /* 1F2937 */
+    --card: 0 0% 100%; /* FFFFFF */
+    --card-foreground: 215 28% 17%;
+    --border: 220 13% 91%; /* E5E7EB */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --shadcn-primary: 216 100% 50%; /* 0066FF */
+    --shadcn-primary-foreground: 0 0% 100%;
+    --ring: 216 100% 50%;
+  }
+}
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 * {

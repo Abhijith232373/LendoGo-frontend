@@ -7,6 +7,7 @@ import Footer from '../../components/Footer/Footer';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
 import illustration from '../../../assets/loan_illustration.png';
 import WhyChooseUs from '../../components/WhyChooseUs/WhyChooseUs';
+import { StaggerFeatures } from '../../components/StaggerFeatures/StaggerFeatures';
 import './SignInPage.css';
 
 const SignInPage = () => {
@@ -48,6 +49,7 @@ const SignInPage = () => {
       <div className="bottom-sections" style={{ width: '100%' }}>
         <WhyChooseUs />
         <WhatWeOffer />
+        <StaggerFeatures />
         <Testimonials />
       </div>
       

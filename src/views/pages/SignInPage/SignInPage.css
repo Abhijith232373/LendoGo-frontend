@@ -2,6 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .main-content {
@@ -57,6 +58,11 @@
   margin-bottom: 2rem;
 }
 
+.bottom-sections {
+  overflow-x: hidden;
+}
+
+/* ─── Tablet ──────────────────────────────────────────────── */
 @media (max-width: 968px) {
   .hero-section {
     grid-template-columns: 1fr;
@@ -68,7 +74,7 @@
     margin: 0 auto;
     align-items: center;
   }
-  
+
   .badge {
     margin: 0 auto 2rem;
   }
@@ -79,5 +85,25 @@
 
   .main-content {
     padding: 0 2rem;
+  }
+}
+
+/* ─── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0 1rem;
+  }
+
+  .hero-section {
+    padding: 2rem 0;
+    gap: 1.5rem;
+  }
+
+  .success-state {
+    padding: 1.5rem;
+  }
+
+  .success-state h2 {
+    font-size: 1.5rem;
   }
 }
