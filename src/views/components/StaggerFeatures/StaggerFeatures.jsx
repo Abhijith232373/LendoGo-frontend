@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Briefcase, Wrench, Building2, FastForward, GraduationCap, Heart, Stethoscope } from 'lucide-react';
 import { cn } from '../../../lib/utils';
@@ -51,19 +49,7 @@ const features = [
   }
 ];
 
-interface FeatureCardProps {
-  position: number;
-  feature: typeof features[0];
-  handleMove: (steps: number) => void;
-  cardSize: number;
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({ 
-  position, 
-  feature, 
-  handleMove, 
-  cardSize 
-}) => {
+const FeatureCard = ({ position, feature, handleMove, cardSize }) => {
   const isCenter = position === 0;
   const IconComponent = feature.icon;
   const clipCorner = Math.max(20, cardSize * 0.12);
@@ -137,7 +123,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   );
 };
 
-const getCardSize = (width: number) => {
+const getCardSize = (width) => {
   if (width < 360) return Math.min(width - 32, 260);   // tiny phones
   if (width < 480) return Math.min(width - 32, 300);   // small phones
   if (width < 640) return Math.min(width - 48, 340);   // phones
@@ -146,9 +132,9 @@ const getCardSize = (width: number) => {
   return 420;                                           // desktop
 };
 
-const getContainerHeight = (cardSize: number) => cardSize + 120;
+const getContainerHeight = (cardSize) => cardSize + 120;
 
-export const StaggerFeatures: React.FC = () => {
+export const StaggerFeatures = () => {
   const [cardSize, setCardSize] = useState(420);
   const [featuresList, setFeaturesList] = useState(features);
 
@@ -156,7 +142,7 @@ export const StaggerFeatures: React.FC = () => {
     setCardSize(getCardSize(window.innerWidth));
   }, []);
 
-  const handleMove = (steps: number) => {
+  const handleMove = (steps) => {
     const newList = [...featuresList];
     if (steps > 0) {
       for (let i = steps; i > 0; i--) {

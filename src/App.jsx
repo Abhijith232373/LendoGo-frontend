@@ -1,10 +1,7 @@
-import SignInPage from './views/pages/SignInPage/SignInPage';
+import AppRoutes from './routes/index';
 
 function App() {
-  return (
-    <SignInPage />
-  )
+  return <AppRoutes />;
 }
 
-export default App
-
+export default App;
