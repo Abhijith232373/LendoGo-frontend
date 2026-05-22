@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Navbar.css';
+import ConsultationModal from '../ConsultationModal/ConsultationModal';
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const navbarRef = useRef(null);
 
   const toggleDropdown = (e, dropdownName) => {
@@ -28,6 +30,7 @@ const Navbar = () => {
   }, []);
 
   return (
+    <>
     <nav className="navbar" ref={navbarRef}>
       <div className="navbar-container">
         <div className="navbar-logo">
@@ -84,7 +87,7 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-actions">
-          <button className="btn-outline">Free Consultation</button>
+          <button className="btn-outline" onClick={() => setModalOpen(true)}>Free Consultation</button>
           <button className="btn-primary">Sign In</button>
         </div>
 
@@ -148,11 +151,14 @@ const Navbar = () => {
         </div>
 
         <div className="mobile-actions">
-          <button className="btn-outline">Free Consultation</button>
+          <button className="btn-outline" onClick={() => { setModalOpen(true); setMenuOpen(false); }}>Free Consultation</button>
           <button className="btn-primary">Sign In</button>
         </div>
       </div>
     </nav>
+
+    <ConsultationModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 };
 

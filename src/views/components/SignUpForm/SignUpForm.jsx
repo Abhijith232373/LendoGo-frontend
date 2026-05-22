@@ -121,32 +121,130 @@ const SignUpForm = () => {
     return valid;
   };
 
+  // const handleSendOtp = async (e) => {
+  //   e.preventDefault();
+  //   if (!validateFields()) return;
+  //   setSending(true);
+  //   // Backend will send OTP — we just trigger the UI state
+  //   // TODO: replace with actual API call
+  //   setTimeout(() => {
+  //     setSending(false);
+  //     setOtpSent(true);
+  //   }, 900);
+  // };
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!validateFields()) return;
     setSending(true);
-    // Backend will send OTP — we just trigger the UI state
-    // TODO: replace with actual API call
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/request-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ fullName, email }),
+      });
+
+      // Safely read body as text first — server may return HTML/plain-text on errors
+      const rawText = await response.text();
+      let data = {};
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        // Response was not JSON (e.g. Express "Cannot POST /...", Nginx 502, etc.)
+        console.error("Non-JSON response from server:", rawText);
+        setSending(false);
+        setEmailError(
+          response.status === 404
+            ? "API route not found (404). Is the backend running and the route registered?"
+            : `Server error ${response.status}: ${rawText.slice(0, 120)}`
+        );
+        return;
+      }
+
+      if (response.ok) {
+        setSending(false);
+        setOtpSent(true);
+      } else {
+        setSending(false);
+        setEmailError(data.error || `Server error (${response.status})`);
+      }
+    } catch (err) {
+      console.error("Network error:", err);
       setSending(false);
-      setOtpSent(true);
-    }, 900);
+      setEmailError("Could not reach the server. Make sure your backend is running on port 8080.");
+    }
   };
+
+  // const handleVerifyOtp = async (e) => {
+  //   e.preventDefault();
+  //   if (!otpValue.trim() || otpValue.length < 4) {
+  //     setOtpError('Please enter the OTP sent to your email.');
+  //     return;
+  //   }
+  //   setOtpError('');
+  //   setVerifying(true);
+  //   // TODO: replace with actual API call to verify OTP
+  //   setTimeout(() => {
+  //     setVerifying(false);
+  //     // Pass user info to password page via navigation state
+  //     navigate('/signup/set-password', { state: { fullName, email } });
+  //   }, 900);
+  // };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (!otpValue.trim() || otpValue.length < 4) {
-      setOtpError('Please enter the OTP sent to your email.');
+
+    if (!otpValue.trim() || otpValue.length !== 6) {
+      setOtpError('Please enter the 6-digit OTP sent to your email.');
       return;
     }
+
     setOtpError('');
     setVerifying(true);
-    // TODO: replace with actual API call to verify OTP
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ email, otp: otpValue }),
+      });
+
+      // Safely parse — server may return plain text on failure
+      const rawText = await response.text();
+      let data = {};
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        console.error("Non-JSON response from server:", rawText);
+        setVerifying(false);
+        setOtpError(
+          response.status === 404
+            ? "Verify route not found (404). Check backend route registration."
+            : `Server error ${response.status}: ${rawText.slice(0, 120)}`
+        );
+        return;
+      }
+
+      if (response.ok) {
+        setVerifying(false);
+        navigate('/signup/set-password', {
+          state: { fullName, email, tempToken: data.tempToken },
+        });
+      } else {
+        setVerifying(false);
+        setOtpError(data.error || `Invalid OTP (${response.status})`);
+      }
+    } catch (err) {
+      console.error("Network error:", err);
       setVerifying(false);
-      // Pass user info to password page via navigation state
-      navigate('/signup/set-password', { state: { fullName, email } });
-    }, 900);
+      setOtpError("Could not reach the server. Make sure your backend is running on port 8080.");
+    }
   };
 
   return (
