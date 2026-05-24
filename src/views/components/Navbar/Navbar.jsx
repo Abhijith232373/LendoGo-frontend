@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
+import ConsultationModal from '../ConsultationModal/ConsultationModal';
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const navbarRef = useRef(null);
 
   const toggleDropdown = (e, dropdownName) => {
@@ -28,6 +31,7 @@ const Navbar = () => {
   }, []);
 
   return (
+    <>
     <nav className="navbar" ref={navbarRef}>
       <div className="navbar-container">
         <div className="navbar-logo">
@@ -77,14 +81,14 @@ const Navbar = () => {
               <div className="dropdown-menu">
                 <a href="#" className="dropdown-item">About Us</a>
                 <a href="#" className="dropdown-item">Contact Us</a>
-                <a href="#" className="dropdown-item">Careers</a>
+                <Link to="/careers" className="dropdown-item">Careers 🚀</Link>
               </div>
             )}
           </div>
         </div>
 
         <div className="navbar-actions">
-          <button className="btn-outline">Free Consultation</button>
+          <button className="btn-outline" onClick={() => setModalOpen(true)}>Free Consultation</button>
           <button className="btn-primary">Sign In</button>
         </div>
 
@@ -142,17 +146,20 @@ const Navbar = () => {
             <div className="mobile-submenu">
               <a href="#" className="mobile-sublink">About Us</a>
               <a href="#" className="mobile-sublink">Contact Us</a>
-              <a href="#" className="mobile-sublink">Careers</a>
+              <Link to="/careers" className="mobile-sublink">Careers 🚀</Link>
             </div>
           )}
         </div>
 
         <div className="mobile-actions">
-          <button className="btn-outline">Free Consultation</button>
+          <button className="btn-outline" onClick={() => { setModalOpen(true); setMenuOpen(false); }}>Free Consultation</button>
           <button className="btn-primary">Sign In</button>
         </div>
       </div>
     </nav>
+
+    <ConsultationModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 };
 

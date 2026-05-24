@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './SignInForm.css';
 
 const SignInForm = ({ onSignIn, loading, error }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -54,7 +56,14 @@ const SignInForm = ({ onSignIn, loading, error }) => {
       </form>
       
       <div className="signup-link">
-        <a href="#">New to LendoGO? Create an account</a>
+        <span>New to LendoGO? </span>
+        <button
+          type="button"
+          className="create-account-btn"
+          onClick={() => navigate('/signup')}
+        >
+          Create an account
+        </button>
       </div>
     </div>
   );

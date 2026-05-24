@@ -103,3 +103,21 @@
 .signup-link a:hover {
   text-decoration: underline;
 }
+
+.create-account-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: var(--font-main);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.create-account-btn:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+}
+
