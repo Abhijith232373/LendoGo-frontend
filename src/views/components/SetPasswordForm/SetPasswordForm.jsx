@@ -35,6 +35,7 @@ const SetPasswordForm = () => {
   const [suggestedPassword, setSuggestedPassword] = useState('');
   const [suggestionShown, setSuggestionShown] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const allMet = requirements.every((r) => r.test(password));
 
@@ -45,6 +46,12 @@ const SetPasswordForm = () => {
     setSuggestedPassword(pw);
     setCopied(false);
   }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(suggestedPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handlePasswordFocus = () => {
     if (!suggestionShown && password === '') {
@@ -66,6 +73,7 @@ const SetPasswordForm = () => {
 
     if (!allMet) { setError('Password does not meet requirements.'); return; }
     if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
+    if (!agreeTerms) { setError('You must agree to our Privacy Policy and Terms & Conditions to continue.'); return; }
 
     setLoading(true);
 
@@ -100,9 +108,48 @@ const SetPasswordForm = () => {
           <div className="spf-input-wrap">
             <input id="spfNewPw" type={showPw ? 'text' : 'password'} className="spf-input" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={handlePasswordFocus} />
             <button type="button" className="spf-eye-btn" onClick={() => setShowPw(!showPw)}><EyeIcon visible={showPw} /></button>
+
+            {showSuggestion && (
+              <div className="spf-suggestion-popup">
+                <div className="spf-suggestion-header">
+                  <div className="spf-suggestion-icon">
+                    <ShieldIcon />
+                  </div>
+                  <div>
+                    <h3 className="spf-suggestion-title">Use strong password?</h3>
+                    <p className="spf-suggestion-subtitle">Highly secure & easy to autofill</p>
+                  </div>
+                </div>
+
+                <div className="spf-suggestion-pw-row">
+                  <span className="spf-suggestion-pw">{suggestedPassword}</span>
+                  <div className="spf-suggestion-pw-actions">
+                    <button type="button" className="spf-suggestion-copy" onClick={handleCopy} title="Copy suggested password">
+                      {copied ? '✓' : '📋'}
+                    </button>
+                    <button type="button" className="spf-suggestion-refresh" onClick={refreshSuggestion} title="Generate new password">
+                      <RefreshIcon />
+                    </button>
+                  </div>
+                </div>
+
+                <p className="spf-suggestion-note">
+                  {copied ? 'Copied to clipboard!' : 'Meets all security requirements'}
+                </p>
+
+                <div className="spf-suggestion-btns">
+                  <button type="button" className="spf-suggestion-btn-cancel" onClick={() => setShowSuggestion(false)}>
+                    No, thanks
+                  </button>
+                  <button type="button" className="spf-suggestion-btn-apply" onClick={handleApplySuggestion}>
+                    Use Suggested
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        
+
         {/* Confirm Password Group */}
         <div className="spf-group">
           <label className="spf-label" htmlFor="spfConfirmPw">confirm password</label>
@@ -110,6 +157,40 @@ const SetPasswordForm = () => {
             <input id="spfConfirmPw" type={showConfirm ? 'text' : 'password'} className="spf-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             <button type="button" className="spf-eye-btn" onClick={() => setShowConfirm(!showConfirm)}><EyeIcon visible={showConfirm} /></button>
           </div>
+        </div>
+
+        {/* Password Requirements List */}
+        <div className="spf-requirements">
+          <p className="spf-req-title">Password must contain:</p>
+          <ul className="spf-req-list">
+            {requirements.map((r, i) => {
+              const met = r.test(password);
+              return (
+                <li key={i} className={`spf-req-item ${met ? 'met' : ''}`}>
+                  <span className="spf-req-dot" />
+                  <span>{r.label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* T&C agreement checkbox */}
+        <div className="spf-agree-group">
+          <label className="spf-agree-label">
+            <input
+              type="checkbox"
+              className="spf-agree-checkbox"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+            />
+            <span className="spf-agree-text">
+              By continuing, you agree to our{' '}
+              <a href="#" className="spf-link" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+              {' '}and{' '}
+              <a href="#" className="spf-link" onClick={(e) => e.preventDefault()}>Terms &amp; Conditions</a>
+            </span>
+          </label>
         </div>
 
         {error && <div className="spf-error">{error}</div>}
