@@ -206,7 +206,7 @@ const SignUpForm = () => {
     setVerifying(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/verify-otp", {
+      const response = await fetch("http://localhost:8080/api/auth/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
