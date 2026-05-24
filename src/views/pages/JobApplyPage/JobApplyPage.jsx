@@ -3,9 +3,10 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import { JOBS } from '../JobListingsPage/jobsData';
+import jobAppImg from '../../../assets/jobapplication.png';
 import './JobApplyPage.css';
 
-/* ── tiny icons ── */
+/* ── icons ── */
 const IconUpload = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" />
@@ -18,7 +19,7 @@ const IconCheck = () => (
   </svg>
 );
 const IconArrow = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
   </svg>
 );
@@ -57,7 +58,6 @@ const JobApplyPage = () => {
     );
   }
 
-  /* ── handlers ── */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
@@ -106,7 +106,7 @@ const JobApplyPage = () => {
     setSubmitted(true);
   };
 
-  /* ── success screen ── */
+  /* success */
   if (submitted) {
     return (
       <div className="ja-page-wrapper">
@@ -120,12 +120,8 @@ const JobApplyPage = () => {
             <strong>{form.email}</strong> within 5–7 business days.
           </p>
           <div className="ja-success-actions">
-            <button className="ja-btn-primary" onClick={() => navigate('/careers/openings')}>
-              Browse More Roles
-            </button>
-            <button className="ja-btn-outline" onClick={() => navigate('/careers')}>
-              Back to Careers
-            </button>
+            <button className="ja-btn-primary" onClick={() => navigate('/careers/openings')}>Browse More Roles</button>
+            <button className="ja-btn-outline" onClick={() => navigate('/careers')}>Back to Careers</button>
           </div>
         </div>
         <Footer />
@@ -137,7 +133,7 @@ const JobApplyPage = () => {
     <div className="ja-page-wrapper">
       <Navbar />
 
-      {/* ── breadcrumb ── */}
+      {/* breadcrumb */}
       <div className="ja-breadcrumb">
         <div className="ja-breadcrumb-inner">
           <button className="ja-back-btn" onClick={() => navigate(-1)}>
@@ -148,125 +144,144 @@ const JobApplyPage = () => {
         </div>
       </div>
 
-      {/* ── form wrapper ── */}
-      <div className="ja-form-wrapper">
-        <div className="ja-form-card">
+      {/* ── TWO-COLUMN LAYOUT ── */}
+      <div className="ja-split-layout">
 
-          {/* heading */}
-          <div className="ja-form-head">
-            <h1 className="ja-form-title">Apply for this position</h1>
-            <p className="ja-form-role">{job.title}</p>
-            <p className="ja-form-required"><span className="ja-req-star">*</span> Required fields</p>
+        {/* LEFT — illustration */}
+        <div className="ja-image-col">
+          <img
+            src={jobAppImg}
+            alt="Job application illustration"
+            className="ja-illustration"
+          />
+          <div className="ja-image-caption">
+            <h3 className="ja-caption-title">One step closer 🎯</h3>
+            <p className="ja-caption-text">
+              Upload your latest resume and let us know who you are.
+              We'll take it from here.
+            </p>
           </div>
-
-          <form onSubmit={handleSubmit} noValidate>
-
-            {/* ── ROW 1: First Name + Last Name ── */}
-            <div className="ja-grid-2">
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="firstName">First Name <span className="ja-req-star">*</span></label>
-                <input id="firstName" name="firstName"
-                  className={`ja-input ${errors.firstName ? 'ja-input--err' : ''}`}
-                  value={form.firstName} onChange={handleChange} placeholder="Arjun" />
-                {errors.firstName && <span className="ja-err">{errors.firstName}</span>}
-              </div>
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="lastName">Last Name <span className="ja-req-star">*</span></label>
-                <input id="lastName" name="lastName"
-                  className={`ja-input ${errors.lastName ? 'ja-input--err' : ''}`}
-                  value={form.lastName} onChange={handleChange} placeholder="Sharma" />
-                {errors.lastName && <span className="ja-err">{errors.lastName}</span>}
-              </div>
-            </div>
-
-            {/* ── ROW 2: Email + Phone ── */}
-            <div className="ja-grid-2">
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="email">Email Address <span className="ja-req-star">*</span></label>
-                <input id="email" name="email" type="email"
-                  className={`ja-input ${errors.email ? 'ja-input--err' : ''}`}
-                  value={form.email} onChange={handleChange} placeholder="arjun@example.com" />
-                {errors.email && <span className="ja-err">{errors.email}</span>}
-              </div>
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="phone">Phone <span className="ja-req-star">*</span></label>
-                <input id="phone" name="phone" type="tel"
-                  className={`ja-input ${errors.phone ? 'ja-input--err' : ''}`}
-                  value={form.phone} onChange={handleChange} placeholder="98765 43210" maxLength={10} />
-                {errors.phone && <span className="ja-err">{errors.phone}</span>}
-              </div>
-            </div>
-
-            {/* ── ROW 3: Address (full width) ── */}
-            <div className="ja-field-group">
-              <label className="ja-label" htmlFor="address">Address</label>
-              <input id="address" name="address" className="ja-input"
-                value={form.address} onChange={handleChange} placeholder="Street / Apartment" />
-            </div>
-
-            {/* ── ROW 4: City + State + Postal ── */}
-            <div className="ja-grid-3">
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="city">City</label>
-                <input id="city" name="city" className="ja-input"
-                  value={form.city} onChange={handleChange} placeholder="Ernakulam" />
-              </div>
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="state">State</label>
-                <input id="state" name="state" className="ja-input"
-                  value={form.state} onChange={handleChange} placeholder="Kerala" />
-              </div>
-              <div className="ja-field-group">
-                <label className="ja-label" htmlFor="postal">Postal Code</label>
-                <input id="postal" name="postal" className="ja-input"
-                  value={form.postal} onChange={handleChange} placeholder="682025" />
-              </div>
-            </div>
-
-            {/* ── RESUME UPLOAD (full width) ── */}
-            <div className="ja-field-group">
-              <label className="ja-label">Resume / CV <span className="ja-req-star">*</span></label>
-              <div
-                className={`ja-upload-zone ${dragging ? 'ja-upload-zone--drag' : ''} ${resume ? 'ja-upload-zone--filled' : ''} ${errors.resume ? 'ja-upload-zone--err' : ''}`}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={handleDrop}
-                onClick={() => fileRef.current?.click()}
-              >
-                <input ref={fileRef} type="file" accept=".pdf,.doc,.docx"
-                  style={{ display: 'none' }}
-                  onChange={(e) => handleFile(e.target.files[0])} />
-
-                {resume ? (
-                  <div className="ja-upload-filled">
-                    <div className="ja-upload-file-icon"><IconFile /></div>
-                    <div className="ja-upload-file-info">
-                      <p className="ja-upload-filename">{resume.name}</p>
-                      <p className="ja-upload-size">{(resume.size / 1024).toFixed(1)} KB · Click to replace</p>
-                    </div>
-                    <div className="ja-upload-tick"><IconCheck /></div>
-                  </div>
-                ) : (
-                  <div className="ja-upload-placeholder">
-                    <div className="ja-upload-icon-wrap"><IconUpload /></div>
-                    <p className="ja-upload-cta">
-                      <strong>Drag & drop</strong> your resume, or{' '}
-                      <span className="ja-upload-link">click to browse</span>
-                    </p>
-                    <p className="ja-upload-hint">PDF, DOC, DOCX · Max 5 MB</p>
-                  </div>
-                )}
-              </div>
-              {errors.resume && <span className="ja-err">{errors.resume}</span>}
-            </div>
-
-            {/* ── SUBMIT ── */}
-            <button type="submit" className="ja-submit-btn" id="submit-application-btn">
-              Submit Application
-            </button>
-
-          </form>
         </div>
+
+        {/* RIGHT — form */}
+        <div className="ja-form-col">
+          <div className="ja-form-card">
+
+            <div className="ja-form-head">
+              <h1 className="ja-form-title">Apply for this position</h1>
+              <p className="ja-form-role">{job.title}</p>
+              <p className="ja-form-required"><span className="ja-req-star">*</span> Required fields</p>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate>
+
+              {/* Name */}
+              <div className="ja-grid-2">
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="firstName">First Name <span className="ja-req-star">*</span></label>
+                  <input id="firstName" name="firstName"
+                    className={`ja-input ${errors.firstName ? 'ja-input--err' : ''}`}
+                    value={form.firstName} onChange={handleChange} placeholder="Arjun" />
+                  {errors.firstName && <span className="ja-err">{errors.firstName}</span>}
+                </div>
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="lastName">Last Name <span className="ja-req-star">*</span></label>
+                  <input id="lastName" name="lastName"
+                    className={`ja-input ${errors.lastName ? 'ja-input--err' : ''}`}
+                    value={form.lastName} onChange={handleChange} placeholder="Sharma" />
+                  {errors.lastName && <span className="ja-err">{errors.lastName}</span>}
+                </div>
+              </div>
+
+              {/* Email + Phone */}
+              <div className="ja-grid-2">
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="email">Email Address <span className="ja-req-star">*</span></label>
+                  <input id="email" name="email" type="email"
+                    className={`ja-input ${errors.email ? 'ja-input--err' : ''}`}
+                    value={form.email} onChange={handleChange} placeholder="arjun@example.com" />
+                  {errors.email && <span className="ja-err">{errors.email}</span>}
+                </div>
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="phone">Phone <span className="ja-req-star">*</span></label>
+                  <input id="phone" name="phone" type="tel"
+                    className={`ja-input ${errors.phone ? 'ja-input--err' : ''}`}
+                    value={form.phone} onChange={handleChange} placeholder="98765 43210" maxLength={10} />
+                  {errors.phone && <span className="ja-err">{errors.phone}</span>}
+                </div>
+              </div>
+
+              {/* Address */}
+              <div className="ja-field-group">
+                <label className="ja-label" htmlFor="address">Address</label>
+                <input id="address" name="address" className="ja-input"
+                  value={form.address} onChange={handleChange} placeholder="Street / Apartment" />
+              </div>
+
+              {/* City / State / Postal */}
+              <div className="ja-grid-3">
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="city">City</label>
+                  <input id="city" name="city" className="ja-input"
+                    value={form.city} onChange={handleChange} placeholder="Ernakulam" />
+                </div>
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="state">State</label>
+                  <input id="state" name="state" className="ja-input"
+                    value={form.state} onChange={handleChange} placeholder="Kerala" />
+                </div>
+                <div className="ja-field-group">
+                  <label className="ja-label" htmlFor="postal">Postal Code</label>
+                  <input id="postal" name="postal" className="ja-input"
+                    value={form.postal} onChange={handleChange} placeholder="682025" />
+                </div>
+              </div>
+
+              {/* Resume Upload */}
+              <div className="ja-field-group">
+                <label className="ja-label">Resume / CV <span className="ja-req-star">*</span></label>
+                <div
+                  className={`ja-upload-zone ${dragging ? 'ja-upload-zone--drag' : ''} ${resume ? 'ja-upload-zone--filled' : ''} ${errors.resume ? 'ja-upload-zone--err' : ''}`}
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <input ref={fileRef} type="file" accept=".pdf,.doc,.docx"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleFile(e.target.files[0])} />
+
+                  {resume ? (
+                    <div className="ja-upload-filled">
+                      <div className="ja-upload-file-icon"><IconFile /></div>
+                      <div className="ja-upload-file-info">
+                        <p className="ja-upload-filename">{resume.name}</p>
+                        <p className="ja-upload-size">{(resume.size / 1024).toFixed(1)} KB · Click to replace</p>
+                      </div>
+                      <div className="ja-upload-tick"><IconCheck /></div>
+                    </div>
+                  ) : (
+                    <div className="ja-upload-placeholder">
+                      <div className="ja-upload-icon-wrap"><IconUpload /></div>
+                      <p className="ja-upload-cta">
+                        <strong>Drag & drop</strong> your resume, or{' '}
+                        <span className="ja-upload-link">click to browse</span>
+                      </p>
+                      <p className="ja-upload-hint">PDF, DOC, DOCX · Max 5 MB</p>
+                    </div>
+                  )}
+                </div>
+                {errors.resume && <span className="ja-err">{errors.resume}</span>}
+              </div>
+
+              <button type="submit" className="ja-submit-btn" id="submit-application-btn">
+                Submit Application
+              </button>
+
+            </form>
+          </div>
+        </div>
+
       </div>
 
       <Footer />

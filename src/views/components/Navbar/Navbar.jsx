@@ -80,7 +80,7 @@ const Navbar = () => {
             {activeDropdown === 'support' && (
               <div className="dropdown-menu">
                 <a href="#" className="dropdown-item">About Us</a>
-                <a href="#" className="dropdown-item">Contact Us</a>
+                {/* <a href="#" className="dropdown-item">Contact Us</a> */}
                 <Link to="/careers" className="dropdown-item">Careers 🚀</Link>
               </div>
             )}
@@ -145,7 +145,7 @@ const Navbar = () => {
           {activeDropdown === 'supportMobile' && (
             <div className="mobile-submenu">
               <a href="#" className="mobile-sublink">About Us</a>
-              <a href="#" className="mobile-sublink">Contact Us</a>
+              {/* <a href="#" className="mobile-sublink">Contact Us</a> */}
               <Link to="/careers" className="mobile-sublink">Careers 🚀</Link>
             </div>
           )}
