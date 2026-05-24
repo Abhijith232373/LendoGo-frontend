@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 import ConsultationModal from '../ConsultationModal/ConsultationModal';
 
@@ -80,7 +81,7 @@ const Navbar = () => {
               <div className="dropdown-menu">
                 <a href="#" className="dropdown-item">About Us</a>
                 <a href="#" className="dropdown-item">Contact Us</a>
-                <a href="#" className="dropdown-item">Careers</a>
+                <Link to="/careers" className="dropdown-item">Careers 🚀</Link>
               </div>
             )}
           </div>
@@ -145,7 +146,7 @@ const Navbar = () => {
             <div className="mobile-submenu">
               <a href="#" className="mobile-sublink">About Us</a>
               <a href="#" className="mobile-sublink">Contact Us</a>
-              <a href="#" className="mobile-sublink">Careers</a>
+              <Link to="/careers" className="mobile-sublink">Careers 🚀</Link>
             </div>
           )}
         </div>

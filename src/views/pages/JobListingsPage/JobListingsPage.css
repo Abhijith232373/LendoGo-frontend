@@ -1,0 +1,414 @@
+/* ═══════════════════════════════════════════
+   JOB LISTINGS PAGE
+═══════════════════════════════════════════ */
+
+.jl-page-wrapper {
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── PAGE HEADER ── */
+.jl-page-header {
+  background: linear-gradient(135deg, #0a1628 0%, #0f2352 55%, #0d3a8a 100%);
+  padding: 4.5rem 2rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.jl-page-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 800px 400px at 60% 120%, rgba(99, 179, 237, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.jl-header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.jl-header-eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  background: rgba(147, 197, 253, 0.1);
+  border: 1px solid rgba(147, 197, 253, 0.25);
+  padding: 0.3rem 1rem;
+  border-radius: 100px;
+  margin-bottom: 1.2rem;
+}
+
+.jl-header-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.75rem;
+}
+
+.jl-header-sub {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+}
+
+/* ── FILTER BAR ── */
+.jl-filter-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e8eef6;
+  padding: 0.75rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.jl-filter-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.jl-filter-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  border: 1.5px solid #d1d9e6;
+  background: #fff;
+  color: #4b5563;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: all 0.2s ease;
+}
+
+.jl-filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(0, 102, 255, 0.04);
+}
+
+.jl-filter-btn--active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.28);
+}
+
+.jl-result-count {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* ── LISTINGS ── */
+.jl-listings {
+  flex: 1;
+  padding: 2.5rem 2rem 4rem;
+}
+
+.jl-listings-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* ── JOB CARD ── */
+.jl-card {
+  background: #ffffff;
+  border: 1px solid #e2eaf4;
+  border-radius: 16px;
+  padding: 1.6rem 1.8rem 1.3rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.jl-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 102, 255, 0.09);
+  border-color: rgba(0, 102, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+/* header row */
+.jl-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.jl-card-logo {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.jl-card-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.jl-job-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.3;
+  margin-bottom: 0.35rem;
+}
+
+.jl-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.jl-dept-tag {
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+}
+
+.jl-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.jl-posted {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.jl-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.jl-btn-apply {
+  padding: 0.55rem 1.3rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.jl-btn-apply:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.35);
+}
+
+.jl-btn-save {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid #d1d9e6;
+  background: #fff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jl-btn-save:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(0, 102, 255, 0.05);
+}
+
+/* details row */
+.jl-details-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.6rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.jl-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.83rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.jl-work-badge {
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 0.22rem 0.75rem;
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+}
+
+.jl-work-badge--hybrid {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.jl-work-badge--remote {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+/* skills */
+.jl-skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.jl-skill-tag {
+  font-size: 0.77rem;
+  font-weight: 600;
+  color: #334155;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.jl-skill-tag:hover {
+  background: rgba(0, 102, 255, 0.08);
+  border-color: rgba(0, 102, 255, 0.2);
+}
+
+/* short description */
+.jl-short-desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.65;
+  margin-bottom: 0.25rem;
+}
+
+/* expandable JD */
+.jl-jd-block {
+  background: #f8faff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  margin-top: 1rem;
+  animation: jl-expand 0.3s ease;
+}
+
+@keyframes jl-expand {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.jl-jd-heading {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0.9rem 0 0.4rem;
+}
+.jl-jd-heading:first-child { margin-top: 0; }
+
+.jl-jd-bullet,
+.jl-jd-text {
+  font-size: 0.86rem;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0.15rem 0;
+}
+
+.jl-jd-bullet {
+  padding-left: 0.5rem;
+}
+
+/* card footer */
+.jl-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.jl-btn-read-more {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-main);
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.jl-btn-read-more:hover { opacity: 0.75; }
+
+.jl-btn-apply-sm {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(0, 102, 255, 0.07);
+  border: 1.5px solid rgba(0, 102, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: all 0.2s;
+}
+
+.jl-btn-apply-sm:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .jl-page-header { padding: 3.5rem 1.5rem 2.5rem; }
+  .jl-filter-bar { padding: 0.6rem 1rem; }
+  .jl-listings { padding: 1.5rem 1rem 3rem; }
+  .jl-card { padding: 1.2rem; }
+  .jl-card-actions { flex-direction: column; align-items: flex-end; }
+  .jl-card-header { flex-wrap: wrap; }
+  .jl-btn-apply { width: 100%; text-align: center; }
+}

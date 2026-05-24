@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -82,7 +83,7 @@ const Footer = () => {
             <ul className="footer-links">
               <li><a href="#">About Us</a></li>
               <li><a href="#">Blogs</a></li>
-              <li><a href="#">Careers</a></li>
+              <li><Link to="/careers" className="footer-careers-link">Careers 🚀</Link></li>
               <li><a href="#">Get in contact</a></li>
               <li><a href="#">Eligibility criteria</a></li>
             </ul>
@@ -118,6 +119,11 @@ const Footer = () => {
         <div className="footer-bottom">
           <div className="copyright">
             © 2026 LendoGO. A brand by LendoGO Platforms Private Limited. All rights reserved.
+          </div>
+          <div className="footer-hiring-pill">
+            <span className="footer-hiring-dot" />
+            <span>We're hiring — </span>
+            <Link to="/careers" className="footer-hiring-link">See open roles</Link>
           </div>
         </div>
       </div>
