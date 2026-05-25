@@ -5,6 +5,8 @@ import SetPasswordPage from '../../views/pages/SetPasswordPage/SetPasswordPage';
 import CareersPage from '../../views/pages/CareersPage/CareersPage';
 import JobListingsPage from '../../views/pages/JobListingsPage/JobListingsPage';
 import JobApplyPage from '../../views/pages/JobApplyPage/JobApplyPage';
+import AboutPage from '../../views/pages/AboutPage/AboutPage';
+import BlogPage from '../../views/pages/BlogPage/BlogPage';
 
 /**
  * Auth-related routes (exported as JSX, not a component).
@@ -20,6 +22,8 @@ const AuthRoutes = (
     <Route path="/careers" element={<CareersPage />} />
     <Route path="/careers/openings" element={<JobListingsPage />} />
     <Route path="/careers/apply/:jobId" element={<JobApplyPage />} />
+    <Route path="/about" element={<AboutPage />} />
+    <Route path="/blogs" element={<BlogPage />} />
   </>
 );
 

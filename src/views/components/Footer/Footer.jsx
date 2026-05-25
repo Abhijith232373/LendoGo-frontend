@@ -81,8 +81,8 @@ const Footer = () => {
           <div className="footer-col">
             <h4 className="footer-heading">LendoGO</h4>
             <ul className="footer-links">
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Blogs</a></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/blogs">Blogs</Link></li>
               <li><Link to="/careers" className="footer-careers-link">Careers 🚀</Link></li>
               <li><a href="#">Get in contact</a></li>
               <li><a href="#">Eligibility criteria</a></li>

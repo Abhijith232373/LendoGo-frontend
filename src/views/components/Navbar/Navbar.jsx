@@ -73,13 +73,13 @@ const Navbar = () => {
           </div>
 
           <a href="#" className="nav-link">Repay Loan</a>
-          <a href="#" className="nav-link">Blogs</a>
+          <Link to="/blogs" className="nav-link">Blogs</Link>
 
           <div className="dropdown-container">
             <a href="#" className="nav-link dropdown" onClick={(e) => toggleDropdown(e, 'support')}>Support</a>
             {activeDropdown === 'support' && (
               <div className="dropdown-menu">
-                <a href="#" className="dropdown-item">About Us</a>
+                <Link to="/about" className="dropdown-item">About Us</Link>
                 {/* <a href="#" className="dropdown-item">Contact Us</a> */}
                 <Link to="/careers" className="dropdown-item">Careers </Link>
               </div>
@@ -136,7 +136,7 @@ const Navbar = () => {
         </div>
 
         <a href="#" className="mobile-link">Repay Loan</a>
-        <a href="#" className="mobile-link">Blogs</a>
+        <Link to="/blogs" className="mobile-link">Blogs</Link>
 
         <div className="mobile-dropdown">
           <button className="mobile-link mobile-link--toggle" onClick={(e) => toggleDropdown(e, 'supportMobile')}>
@@ -144,7 +144,7 @@ const Navbar = () => {
           </button>
           {activeDropdown === 'supportMobile' && (
             <div className="mobile-submenu">
-              <a href="#" className="mobile-sublink">About Us</a>
+              <Link to="/about" className="mobile-sublink">About Us</Link>
               {/* <a href="#" className="mobile-sublink">Contact Us</a> */}
               <Link to="/careers" className="mobile-sublink">Careers </Link>
             </div>
