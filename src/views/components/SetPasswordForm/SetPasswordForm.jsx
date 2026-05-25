@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './SetPasswordForm.css';
+import { useAuthController } from '../../../controllers/auth/useAuthController';
 
 /* ─── Password requirements ─────────────────────────────────── */
 const requirements = [
@@ -22,7 +23,8 @@ const ShieldIcon = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="n
 const SetPasswordForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fullName, email } = location.state || {};
+  const { loginUserLocally } = useAuthController();
+  const { fullName, email, tempToken } = location.state || {};
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -78,16 +80,27 @@ const SetPasswordForm = () => {
     setLoading(true);
 
     try {
-      // THE FIX: Added /api to match your Go router grouping!
-      const response = await fetch('http://localhost:8080/api/auth/register', {
+      const response = await fetch('http://localhost:8080/api/auth/set-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, email, password }),
+        // 👇 FIX: Added confirmPassword to the payload
+        body: JSON.stringify({ 
+          fullName, 
+          email, 
+          password, 
+          confirmPassword, 
+          token: tempToken 
+        }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        navigate('/'); 
+        loginUserLocally({
+          id: data.id || 'unknown',
+          email: email,
+          name: fullName || 'LendoGO User',
+        });
+        navigate('/home'); 
       } else {
         setError(data.error || 'Registration failed');
       }

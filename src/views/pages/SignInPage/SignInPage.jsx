@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import SignInForm from '../../components/SignInForm/SignInForm';
 import WhatWeOffer from '../../components/WhatWeOffer/WhatWeOffer';
@@ -12,14 +13,22 @@ import './SignInPage.css';
 
 const SignInPage = () => {
   const { signIn, loading, error, user } = useAuthController();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user.isAuthenticated) {
+      navigate('/home');
+    }
+  }, [user.isAuthenticated, navigate]);
 
   const handleSignIn = async (email, password) => {
     try {
       await signIn(email, password);
-      // Success is handled by the controller updating the user state
       console.log('Signed in successfully');
+      navigate('/home');
     } catch (err) {
       console.error('Sign in failed:', err);
+      throw err;
     }
   };
 
