@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './SetPasswordForm.css';
+import { useAuthController } from '../../../controllers/auth/useAuthController';
 
 /* ─── Password requirements ─────────────────────────────────── */
 const requirements = [
@@ -22,6 +23,7 @@ const ShieldIcon = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="n
 const SetPasswordForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { loginUserLocally } = useAuthController();
   const { fullName, email, tempToken } = location.state || {};
 
   const [password, setPassword] = useState('');
@@ -93,7 +95,12 @@ const SetPasswordForm = () => {
 
       const data = await response.json();
       if (response.ok) {
-        navigate('/'); 
+        loginUserLocally({
+          id: data.id || 'unknown',
+          email: email,
+          name: fullName || 'LendoGO User',
+        });
+        navigate('/home'); 
       } else {
         setError(data.error || 'Registration failed');
       }
