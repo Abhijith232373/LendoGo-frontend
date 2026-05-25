@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
+
     ports:
       - "5173:5173"
+
     volumes:
-      # Syncs your local code to the container
       - .:/app
-      # Prevents your local node_modules from breaking the container's Linux modules
-      - /app/node_modules 
+      - /app/node_modules
