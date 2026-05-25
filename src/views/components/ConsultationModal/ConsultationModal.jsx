@@ -26,13 +26,27 @@ const ConsultationModal = ({ isOpen, onClose }) => {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = 'Full name is required.';
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!form.email.trim() || !emailRe.test(form.email)) e.email = 'Enter a valid email address.';
-    const phoneRe = /^[6-9]\d{9}$/;
-    if (!form.phone.trim() || !phoneRe.test(form.phone.replace(/\s/g, ''))) {
-      e.phone = 'Enter a valid 10-digit mobile number.';
+    if (!form.name.trim()) {
+      e.name = 'Full name is required.';
+    } else if (form.name.trim().length < 3) {
+      e.name = 'Please enter your actual full name.';
     }
+
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email.trim()) {
+      e.email = 'Email address is required.';
+    } else if (!emailRe.test(form.email)) {
+      e.email = 'Enter a valid email format (e.g. name@domain.com).';
+    }
+
+    const phoneRe = /^[6-9]\d{9}$/;
+    const sanitizedPhone = form.phone.replace(/[^0-9]/g, '');
+    if (!form.phone.trim()) {
+      e.phone = 'Phone number is required.';
+    } else if (sanitizedPhone.length !== 10 || !phoneRe.test(sanitizedPhone)) {
+      e.phone = 'Enter a valid 10-digit Indian mobile number.';
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -47,15 +61,40 @@ const ConsultationModal = ({ isOpen, onClose }) => {
     if (!validate()) return;
     setLoading(true);
 
-    // TODO: Replace with real API call
-    // const res = await fetch('/api/consultation/request', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    //   body: JSON.stringify(form),
-    // });
-    await new Promise((r) => setTimeout(r, 1000)); // dummy delay
-    setLoading(false);
-    setSubmitted(true);
+    const payload = {
+      full_name: form.name.trim(),
+      email: form.email.trim(),
+      phone_number: form.phone.replace(/[^0-9]/g, '')
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/consultation/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setErrors((prev) => ({
+          ...prev,
+          submit: data.error || "Failed to submit request. Please verify your details."
+        }));
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      // Fallback: If local backend is down during testing, show a helpful validation error
+      setErrors((prev) => ({
+        ...prev,
+        submit: "Failed to connect to the backend server at localhost:8080."
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -89,6 +128,13 @@ const ConsultationModal = ({ isOpen, onClose }) => {
               <h2 className="cm-title">Free Consultation</h2>
               <p className="cm-subtitle">Our loan experts will call you within 24 hours.</p>
             </div>
+
+            {/* Error Banner */}
+            {errors.submit && (
+              <div className="cm-submit-error">
+                ⚠️ {errors.submit}
+              </div>
+            )}
 
             {/* Form */}
             <form className="cm-form" onSubmit={handleSubmit} noValidate>
@@ -146,12 +192,11 @@ const ConsultationModal = ({ isOpen, onClose }) => {
                     id="cm-phone"
                     type="tel"
                     className="cm-input"
-                    placeholder="e.g. 98765 43210"
+                    placeholder="e.g. 9876543210"
                     value={form.phone}
                     onChange={handleChange('phone')}
                     autoComplete="tel"
-                    maxLength={11}
-                    inputMode="numeric"
+                    maxLength={15}
                   />
                 </div>
                 {errors.phone && <span className="cm-error">{errors.phone}</span>}
@@ -191,7 +236,7 @@ const ConsultationModal = ({ isOpen, onClose }) => {
             </div>
             <h2 className="cm-success-title">You're all set!</h2>
             <p className="cm-success-msg">
-              Thanks, <strong>{form.name.split(' ')[0]}</strong>! Our team will reach out to <strong>{form.email}</strong> or call you on <strong>{form.phone}</strong> within 24 hours.
+              Thanks, <strong>{form.name.split(' ')[0]}</strong>! Our team will reach out to <strong>{form.email}</strong> or call you on <strong>{form.phone}</strong> shortly.
             </p>
             <button className="cm-submit" onClick={onClose}>Done</button>
           </div>
