@@ -13,30 +13,51 @@ export const useAuthController = () => {
     setLoading(true);
     setError(null);
     
-    // Mocking an API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!email || !password) {
-          const err = 'Email and password are required.';
-          setError(err);
-          setLoading(false);
-          reject(err);
-          return;
-        }
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const rawText = await response.text();
+      let data = {};
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        console.error("Non-JSON response from login server:", rawText);
+        const errMsg = `Server error (${response.status})`;
+        setError(errMsg);
+        throw new Error(errMsg);
+      }
 
-        // Mock success
+      if (response.ok) {
         const loggedInUser = new UserModel({
-          id: '123',
-          email,
-          name: 'LendoGO User',
+          id: data.id || 'unknown',
+          email: data.email || email,
+          name: data.name || 'LendoGO User',
           isAuthenticated: true,
         });
         
         setUser(loggedInUser);
-        setLoading(false);
-        resolve(loggedInUser);
-      }, 1000); // 1 second delay
-    });
+        return loggedInUser;
+      } else {
+        const errMsg = data.error || 'Invalid email or password';
+        setError(errMsg);
+        throw new Error(errMsg);
+      }
+    } catch (err) {
+      const errMsg = err.message === 'Failed to fetch' || err.message.includes('network')
+        ? 'Could not connect to the authentication server. Please check if the backend is running.'
+        : err.message || 'An error occurred during sign in.';
+      setError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = () => {

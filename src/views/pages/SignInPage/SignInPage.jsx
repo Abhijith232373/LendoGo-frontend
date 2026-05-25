@@ -20,6 +20,7 @@ const SignInPage = () => {
       console.log('Signed in successfully');
     } catch (err) {
       console.error('Sign in failed:', err);
+      throw err;
     }
   };
 
