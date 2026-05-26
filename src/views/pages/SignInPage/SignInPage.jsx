@@ -17,15 +17,24 @@ const SignInPage = () => {
 
   useEffect(() => {
     if (user.isAuthenticated) {
-      navigate('/home');
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/home');
+      }
     }
-  }, [user.isAuthenticated, navigate]);
+  }, [user.isAuthenticated, user.role, navigate]);
 
   const handleSignIn = async (email, password) => {
     try {
-      await signIn(email, password);
+      const loggedInUser = await signIn(email, password);
       console.log('Signed in successfully');
-      navigate('/home');
+      if (loggedInUser && loggedInUser.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/home');
+      }
+      return loggedInUser;
     } catch (err) {
       console.error('Sign in failed:', err);
       throw err;

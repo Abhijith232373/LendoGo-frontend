@@ -68,13 +68,12 @@ const Navbar = () => {
             <a href="#" className="nav-link dropdown" onClick={(e) => toggleDropdown(e, 'loanProducts')}>Loan Products</a>
             {activeDropdown === 'loanProducts' && (
               <div className="dropdown-menu">
-                <a href="#" className="dropdown-item">Personal Loans</a>
-                <a href="#" className="dropdown-item">Business Loan</a>
-                <a href="#" className="dropdown-item">Home Loan</a>
-                <a href="#" className="dropdown-item">Loan Against Property</a>
-                <a href="#" className="dropdown-item">Loan Against Securities</a>
-                <a href="#" className="dropdown-item">Instant Personal Loans</a>
-                <a href="#" className="dropdown-item">Credit Builder Loan</a>
+                <button className="dropdown-item" onClick={() => { navigate('/loan/apply/details?type=personal'); setActiveDropdown(null); }}>Personal Loans</button>
+                <button className="dropdown-item" onClick={() => { navigate('/loan/apply/details?type=business'); setActiveDropdown(null); }}>Business Loan</button>
+                <button className="dropdown-item" onClick={() => { navigate('/loan/apply/details?type=home'); setActiveDropdown(null); }}>Home Loan</button>
+                <button className="dropdown-item" onClick={() => { navigate('/loan/apply/details?type=property'); setActiveDropdown(null); }}>Loan Against Property</button>
+                <button className="dropdown-item" onClick={() => { navigate('/loan/apply/details?type=instant'); setActiveDropdown(null); }}>Instant Personal Loans</button>
+                <button className="dropdown-item" onClick={() => { navigate('/loan/apply/details?type=credit-builder'); setActiveDropdown(null); }}>Credit Builder Loan</button>
               </div>
             )}
           </div>
@@ -185,12 +184,12 @@ const Navbar = () => {
           </button>
           {activeDropdown === 'loanProductsMobile' && (
             <div className="mobile-submenu">
-              <a href="#" className="mobile-sublink" onClick={() => setMenuOpen(false)}>Personal Loans</a>
-              <a href="#" className="mobile-sublink" onClick={() => setMenuOpen(false)}>Business Loan</a>
-              <a href="#" className="mobile-sublink" onClick={() => setMenuOpen(false)}>Home Loan</a>
-              <a href="#" className="mobile-sublink" onClick={() => setMenuOpen(false)}>Loan Against Property</a>
-              <a href="#" className="mobile-sublink" onClick={() => setMenuOpen(false)}>Instant Personal Loans</a>
-              <a href="#" className="mobile-sublink" onClick={() => setMenuOpen(false)}>Credit Builder Loan</a>
+              <button className="mobile-sublink" onClick={() => { navigate('/loan/apply/details?type=personal'); setMenuOpen(false); }}>Personal Loans</button>
+              <button className="mobile-sublink" onClick={() => { navigate('/loan/apply/details?type=business'); setMenuOpen(false); }}>Business Loan</button>
+              <button className="mobile-sublink" onClick={() => { navigate('/loan/apply/details?type=home'); setMenuOpen(false); }}>Home Loan</button>
+              <button className="mobile-sublink" onClick={() => { navigate('/loan/apply/details?type=property'); setMenuOpen(false); }}>Loan Against Property</button>
+              <button className="mobile-sublink" onClick={() => { navigate('/loan/apply/details?type=instant'); setMenuOpen(false); }}>Instant Personal Loans</button>
+              <button className="mobile-sublink" onClick={() => { navigate('/loan/apply/details?type=credit-builder'); setMenuOpen(false); }}>Credit Builder Loan</button>
             </div>
           )}
         </div>

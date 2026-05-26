@@ -2,6 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminPage.css';
 
+// Import Modular Components
+import AdminSidebar from './components/AdminSidebar';
+import AdminTopbar from './components/AdminTopbar';
+import DashboardTab from './components/DashboardTab';
+import UserManagementTab from './components/UserManagementTab';
+import LoanRequestsTab from './components/LoanRequestsTab';
+import LoanApprovalsTab from './components/LoanApprovalsTab';
+import CareersManagementTab from './components/CareersManagementTab';
+import CustomerCareTab from './components/CustomerCareTab';
+import StaffManagementTab from './components/StaffManagementTab';
+import WebConfigurationTab from './components/WebConfigurationTab';
+import AuditLogsTab from './components/AuditLogsTab';
+import AdminSettingsTab from './components/AdminSettingsTab';
+
 const AdminPage = () => {
   const navigate = useNavigate();
 
@@ -336,973 +350,137 @@ const AdminPage = () => {
 
       <div className="admin-main-container">
         
-        {/* ── LEFT SIDEBAR ── */}
-        <aside className="admin-sidebar">
-          <div className="sidebar-header">
-            <div className="admin-logo-icon">L</div>
-            <span className="admin-logo-text">LendoGO <span className="admin-badge-pill">Admin</span></span>
-          </div>
-
-          <nav className="sidebar-nav">
-            <ul className="nav-list">
-              {navItems.map((item) => (
-                <li key={item.name}>
-                  <button
-                    className={`nav-btn ${activeTab === item.name ? 'active' : ''}`}
-                    onClick={() => setActiveTab(item.name)}
-                  >
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-text">{item.name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Theme Switcher Toggle */}
-          <div className="sidebar-theme-toggle">
-            <span className="toggle-label">{darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={darkMode}
-                onChange={() => setDarkMode(!darkMode)}
-              />
-              <span className="slider-round" />
-            </label>
-          </div>
-        </aside>
+        {/* Sidebar Component */}
+        <AdminSidebar 
+          navItems={navItems}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
 
         {/* ── MAIN DASHBOARD CONTENT AREA ── */}
         <main className="admin-content-area">
           
-          {/* Top Navbar */}
-          <header className="admin-topbar">
-            <div className="topbar-left">
-              <div className="metric-box">
-                <span className="metric-label">Total Capital Disbursed</span>
-                <h3 className="metric-value">₹{disbursedCapital.toLocaleString('en-IN')}.00</h3>
-              </div>
-            </div>
-
-            <div className="topbar-right">
-              <div className="topbar-search-wrap">
-                <span className="search-icon">🔍</span>
-                <input
-                  type="text"
-                  placeholder="Filter listings, PAN, emails..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="topbar-search-input"
-                />
-              </div>
-
-              <div className="topbar-actions-container">
-                {/* Dynamic Wallet Capital Pill */}
-                <button 
-                  className="topbar-action-btn wallet-action-pill" 
-                  title={`Available Capital Reserves: ₹${activeBalance.toLocaleString('en-IN')}`}
-                  onClick={() => alert(`Operational Vault Capital Reserves: ₹${activeBalance.toLocaleString('en-IN')}`)}
-                >
-                  <span className="action-icon">💳</span>
-                  <span className="wallet-amount-text">₹{(activeBalance / 100000).toFixed(2)}L</span>
-                </button>
-
-                {/* Notification Bell Toggle */}
-                <button 
-                  className="topbar-action-btn notification-bell-btn" 
-                  title="Platform Operations Alert Log"
-                  onClick={() => alert('All lending operations systems are operating normally. No unread compliance flags.')}
-                >
-                  <span className="action-icon">🔔</span>
-                  <span className="bell-badge-pulse" />
-                </button>
-              </div>
-
-              <div className="admin-profile-card">
-                <div className="profile-avatar">
-                  {adminAvatar.startsWith('data:') || adminAvatar.startsWith('http') ? (
-                    <img src={adminAvatar} alt="Avatar" className="admin-custom-avatar-img" />
-                  ) : (
-                    <span className="default-avatar-initials">{adminName.charAt(0)}</span>
-                  )}
-                </div>
-                <div className="profile-details">
-                  <span className="profile-name">{adminName}</span>
-                  <span className="profile-role">{adminEmail}</span>
-                </div>
-              </div>
-            </div>
-          </header>
+          {/* Topbar Component */}
+          <AdminTopbar 
+            disbursedCapital={disbursedCapital}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeBalance={activeBalance}
+            adminAvatar={adminAvatar}
+            adminName={adminName}
+            adminEmail={adminEmail}
+          />
 
           <div className="dashboard-scroll-container">
 
-            {/* TAB VIEW 1: DASHBOARD */}
+            {/* Conditional Tab Views rendering */}
             {activeTab === 'Dashboard' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="welcome-banner">
-                  <div className="banner-content">
-                    <h2>LendoGo Operational Control</h2>
-                    <p>Welcome back, Officer. Operational metrics, credit portfolio risk audits, and capital flows are updated.</p>
-                  </div>
-                </div>
-
-                <div className="admin-grid-layout">
-                  <div className="grid-card assets-card">
-                    <div className="card-header">
-                      <h4>Active Loan Portfolio</h4>
-                      <span className="info-icon" title="Aggregated sum of all active loans distributed.">ⓘ</span>
-                    </div>
-                    <div className="card-value-wrap">
-                      <h2>₹{activeBalance.toLocaleString('en-IN')}.00</h2>
-                      <span className="trend-badge positive">↑ 12% <span className="trend-sub">Operational Safe</span></span>
-                    </div>
-                    <div className="asset-dist-bar">
-                      <div className="dist-segment personal" style={{ width: '65%' }} />
-                      <div className="dist-segment business" style={{ width: '25%' }} />
-                      <div className="dist-segment home-auto" style={{ width: '10%' }} />
-                    </div>
-                    <ul className="asset-distribution-list">
-                      <li>
-                        <span className="legend-dot personal" />
-                        <span className="dist-label">Personal Loans (65%)</span>
-                      </li>
-                      <li>
-                        <span className="legend-dot business" />
-                        <span className="dist-label">Business Loans (25%)</span>
-                      </li>
-                      <li>
-                        <span className="legend-dot home-auto" />
-                        <span className="dist-label">Home & Auto Loans (10%)</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="grid-card chart-card">
-                    <div className="card-header">
-                      <h4>Capital Disbursements vs Repayments</h4>
-                    </div>
-                    <div className="card-value-wrap">
-                      <h2>₹{disbursedCapital.toLocaleString('en-IN')}.00</h2>
-                    </div>
-                    {/* SVG Line Chart */}
-                    <div className="svg-chart-container">
-                      <svg viewBox="0 0 500 140" className="svg-line-chart">
-                        <line x1="40" y1="20" x2="480" y2="20" className="chart-grid-line" />
-                        <line x1="40" y1="70" x2="480" y2="70" className="chart-grid-line" />
-                        <line x1="40" y1="120" x2="480" y2="120" className="chart-grid-line" />
-                        
-                        <defs>
-                          <linearGradient id="chart-disbursed-grad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.0" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M40,120 L150,90 L260,85 L370,55 L480,25 L480,140 L40,140 Z" fill="url(#chart-disbursed-grad)" />
-                        <path d="M40,120 L150,90 L260,85 L370,55 L480,25" fill="none" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  <div className="grid-card robo-advisor-card">
-                    <div className="advisor-content">
-                      <div className="advisor-logo">🔒</div>
-                      <h3>Audit & Verification Index</h3>
-                      <p>Run automated PAN checks and background system integrity reports directly in the requests tab.</p>
-                      <button className="btn-advisor-action" onClick={() => setActiveTab('Loan Requests')}>
-                        Go to Requests Tab
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <DashboardTab 
+                activeBalance={activeBalance}
+                disbursedCapital={disbursedCapital}
+                setActiveTab={setActiveTab}
+              />
             )}
 
-            {/* TAB VIEW 2: USER MANAGEMENT */}
             {activeTab === 'User Management' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Borrower Directory</h2>
-                  <p>Check active borrow histories, email verifications, and credit standing indexes.</p>
-                </div>
-
-                <div className="table-responsive-admin">
-                  <table className="admin-data-table">
-                    <thead>
-                      <tr>
-                        <th>User ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>PAN Number</th>
-                        <th>Risk Index</th>
-                        <th>Status</th>
-                        <th>Joined</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUsers.length > 0 ? (
-                        filteredUsers.map((user) => (
-                          <tr key={user.id}>
-                            <td><strong>{user.id}</strong></td>
-                            <td>{user.name}</td>
-                            <td>{user.email}</td>
-                            <td><code className="pan-code">{user.PAN}</code></td>
-                            <td>
-                              <span className={`risk-tag ${user.rating.toLowerCase().replace(' ', '-')}`}>
-                                {user.rating}
-                              </span>
-                            </td>
-                            <td>
-                              <span className={`status-tag ${user.status.toLowerCase()}`}>
-                                {user.status}
-                              </span>
-                            </td>
-                            <td>{user.joined}</td>
-                            <td>
-                              <button 
-                                className={`btn-action-status ${user.status === 'Active' ? 'suspend' : 'activate'}`}
-                                onClick={() => handleToggleUserStatus(user.id, user.name, user.status)}
-                              >
-                                {user.status === 'Active' ? 'Suspend' : 'Activate'}
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="8" className="empty-row-text">No registered users match your search queries.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <UserManagementTab 
+                filteredUsers={filteredUsers}
+                handleToggleUserStatus={handleToggleUserStatus}
+              />
             )}
 
-            {/* TAB VIEW 3: LOAN REQUESTS */}
             {activeTab === 'Loan Requests' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Pending Loan Applications</h2>
-                  <p>Run simulated credit assessments and approve or decline incoming loan sanction contracts.</p>
-                </div>
-
-                <div className="requests-grid-wrapper">
-                  {loanRequests.length > 0 ? (
-                    loanRequests.map((req) => (
-                      <div className="request-card" key={req.id}>
-                        <div className="req-card-header">
-                          <span className="req-id-badge">{req.id}</span>
-                          <span className="req-type-badge">{req.type}</span>
-                        </div>
-                        
-                        <div className="req-card-body">
-                          <h3>{req.name}</h3>
-                          <div className="req-details-grid">
-                            <div>
-                              <span className="detail-lbl">Requested Sum</span>
-                              <strong className="detail-val text-primary">₹{req.amount.toLocaleString('en-IN')}</strong>
-                            </div>
-                            <div>
-                              <span className="detail-lbl">Tax Registry PAN</span>
-                              <strong className="detail-val"><code>{req.PAN}</code></strong>
-                            </div>
-                          </div>
-
-                          {/* Risk Audit Progress / Score */}
-                          {req.auditState === 'idle' && (
-                            <div className="audit-state-box idle">
-                              <span className="state-msg">Credit audit analysis required before decision.</span>
-                            </div>
-                          )}
-
-                          {req.auditState === 'scanning' && (
-                            <div className="audit-state-box scanning">
-                              <div className="mini-spinner" />
-                              <span className="state-msg animate-pulse">Scanning risk profile databases...</span>
-                            </div>
-                          )}
-
-                          {req.auditState === 'completed' && (
-                            <div className="audit-state-box completed">
-                              <div className="score-badge-circle">
-                                <strong>{req.riskScore}</strong>
-                                <span>/850</span>
-                              </div>
-                              <div className="score-desc">
-                                <span className="score-level">
-                                  Rating: <strong className={req.riskScore >= 700 ? 'text-green' : req.riskScore >= 600 ? 'text-orange' : 'text-red'}>
-                                    {req.riskScore >= 700 ? 'Safe Account' : req.riskScore >= 600 ? 'Moderate Risk' : 'Critical Credit Risk'}
-                                  </strong>
-                                </span>
-                                <p>KYC verified, bank statements matches approved criteria.</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="req-card-actions">
-                          {req.auditState === 'idle' ? (
-                            <button className="btn-req-audit" onClick={() => handleRunRiskAudit(req.id)}>
-                              📊 Run Credit Risk Audit
-                            </button>
-                          ) : (
-                            <>
-                              <button 
-                                className="btn-decision approve" 
-                                disabled={req.auditState === 'scanning'}
-                                onClick={() => handleApproveLoan(req)}
-                              >
-                                Approve & Disburse
-                              </button>
-                              <button 
-                                className="btn-decision reject" 
-                                disabled={req.auditState === 'scanning'}
-                                onClick={() => handleRejectLoan(req.id, req.name)}
-                              >
-                                Reject
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="empty-state-card">
-                      <span>✓</span>
-                      <h3>All Requests Cleared!</h3>
-                      <p>There are no outstanding loan applications waiting to be sanctioned.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <LoanRequestsTab 
+                loanRequests={loanRequests}
+                handleRunRiskAudit={handleRunRiskAudit}
+                handleApproveLoan={handleApproveLoan}
+                handleRejectLoan={handleRejectLoan}
+              />
             )}
 
-            {/* TAB VIEW 4: LOAN APPROVALS */}
             {activeTab === 'Loan Approvals' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Sanctioned Disbursements Ledger</h2>
-                  <p>Verify bank transfer completions, locked interest rates, and loan payment timelines.</p>
-                </div>
-
-                <div className="table-responsive-admin">
-                  <table className="admin-data-table">
-                    <thead>
-                      <tr>
-                        <th>Loan ID</th>
-                        <th>Borrower</th>
-                        <th>Type</th>
-                        <th>Capital Sanctioned</th>
-                        <th>Interest P.A.</th>
-                        <th>Sanction Date</th>
-                        <th>Disbursal Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {approvedLoans.map((loan) => (
-                        <tr key={loan.id}>
-                          <td><strong>{loan.id}</strong></td>
-                          <td>{loan.name}</td>
-                          <td>{loan.type}</td>
-                          <td className="text-primary font-weight-bold">₹{loan.amount.toLocaleString('en-IN')}</td>
-                          <td>{loan.rate}% Fixed</td>
-                          <td>{loan.date}</td>
-                          <td>
-                            <span className="status-badge completed">
-                              {loan.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <LoanApprovalsTab 
+                approvedLoans={approvedLoans}
+              />
             )}
 
-            {/* TAB VIEW 5: CAREERS MANAGEMENT */}
             {activeTab === 'Careers Management' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Careers & Staff Recruitment</h2>
-                  <p>Create mock openings and review candidate applications for LendoGo operations.</p>
-                </div>
-
-                <div className="double-subtab-container">
-                  <div className="sub-panel">
-                    <h3>Active Job Postings</h3>
-                    <table className="admin-data-table mini-table">
-                      <thead>
-                        <tr>
-                          <th>Job Code</th>
-                          <th>Role Title</th>
-                          <th>Department</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {careersOpenings.map(job => (
-                          <tr key={job.id}>
-                            <td><strong>{job.id}</strong></td>
-                            <td>{job.title}</td>
-                            <td>{job.dept}</td>
-                            <td>
-                              <span className={`status-tag ${job.status.toLowerCase()}`}>{job.status}</span>
-                            </td>
-                            <td>
-                              <button 
-                                className="btn-action-toggle-job"
-                                onClick={() => handleToggleJobStatus(job.id, job.title, job.status)}
-                              >
-                                {job.status === 'Open' ? 'Close' : 'Reopen'}
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="sub-panel">
-                    <h3>Received Applications</h3>
-                    <table className="admin-data-table mini-table">
-                      <thead>
-                        <tr>
-                          <th>Candidate</th>
-                          <th>Target Role</th>
-                          <th>Applied Date</th>
-                          <th>Progress Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {jobApplications.map(app => (
-                          <tr key={app.id}>
-                            <td>
-                              <div className="applicant-profile-cell">
-                                <strong>{app.name}</strong>
-                                <span>{app.email}</span>
-                              </div>
-                            </td>
-                            <td>{app.role}</td>
-                            <td>{app.applied}</td>
-                            <td>
-                              <span className={`recru-status ${app.status.toLowerCase()}`}>{app.status}</span>
-                            </td>
-                            <td>
-                              <select 
-                                className="applicant-status-select"
-                                value={app.status}
-                                onChange={(e) => handleUpdateApplicantStatus(app.id, app.name, e.target.value)}
-                              >
-                                <option value="Reviewing">Reviewing</option>
-                                <option value="Shortlisted">Shortlist</option>
-                                <option value="Interviewing">Interview</option>
-                                <option value="Rejected">Reject</option>
-                              </select>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+              <CareersManagementTab 
+                careersOpenings={careersOpenings}
+                handleToggleJobStatus={handleToggleJobStatus}
+                jobApplications={jobApplications}
+                handleUpdateApplicantStatus={handleUpdateApplicantStatus}
+              />
             )}
 
-            {/* TAB VIEW 6: CUSTOMER CARE */}
             {activeTab === 'Customer Care' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Free Consultations Inquiries</h2>
-                  <p>Connect with prospective borrowers who requested assistance from the Consultation forms.</p>
-                </div>
-
-                <div className="table-responsive-admin">
-                  <table className="admin-data-table">
-                    <thead>
-                      <tr>
-                        <th>Ticket ID</th>
-                        <th>Client Name</th>
-                        <th>Email Contact</th>
-                        <th>Phone Number</th>
-                        <th>Requested Category</th>
-                        <th>Registered Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {consultations.map(ticket => (
-                        <tr key={ticket.id}>
-                          <td><strong>{ticket.id}</strong></td>
-                          <td>{ticket.name}</td>
-                          <td>{ticket.email}</td>
-                          <td>{ticket.phone}</td>
-                          <td>{ticket.type}</td>
-                          <td>{ticket.date}</td>
-                          <td>
-                            <span className={`status-tag ${ticket.status === 'Contacted' ? 'active' : 'suspended'}`}>
-                              {ticket.status}
-                            </span>
-                          </td>
-                          <td>
-                            {ticket.status === 'Pending' ? (
-                              <button 
-                                className="btn-action-status activate"
-                                onClick={() => handleResolveTicket(ticket.id, ticket.name)}
-                              >
-                                Mark Contacted
-                              </button>
-                            ) : (
-                              <span className="contact-check">✓ Completed</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <CustomerCareTab 
+                consultations={consultations}
+                handleResolveTicket={handleResolveTicket}
+              />
             )}
 
-            {/* TAB VIEW 7: STAFF MANAGEMENT */}
             {activeTab === 'Staff Management' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Staff Accounts & Permissions</h2>
-                  <p>Manage operating lending credentials, compliance officer clearances, and staff audits.</p>
-                </div>
-
-                <div className="double-subtab-container">
-                  <div className="sub-panel flex-1">
-                    <h3>Add New Operational Staff</h3>
-                    <form className="staff-form" onSubmit={handleAddStaff}>
-                      <div className="form-input-group">
-                        <label>Employee Full Name</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={newStaffName} 
-                          onChange={(e) => setNewStaffName(e.target.value)} 
-                          placeholder="e.g. Anand Sharma" 
-                          className="staff-field"
-                        />
-                      </div>
-                      <div className="form-input-group">
-                        <label>LendoGo Office Email</label>
-                        <input 
-                          type="email" 
-                          required
-                          value={newStaffEmail} 
-                          onChange={(e) => setNewStaffEmail(e.target.value)} 
-                          placeholder="e.g. anand.s@lendogo.com" 
-                          className="staff-field"
-                        />
-                      </div>
-                      <div className="form-input-group">
-                        <label>Assigned Staff Role</label>
-                        <select 
-                          value={newStaffRole} 
-                          onChange={(e) => setNewStaffRole(e.target.value)}
-                          className="staff-field"
-                        >
-                          <option value="Verification Agent">Verification Agent (L1 Ops)</option>
-                          <option value="Credit Underwriter">Credit Underwriter (L2 Compliance)</option>
-                        </select>
-                      </div>
-                      <button type="submit" className="btn-add-staff-submit">
-                        ＋ Save Staff Member
-                      </button>
-                    </form>
-                  </div>
-
-                  <div className="sub-panel flex-2">
-                    <h3>Current Active Team</h3>
-                    <table className="admin-data-table mini-table">
-                      <thead>
-                        <tr>
-                          <th>Staff Officer</th>
-                          <th>Assigned Role</th>
-                          <th>Clearance Level</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {staffMembers.map((staff, idx) => (
-                          <tr key={idx}>
-                            <td>
-                              <div className="applicant-profile-cell">
-                                <strong>{staff.name}</strong>
-                                <span>{staff.email}</span>
-                              </div>
-                            </td>
-                            <td>{staff.role}</td>
-                            <td><code>{staff.clearance}</code></td>
-                            <td>
-                              <span className={`status-tag ${staff.status === 'Active' ? 'active' : 'suspended'}`}>
-                                {staff.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+              <StaffManagementTab 
+                handleAddStaff={handleAddStaff}
+                newStaffName={newStaffName}
+                setNewStaffName={setNewStaffName}
+                newStaffEmail={newStaffEmail}
+                setNewStaffEmail={setNewStaffEmail}
+                newStaffRole={newStaffRole}
+                setNewStaffRole={setNewStaffRole}
+                staffMembers={staffMembers}
+              />
             )}
 
-            {/* TAB VIEW 8: WEB CONFIGURATION */}
             {activeTab === 'Web Configuration' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>System Web Configurations</h2>
-                  <p>Configure borrowing constraints, approval credit rules, and active application parameters.</p>
-                </div>
-
-                <div className="web-config-card-box">
-                  {showConfigSuccess && (
-                    <div className="config-success-banner animate-scale-up">
-                      ✓ Platform parameters updated in secure database.
-                    </div>
-                  )}
-
-                  <div className="config-row-item">
-                    <div className="config-info-text">
-                      <h4>Minimum Scoring Index Requirement</h4>
-                      <p>Incoming borrowers must achieve this score on simulated database scans to unlock instant approvals.</p>
-                    </div>
-                    <div className="config-action-control">
-                      <div className="range-score-wrap">
-                        <input 
-                          type="range"
-                          min={300}
-                          max={850}
-                          value={minCreditScore}
-                          onChange={(e) => setMinCreditScore(Number(e.target.value))}
-                          className="config-slider-range"
-                        />
-                        <strong className="slider-score-indicator">{minCreditScore}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="config-row-item">
-                    <div className="config-info-text">
-                      <h4>Platform Base Interest Rate P.A.</h4>
-                      <p>Global baseline interest index applied to newly approved credit contracts.</p>
-                    </div>
-                    <div className="config-action-control">
-                      <div className="range-score-wrap">
-                        <input 
-                          type="range"
-                          min={5}
-                          max={25}
-                          value={baseInterestRate}
-                          onChange={(e) => setBaseInterestRate(Number(e.target.value))}
-                          className="config-slider-range"
-                        />
-                        <strong className="slider-score-indicator">{baseInterestRate}%</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="config-row-item">
-                    <div className="config-info-text">
-                      <h4>Enable Public Account Sign-ups</h4>
-                      <p>Disabling blocks new user registration endpoints on the server (maintenance mode).</p>
-                    </div>
-                    <div className="config-action-control">
-                      <label className="toggle-switch">
-                        <input 
-                          type="checkbox"
-                          checked={isSignupsEnabled}
-                          onChange={() => setIsSignupsEnabled(!isSignupsEnabled)}
-                        />
-                        <span className="slider-round" />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="config-row-item">
-                    <div className="config-info-text">
-                      <h4>Enable Free Consultation Dialogs</h4>
-                      <p>Controls visibility of consultation query prompts in public site footers.</p>
-                    </div>
-                    <div className="config-action-control">
-                      <label className="toggle-switch">
-                        <input 
-                          type="checkbox"
-                          checked={isConsultationsEnabled}
-                          onChange={() => setIsConsultationsEnabled(!isConsultationsEnabled)}
-                        />
-                        <span className="slider-round" />
-                      </label>
-                    </div>
-                  </div>
-
-                  <button className="btn-save-web-config" onClick={handleSaveWebConfig}>
-                    Save System Parameters
-                  </button>
-                </div>
-              </div>
+              <WebConfigurationTab 
+                showConfigSuccess={showConfigSuccess}
+                minCreditScore={minCreditScore}
+                setMinCreditScore={setMinCreditScore}
+                baseInterestRate={baseInterestRate}
+                setBaseInterestRate={setBaseInterestRate}
+                isSignupsEnabled={isSignupsEnabled}
+                setIsSignupsEnabled={setIsSignupsEnabled}
+                isConsultationsEnabled={isConsultationsEnabled}
+                setIsConsultationsEnabled={setIsConsultationsEnabled}
+                handleSaveWebConfig={handleSaveWebConfig}
+              />
             )}
 
-            {/* TAB VIEW 9: AUDIT LOGS */}
             {activeTab === 'Audit Logs' && (
-              <div className="tab-pane-container animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Platform Activity & Audit Logs</h2>
-                  <p>Real-time security log captures access tokens, admin updates, and system events.</p>
-                </div>
-
-                <div className="audit-ledger-box">
-                  <div className="ledger-header-row">
-                    <span>SECURITY CHRONICLE</span>
-                    <button className="btn-clear-logs" onClick={() => { setAuditLogs([]); alert('Platform log wiped locally.'); }}>
-                      Wipe Logs
-                    </button>
-                  </div>
-
-                  <div className="audit-scroll-ledger">
-                    {auditLogs.length > 0 ? (
-                      auditLogs.map((log) => (
-                        <div className={`log-item-row ${log.type}`} key={log.id}>
-                          <span className="log-time">{log.timestamp}</span>
-                          <span className={`log-badge-type ${log.type}`}>{log.type.toUpperCase()}</span>
-                          <span className="log-operator">[{log.user}]</span>
-                          <span className="log-action">{log.action}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="empty-ledger-view">
-                        <p>No platform logs captured.</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <AuditLogsTab 
+                auditLogs={auditLogs}
+                setAuditLogs={setAuditLogs}
+              />
             )}
 
-            {/* TAB VIEW 10: SETTINGS (EXTENDED WORKFLOWS) */}
             {activeTab === 'Admin Settings' && (
-              <div className="tab-pane-container settings-dashboard-view animate-fade-in">
-                <div className="section-header-row">
-                  <h2>Administrative Control Center</h2>
-                  <p>Configure officer profiles, system credentials, integrations, and platform ownership in a single unified cockpit.</p>
-                </div>
-
-                <div className="settings-unified-grid">
-                  
-                  {/* CARD 1: PROFILE & BRANDING */}
-                  <div className="settings-group-card profile-branding-card">
-                    <div className="settings-card-header">
-                      <span className="card-icon">📸</span>
-                      <h3>Profile & Branding</h3>
-                    </div>
-                    
-                    <div className="settings-account-hero-card dense-hero">
-                      <div className="hero-avatar-wrapper">
-                        {adminAvatar.startsWith('data:') || adminAvatar.startsWith('http') ? (
-                          <img src={adminAvatar} alt="Avatar" className="admin-custom-avatar-img-large" />
-                        ) : (
-                          <span className="default-avatar-initials">{adminName.charAt(0)}</span>
-                        )}
-                        <label className="avatar-edit-badge" title="Upload custom photo">
-                          📷
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={handleSimulatePhotoUpload}
-                            className="file-input-hidden"
-                          />
-                        </label>
-                      </div>
-                      <div className="hero-identity-wrap">
-                        <span className="owner-badge">Lending Owner</span>
-                        <h2>{adminName}</h2>
-                        <p>{adminEmail}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CARD 2: OFFICER PROFILE DETAILS */}
-                  <div className="settings-group-card profile-details-card">
-                    <div className="settings-card-header">
-                      <span className="card-icon">👤</span>
-                      <h3>Profile Settings</h3>
-                    </div>
-                    <form onSubmit={handleUpdateAdminEmail} className="settings-inner-form mt-1">
-                      <div className="form-input-group mb-2">
-                        <label>Officer Name</label>
-                        <input 
-                          type="text"
-                          required
-                          value={adminName}
-                          onChange={(e) => setAdminName(e.target.value)}
-                          className="staff-field"
-                        />
-                      </div>
-                      <div className="form-input-group">
-                        <label>Officer Email Coordinate</label>
-                        <input 
-                          type="email" 
-                          required
-                          value={emailInput} 
-                          onChange={(e) => setEmailInput(e.target.value)} 
-                          className="staff-field"
-                        />
-                      </div>
-                      <button type="submit" className="btn-save-web-config mt-2">
-                        Save Profile Details
-                      </button>
-                    </form>
-                  </div>
-
-                  {/* CARD 3: SECURITY KEY SETTINGS */}
-                  <div className="settings-group-card security-credentials-card">
-                    <div className="settings-card-header">
-                      <span className="card-icon">🔒</span>
-                      <h3>Security Key Credentials</h3>
-                    </div>
-                    <form className="settings-inner-form mt-1" onSubmit={handleUpdateAdminPassword}>
-                      <div className="form-input-group mb-2">
-                        <label>Current Key Pass</label>
-                        <input 
-                          type="password" 
-                          required
-                          placeholder="••••••••"
-                          value={currentPassword} 
-                          onChange={(e) => setCurrentPassword(e.target.value)} 
-                          className="staff-field"
-                        />
-                      </div>
-                      <div className="form-input-group mb-2">
-                        <label>New Strong Password</label>
-                        <input 
-                          type="password" 
-                          required
-                          placeholder="••••••••"
-                          value={newPassword} 
-                          onChange={(e) => setNewPassword(e.target.value)} 
-                          className="staff-field"
-                        />
-                      </div>
-                      <div className="form-input-group">
-                        <label>Confirm New Password</label>
-                        <input 
-                          type="password" 
-                          required
-                          placeholder="••••••••"
-                          value={confirmPassword} 
-                          onChange={(e) => setConfirmPassword(e.target.value)} 
-                          className="staff-field"
-                        />
-                      </div>
-                      <button type="submit" className="btn-save-web-config mt-2">
-                        Save Operations Key
-                      </button>
-                    </form>
-                  </div>
-
-                  {/* CARD 4: PLATFORM INTEGRATIONS */}
-                  <div className="settings-group-card system-integrations-card">
-                    <div className="settings-card-header">
-                      <span className="card-icon">🌐</span>
-                      <h3>Platform Integrations</h3>
-                    </div>
-                    
-                    <div className="integrations-fields-wrap mt-1">
-                      <div className="integration-row mb-2">
-                        <div className="row-text">
-                          <h4>2-Factor Verification</h4>
-                          <p>For transfers &gt; ₹5,00,000</p>
-                        </div>
-                        <label className="toggle-switch">
-                          <input type="checkbox" defaultChecked />
-                          <span className="slider-round" />
-                        </label>
-                      </div>
-
-                      <div className="integration-row mb-2">
-                        <div className="row-text">
-                          <h4>Database Synchronization</h4>
-                          <p>Cloud offshore replicas</p>
-                        </div>
-                        <select className="settings-select-field">
-                          <option>Every 1 Hour (Realtime)</option>
-                          <option>Every 12 Hours</option>
-                          <option>Every 24 Hours</option>
-                        </select>
-                      </div>
-
-                      <div className="integration-row">
-                        <div className="row-text">
-                          <h4>Amazon SES Mailer</h4>
-                          <p>Dispatch transaction alerts</p>
-                        </div>
-                        <strong className="text-green font-weight-bold">● Connected</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CARD 5: DANGER ZONE & CLEARANCES (FULL WIDTH) */}
-                  <div className="settings-group-card danger-zone-group full-width-card">
-                    <div className="settings-card-header text-red">
-                      <span className="card-icon">⚠️</span>
-                      <h3>Master Clearances & Danger Operations</h3>
-                    </div>
-                    
-                    <div className="danger-dashboard-row">
-                      <div className="danger-form-column">
-                        <p>Transfer master administrative clearances to a new coordinate. Your clearances will instantly revoke.</p>
-                        <form className="settings-inner-form mt-2" onSubmit={handleTransferOwnership}>
-                          <div className="form-input-group mb-2">
-                            <label>Designated Recipient Email</label>
-                            <input 
-                              type="email" 
-                              required
-                              placeholder="new.owner@lendogo.com"
-                              value={transferEmail} 
-                              onChange={(e) => setTransferEmail(e.target.value)} 
-                              className="staff-field danger-field"
-                            />
-                          </div>
-                          <div className="form-input-group mb-2">
-                            <label>Master Security Clearance Code</label>
-                            <input 
-                              type="password" 
-                              required
-                              placeholder="Clearance ID Code"
-                              value={transferKey} 
-                              onChange={(e) => setTransferKey(e.target.value)} 
-                              className="staff-field danger-field"
-                            />
-                          </div>
-                          <button type="submit" className="btn-transfer-ownership-submit">
-                            ⚠️ Transfer Master Clearances
-                          </button>
-                        </form>
-                      </div>
-
-                      <div className="danger-logout-column">
-                        <div className="logout-prompt-box">
-                          <h4>Administrative Session Control</h4>
-                          <p>Close operational session registers and secure audit ledgers locally.</p>
-                          <button type="button" className="btn-admin-logout-trigger mt-2" onClick={handleAdminLogout}>
-                            🚪 Sign Out of Admin Panel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
+              <AdminSettingsTab 
+                adminAvatar={adminAvatar}
+                adminName={adminName}
+                setAdminName={setAdminName}
+                adminEmail={adminEmail}
+                handleSimulatePhotoUpload={handleSimulatePhotoUpload}
+                handleUpdateAdminEmail={handleUpdateAdminEmail}
+                emailInput={emailInput}
+                setEmailInput={setEmailInput}
+                handleUpdateAdminPassword={handleUpdateAdminPassword}
+                currentPassword={currentPassword}
+                setCurrentPassword={setCurrentPassword}
+                newPassword={newPassword}
+                setNewPassword={setNewPassword}
+                confirmPassword={confirmPassword}
+                setConfirmPassword={setConfirmPassword}
+                handleTransferOwnership={handleTransferOwnership}
+                transferEmail={transferEmail}
+                setTransferEmail={setTransferEmail}
+                transferKey={transferKey}
+                setTransferKey={setTransferKey}
+                handleAdminLogout={handleAdminLogout}
+              />
             )}
 
           </div>

@@ -1,0 +1,985 @@
+/* LendoGo Premium Apply Loan Modal CSS Stylesheet */
+
+/* Modal Backdrop */
+.loan-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(9, 13, 22, 0.75);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: modalBackdropFade 0.4s ease forwards;
+  padding: 20px;
+}
+
+/* Modal Box Container */
+.loan-modal-container {
+  background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  width: 100%;
+  max-width: 820px;
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  color: #f3f4f6;
+  animation: modalSlideReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+}
+
+/* Close Icon Button */
+.loan-modal-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 1.1rem;
+  z-index: 10;
+}
+
+.loan-modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Modal Body Padding */
+.loan-modal-body {
+  padding: 40px;
+}
+
+/* Modal Header Styles */
+.loan-modal-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.loan-modal-header h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #3b82f6 0%, #00d2ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.loan-modal-header p {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* Multi-Step Wizard Progress Indicator */
+.loan-step-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto 36px auto;
+  max-width: 480px;
+  position: relative;
+}
+
+.loan-step-progress::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.loan-step-bar-active {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  background: #3b82f6;
+  transform: translateY(-50%);
+  z-index: 1;
+  transition: width 0.3s ease;
+}
+
+.loan-step-dot {
+  width: 32px;
+  height: 32px;
+  background: #1f2937;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #9ca3af;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.loan-step-dot.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+.loan-step-dot.completed {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+/* Step 1: Select Type Cards Grid */
+.loan-types-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 480px) {
+  .loan-types-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.loan-type-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 24px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.loan-type-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.loan-type-card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-4px);
+}
+
+.loan-type-card.selected {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+.loan-type-card.selected::before {
+  opacity: 1;
+}
+
+.loan-type-icon {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.loan-type-card.selected .loan-type-icon {
+  background: rgba(59, 130, 246, 0.2);
+  transform: scale(1.05);
+}
+
+.loan-type-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #f3f4f6;
+}
+
+.loan-type-card p {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  flex: 1;
+}
+
+.loan-tier-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.loan-tier-tag.bronze {
+  background: rgba(217, 119, 6, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.loan-tier-tag.secured {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Step 2: Configure Calculator (CreditSea Grid Style) */
+.emi-calculator-container {
+  width: 100%;
+}
+
+.emi-calculator-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.emi-calculator-header h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.emi-calculator-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .emi-calculator-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* Left Column: Slider Cards */
+.emi-sliders-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emi-slider-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 16px 20px;
+}
+
+.emi-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.emi-slider-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 0.2px;
+}
+
+.emi-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+.emi-currency-symbol {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-right: 4px;
+}
+
+.emi-number-input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  width: 78px;
+  outline: none;
+  text-align: right;
+  font-family: 'Outfit', sans-serif;
+}
+
+.emi-number-input.narrow {
+  width: 55px;
+}
+
+/* Range Slider Input Styling */
+.emi-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  outline: none;
+  margin: 10px 0;
+  display: block;
+}
+
+.emi-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border: 3px solid #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+  transition: transform 0.15s ease;
+}
+
+.emi-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.emi-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin-top: 6px;
+  padding: 0 2px;
+}
+
+/* Right Column: Visual Charts */
+.emi-visual-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.emi-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.emi-donut-chart {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.emi-donut-hole {
+  width: 114px;
+  height: 114px;
+  background: #0f172a; /* matches container background */
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.donut-center-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.donut-center-value {
+  font-size: 1.1rem;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.emi-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.principal {
+  background: #10b981;
+}
+
+.legend-dot.interest {
+  background: #3b82f6;
+}
+
+/* Dynamic Details Breakdown Table */
+.emi-details-table {
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 14px;
+}
+
+.emi-table-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.emi-table-row.total-highlight {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 6px;
+  padding-top: 10px;
+}
+
+.emi-table-row.total-highlight .emi-row-label {
+  font-weight: 800;
+  color: #3b82f6;
+  font-size: 0.9rem;
+}
+
+.emi-table-row.total-highlight .emi-row-value {
+  font-weight: 850;
+  color: #3b82f6;
+  font-size: 1.15rem;
+}
+
+/* Step 3: Document Upload Area */
+.kyc-fast-pass-box {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+.fast-pass-shield {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.kyc-fast-pass-box h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #34d399;
+  margin-bottom: 6px;
+}
+
+.kyc-fast-pass-box p {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.fast-pass-details-list {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 14px 20px;
+  text-align: left;
+  list-style: none;
+  font-size: 0.8rem;
+  color: #f3f4f6;
+  display: inline-block;
+}
+
+.fast-pass-details-list li {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fast-pass-details-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* File Upload System */
+.document-upload-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-card-row {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.upload-card-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.upload-icon-circle {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.3rem;
+}
+
+.upload-meta {
+  flex: 1;
+}
+
+.upload-meta h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 2px;
+}
+
+.upload-meta p {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.btn-upload-browse {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-upload-browse:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.file-input-hidden {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Uploaded State */
+.upload-card-row.uploaded {
+  background: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.2);
+  border-style: solid;
+}
+
+.upload-card-row.uploaded .upload-icon-circle {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.uploaded-tick {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Progress Simulation Bar */
+.upload-progress-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+/* Step 4: Digital E-Sign */
+.esign-prompt-section {
+  text-align: center;
+}
+
+.esign-summary-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.esign-summary-card h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.esign-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+}
+
+.summary-data-lbl {
+  font-size: 0.8rem;
+  color: #6b7280;
+  display: block;
+}
+
+.summary-data-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.summary-data-val.payout {
+  color: #10b981;
+}
+
+/* E-Signature Canvas Panel */
+.esign-box-wrapper {
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.esign-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.btn-clear-esign {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.esign-canvas-element {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  width: 100%;
+  height: 120px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.esign-typed-input {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  color: #f3f4f6;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.esign-typed-input:focus {
+  border-color: #3b82f6;
+}
+
+/* Step 5: Auditing Ticker Progress */
+.audit-timeline-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 10px;
+}
+
+.audit-circular-spinner {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.audit-spinner-outer {
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(59, 130, 246, 0.05);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spinnerRotate 1.2s linear infinite;
+}
+
+.audit-spinner-shield {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.2rem;
+}
+
+.audit-ticker-status {
+  text-align: center;
+  max-width: 420px;
+  margin-bottom: 30px;
+}
+
+.audit-ticker-status h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #60a5fa;
+  margin-bottom: 8px;
+}
+
+.audit-ticker-status p {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  min-height: 24px;
+}
+
+.audit-checkboxes-stack {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audit-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  transition: all 0.3s ease;
+}
+
+.audit-checkbox-item.checked {
+  color: #f3f4f6;
+}
+
+.checkbox-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.65rem;
+  transition: all 0.3s ease;
+}
+
+.audit-checkbox-item.checked .checkbox-circle {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+/* Success Card Presentation */
+.success-screen-wrapper {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.success-badge-blast {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 28px auto;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+  animation: popSuccessBlast 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.success-badge-blast span {
+  font-size: 3rem;
+  color: #ffffff;
+}
+
+.success-screen-wrapper h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #34d399;
+  margin-bottom: 8px;
+}
+
+.success-screen-wrapper p {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-bottom: 28px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Bottom Action Buttons footer */
+.loan-modal-actions-footer {
+  padding: 0 40px 40px 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.btn-loan-modal {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.btn-loan-modal.btn-back {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d1d5db;
+}
+
+.btn-loan-modal.btn-back:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-loan-modal.btn-next {
+  background: #3b82f6;
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+  flex: 1;
+}
+
+.btn-loan-modal.btn-next:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-loan-modal.btn-next:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: #4b5563;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-loan-modal.btn-finish {
+  background: #10b981;
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+  width: 100%;
+}
+
+.btn-loan-modal.btn-finish:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* Animations declarations */
+@keyframes modalBackdropFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes modalSlideReveal {
+  0% { opacity: 0; transform: scale(0.95) translateY(15px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes spinnerRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes popSuccessBlast {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes alertReveal {
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
