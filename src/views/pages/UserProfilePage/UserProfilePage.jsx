@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
+import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
+import ParallaxShapes from '../../components/ParallaxShapes/ParallaxShapes';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
 import './UserProfilePage.css';
 
@@ -152,10 +154,13 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div className="profile-page-wrapper">
+    <div className="profile-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <Navbar />
 
-      <main className="profile-main-content animate-fade-in">
+      {/* Dynamic ambient moving shapes background */}
+      <ParallaxShapes preset="side-decor" />
+
+      <main className="profile-main-content animate-fade-in" style={{ position: 'relative', zIndex: 2 }}>
         {/* Profile Premium Header Hero */}
         <section className="profile-hero-section">
           <div className="profile-hero-left">

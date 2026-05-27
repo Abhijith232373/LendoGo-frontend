@@ -17,7 +17,7 @@
 .loan-progress-header {
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 24px 60px 0;
+  padding: 12px 60px 0;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -28,7 +28,7 @@
   font-size: 1.4rem;
   font-weight: 800;
   color: #1d4ed8;
-  margin-bottom: 28px;
+  margin-bottom: 12px;
   cursor: pointer;
   display: inline-block;
   letter-spacing: -0.3px;
@@ -40,7 +40,7 @@
 .loan-tab-navbar-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding-bottom: 24px;
+  padding-bottom: 10px;
 }
 
 .loan-tab-navbar {
@@ -154,7 +154,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 48px 24px 100px;
+  padding: 16px 24px 24px;
 }
 
 /* ── Step Card ──────────────────────────────────────────── */
@@ -162,9 +162,9 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 56px 64px;
+  padding: 24px 40px;
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.06);
 }
 
@@ -542,8 +542,8 @@
 
 /* ── Compact Cards & Layout Optimization ────────────────── */
 .loan-step-card.compact-card {
-  padding: 36px 44px;
-  max-width: 820px;
+  padding: 24px 40px;
+  max-width: 1000px;
 }
 
 .form-compact-grid {
@@ -717,25 +717,25 @@
 
 /* ── Roadoz Style Flat Form Inputs ──────────────────────── */
 .form-label-flat {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  color: #64748b;
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   display: block;
 }
 
 .form-input-flat,
 .form-select-flat {
   width: 100%;
-  height: 44px;
-  padding: 10px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.88rem;
+  height: 54px;
+  padding: 12px 18px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.96rem;
   font-family: 'Outfit', sans-serif;
-  color: #1e293b;
+  color: #0f172a;
   background: #ffffff;
   outline: none;
   transition: all 0.2s ease;

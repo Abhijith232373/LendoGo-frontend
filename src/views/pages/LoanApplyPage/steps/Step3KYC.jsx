@@ -14,8 +14,6 @@ const Step3KYC = () => {
     incomeProof, setIncomeProof,
     propertyDoc, setPropertyDoc,
     registrationDoc, setRegistrationDoc,
-    agreementDoc, setAgreementDoc,
-    creditHistory, setCreditHistory,
     employmentType, setEmploymentType,
     monthlyIncome, setMonthlyIncome,
     markStepComplete,
@@ -25,28 +23,29 @@ const Step3KYC = () => {
     if (!completedSteps.step2) navigate('/loan/apply/offer');
   }, []);
 
-  const isTier1 = loanType === 'personal' || loanType === 'instant' || loanType === 'credit-builder';
+  // Determine track active
+  const isLowTrack = loanType === 'instant' || loanType === 'credit-builder';
 
-  const tier1Docs = [
-    { key: 'aadhaarFront', label: 'Aadhaar Front', state: aadhaarFront, setter: setAadhaarFront },
-    { key: 'aadhaarBack',  label: 'Aadhaar Back',  state: aadhaarBack,  setter: setAadhaarBack },
-    { key: 'panCard',      label: 'PAN Card',      state: panCard,      setter: setPanCard },
-    { key: 'liveSelfie',   label: 'Live Selfie',   state: liveSelfie,   setter: setLiveSelfie },
+  // Minimal 4-document KYC Checklist for Micro-Credit Track
+  const lowTrackDocs = [
+    { key: 'liveSelfie',   label: 'Live Selfie (Photo)',   state: liveSelfie,   setter: setLiveSelfie,   accept: 'image/*' },
+    { key: 'aadhaarFront', label: 'Aadhaar Front (ID)',    state: aadhaarFront, setter: setAadhaarFront, accept: '.jpg,.jpeg,.png,.pdf' },
+    { key: 'aadhaarBack',  label: 'Aadhaar Back (ID)',     state: aadhaarBack,  setter: setAadhaarBack,  accept: '.jpg,.jpeg,.png,.pdf' },
+    { key: 'panCard',      label: 'PAN Card (ID)',         state: panCard,      setter: setPanCard,      accept: '.jpg,.jpeg,.png,.pdf' },
   ];
 
-  const tier2Docs = [
-    { key: 'aadhaarFront',    label: 'Aadhaar Front',    state: aadhaarFront,    setter: setAadhaarFront },
-    { key: 'aadhaarBack',     label: 'Aadhaar Back',     state: aadhaarBack,     setter: setAadhaarBack },
-    { key: 'panCard',         label: 'PAN Card',         state: panCard,         setter: setPanCard },
-    { key: 'liveSelfie',      label: 'Live Selfie',      state: liveSelfie,      setter: setLiveSelfie },
-    { key: 'incomeProof',     label: 'Income Proof',     state: incomeProof,     setter: setIncomeProof },
-    { key: 'propertyDoc',     label: 'Property Docs',    state: propertyDoc,     setter: setPropertyDoc },
-    { key: 'registrationDoc', label: 'Registration Cert',state: registrationDoc, setter: setRegistrationDoc },
-    { key: 'agreementDoc',    label: 'Loan Agreement',   state: agreementDoc,    setter: setAgreementDoc },
-    { key: 'creditHistory',   label: 'Credit History',   state: creditHistory,   setter: setCreditHistory },
+  // Rigorous 7-document "Tuff" KYC Checklist for Elite Asset Funding
+  const highTrackDocs = [
+    { key: 'liveSelfie',      label: 'Live Selfie (Photo)',        state: liveSelfie,      setter: setLiveSelfie,      accept: 'image/*' },
+    { key: 'aadhaarFront',    label: 'Aadhaar Front (ID)',         state: aadhaarFront,    setter: setAadhaarFront,    accept: '.jpg,.jpeg,.png,.pdf' },
+    { key: 'aadhaarBack',     label: 'Aadhaar Back (ID)',          state: aadhaarBack,     setter: setAadhaarBack,     accept: '.jpg,.jpeg,.png,.pdf' },
+    { key: 'panCard',         label: 'PAN Card (ID)',              state: panCard,         setter: setPanCard,         accept: '.jpg,.jpeg,.png,.pdf' },
+    { key: 'incomeProof',     label: '3-Month Bank Statement',     state: incomeProof,     setter: setIncomeProof,     accept: '.pdf' },
+    { key: 'propertyDoc',     label: 'Property/Asset Agreement',   state: propertyDoc,     setter: setPropertyDoc,     accept: '.pdf' },
+    { key: 'registrationDoc', label: 'Income Proof / ITR',         state: registrationDoc, setter: setRegistrationDoc, accept: '.pdf' },
   ];
 
-  const activeDocs = isTier1 ? tier1Docs : tier2Docs;
+  const activeDocs = isLowTrack ? lowTrackDocs : highTrackDocs;
 
   const allDocsUploaded = activeDocs.every(doc => doc.state !== null);
   const canContinue = allDocsUploaded && employmentType && monthlyIncome && Number(monthlyIncome) >= 0;
@@ -76,6 +75,14 @@ const Step3KYC = () => {
     </svg>
   );
 
+  const PdfIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#ef4444' }}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <text x="8" y="16" fill="#ef4444" fontSize="5" fontWeight="800" fontFamily="sans-serif">PDF</text>
+    </svg>
+  );
+
   const CheckIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#10b981' }}>
       <polyline points="20 6 9 17 4 12"/>
@@ -84,35 +91,36 @@ const Step3KYC = () => {
 
   return (
     <LoanApplyLayout>
-      <div className="loan-step-card compact-card shadow-sm">
+      <div className="loan-step-card compact-card shadow-sm" style={{ maxWidth: '1000px' }}>
         {/* Step Title Row */}
         <div className="step-card-header-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
           <DocOutlineIcon />
           <h2 className="step-card-title-flat" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>
-            3. Document Setup
+            3. Document Setup ({loanTypeLabel})
           </h2>
         </div>
 
-        {/* Dynamic Compact Grid */}
-        <div className={isTier1 ? 'kyc-grid-2x2' : 'kyc-grid-3x3'}>
+        {/* Dynamic Compact Grid (2x2 for Micro-loans, 3x3 for Asset loans) */}
+        <div className={isLowTrack ? 'kyc-grid-2x2' : 'kyc-grid-3x3'}>
           {activeDocs.map((doc) => {
             const isSelfie = doc.key === 'liveSelfie';
+            const isPdfOnly = doc.accept === '.pdf';
             const isUploaded = !!doc.state;
             return (
-              <div key={doc.key} className={`kyc-grid-cell ${isUploaded ? 'uploaded' : ''}`}>
-                <div className="cell-icon-wrap">
-                  {isUploaded ? <CheckIcon /> : isSelfie ? <SelfieIcon /> : <DocCellIcon />}
+              <div key={doc.key} className={`kyc-grid-cell ${isUploaded ? 'uploaded' : ''}`} style={{ minHeight: '68px', padding: '10px 12px' }}>
+                <div className="cell-icon-wrap" style={{ width: '32px', height: '32px' }}>
+                  {isUploaded ? <CheckIcon /> : isSelfie ? <SelfieIcon /> : isPdfOnly ? <PdfIcon /> : <DocCellIcon />}
                 </div>
                 <div className="cell-content">
-                  <span className="cell-label">{doc.label}</span>
+                  <span className="cell-label" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{doc.label}</span>
                   {isUploaded ? (
-                    <span className="cell-filename" title={doc.state}>Uploaded</span>
+                    <span className="cell-filename" title={doc.state} style={{ fontSize: '0.68rem' }}>Uploaded</span>
                   ) : (
-                    <label className="cell-upload-btn">
-                      Upload
+                    <label className="cell-upload-btn" style={{ fontSize: '0.7rem' }}>
+                      Upload {isPdfOnly ? 'PDF' : ''}
                       <input
                         type="file"
-                        accept={isSelfie ? "image/*" : ".pdf,.jpg,.jpeg,.png"}
+                        accept={doc.accept}
                         className="file-input-hidden"
                         onChange={(e) => doc.setter(e.target.files[0]?.name || 'uploaded_doc.pdf')}
                       />
@@ -124,7 +132,7 @@ const Step3KYC = () => {
           })}
         </div>
 
-        {/* Employment & Income */}
+        {/* Employment & Income inputs */}
         <div className="form-row-multi" style={{ marginTop: 14, gap: '16px' }}>
           <div className="form-group flex-1" style={{ marginBottom: 0 }}>
             <label className="form-label-flat">EMPLOYMENT STATUS*</label>
@@ -132,7 +140,6 @@ const Step3KYC = () => {
               className="form-select-flat"
               value={employmentType}
               onChange={(e) => setEmploymentType(e.target.value)}
-              style={{ height: '48px', padding: '8px 12px', fontSize: '0.9rem' }}
             >
               <option value="">Select employment</option>
               <option value="Salaried">Salaried</option>
@@ -151,7 +158,6 @@ const Step3KYC = () => {
               placeholder="e.g. 45000"
               value={monthlyIncome}
               onChange={(e) => setMonthlyIncome(e.target.value)}
-              style={{ height: '48px', padding: '8px 12px', fontSize: '0.9rem' }}
               min={0}
             />
           </div>
@@ -163,7 +169,7 @@ const Step3KYC = () => {
             type="button"
             className="btn-step-prev"
             onClick={() => navigate('/loan/apply/offer')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 24px', fontSize: '0.82rem', fontWeight: 700, color: '#64748b', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 28px', fontSize: '0.86rem', fontWeight: 700, color: '#64748b', cursor: 'pointer' }}
           >
             &lt; PREVIOUS
           </button>
@@ -173,7 +179,7 @@ const Step3KYC = () => {
             className="btn-step-next"
             disabled={!canContinue}
             onClick={handleContinue}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: canContinue ? '#1d4ed8' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '12px 28px', fontSize: '0.82rem', fontWeight: 700, color: canContinue ? '#ffffff' : '#94a3b8', cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 12px rgba(29,78,216,0.15)' : 'none', transition: 'all 0.2s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: canContinue ? '#1d4ed8' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '14px 32px', fontSize: '0.86rem', fontWeight: 700, color: canContinue ? '#ffffff' : '#94a3b8', cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 12px rgba(29,78,216,0.15)' : 'none', transition: 'all 0.2s' }}
           >
             NEXT STEP &gt;
           </button>

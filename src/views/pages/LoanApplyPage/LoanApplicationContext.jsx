@@ -56,6 +56,10 @@ export const LoanApplicationProvider = ({ children }) => {
     loanType === 'instant'  ? 18   : 14; // personal / default
 
   const calcEmi = (amount, months, rate) => {
+    if (loanType === 'instant' || loanType === 'credit-builder') {
+      const interest = amount * (months === 3 ? 0.08 : 0.16);
+      return Math.round((amount + interest) / months);
+    }
     const r = rate / 12 / 100;
     if (r === 0) return Math.round(amount / months);
     return Math.round((amount * r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1));

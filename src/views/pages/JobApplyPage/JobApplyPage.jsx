@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
+import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
+import ParallaxShapes from '../../components/ParallaxShapes/ParallaxShapes';
 import { JOBS } from '../JobListingsPage/jobsData';
 import jobAppImg from '../../../assets/jobapplication.png';
 import './JobApplyPage.css';
@@ -109,62 +111,75 @@ const JobApplyPage = () => {
   /* success */
   if (submitted) {
     return (
-      <div className="ja-page-wrapper">
+      <div className="ja-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
         <Navbar />
-        <div className="ja-success">
-          <div className="ja-success-icon">🎉</div>
-          <h2 className="ja-success-title">Application Submitted!</h2>
-          <p className="ja-success-msg">
-            Thanks, <strong>{form.firstName}</strong>! We've received your application for{' '}
-            <strong>{job.title}</strong>. Our team will be in touch at{' '}
-            <strong>{form.email}</strong> within 5–7 business days.
-          </p>
-          <div className="ja-success-actions">
-            <button className="ja-btn-primary" onClick={() => navigate('/careers/openings')}>Browse More Roles</button>
-            <button className="ja-btn-outline" onClick={() => navigate('/careers')}>Back to Careers</button>
+
+        {/* Dynamic ambient moving shapes background */}
+        <ParallaxShapes preset="side-decor" />
+
+        <ScrollReveal variant="zoom-in">
+          <div className="ja-success" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="ja-success-icon">🎉</div>
+            <h2 className="ja-success-title">Application Submitted!</h2>
+            <p className="ja-success-msg">
+              Thanks, <strong>{form.firstName}</strong>! We've received your application for{' '}
+              <strong>{job.title}</strong>. Our team will be in touch at{' '}
+              <strong>{form.email}</strong> within 5–7 business days.
+            </p>
+            <div className="ja-success-actions">
+              <button className="ja-btn-primary" onClick={() => navigate('/careers/openings')}>Browse More Roles</button>
+              <button className="ja-btn-outline" onClick={() => navigate('/careers')}>Back to Careers</button>
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="ja-page-wrapper">
+    <div className="ja-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <Navbar />
 
+      {/* Dynamic ambient moving shapes background */}
+      <ParallaxShapes preset="side-decor" />
+
       {/* breadcrumb */}
-      <div className="ja-breadcrumb">
-        <div className="ja-breadcrumb-inner">
-          <button className="ja-back-btn" onClick={() => navigate(-1)}>
-            <IconArrow /> Back to openings
-          </button>
-          <span className="ja-breadcrumb-sep">›</span>
-          <span className="ja-breadcrumb-current">{job.title}</span>
-        </div>
+      <div className="ja-breadcrumb" style={{ position: 'relative', zIndex: 2 }}>
+        <ScrollReveal variant="fade-up">
+          <div className="ja-breadcrumb-inner">
+            <button className="ja-back-btn" onClick={() => navigate(-1)}>
+              <IconArrow /> Back to openings
+            </button>
+            <span className="ja-breadcrumb-sep">›</span>
+            <span className="ja-breadcrumb-current">{job.title}</span>
+          </div>
+        </ScrollReveal>
       </div>
 
       {/* ── TWO-COLUMN LAYOUT ── */}
-      <div className="ja-split-layout">
+      <div className="ja-split-layout" style={{ position: 'relative', zIndex: 2 }}>
 
         {/* LEFT — illustration */}
-        <div className="ja-image-col">
-          <img
-            src={jobAppImg}
-            alt="Job application illustration"
-            className="ja-illustration"
-          />
-          <div className="ja-image-caption">
-            <h3 className="ja-caption-title">One step closer 🎯</h3>
-            <p className="ja-caption-text">
-              Upload your latest resume and let us know who you are.
-              We'll take it from here.
-            </p>
+        <ScrollReveal variant="fade-right" className="ja-image-col">
+          <div style={{ height: '100%' }}>
+            <img
+              src={jobAppImg}
+              alt="Job application illustration"
+              className="ja-illustration"
+            />
+            <div className="ja-image-caption">
+              <h3 className="ja-caption-title">One step closer 🎯</h3>
+              <p className="ja-caption-text">
+                Upload your latest resume and let us know who you are.
+                We'll take it from here.
+              </p>
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* RIGHT — form */}
-        <div className="ja-form-col">
+        <ScrollReveal variant="fade-left" className="ja-form-col">
           <div className="ja-form-card">
 
             <div className="ja-form-head">
@@ -280,7 +295,7 @@ const JobApplyPage = () => {
 
             </form>
           </div>
-        </div>
+        </ScrollReveal>
 
       </div>
 

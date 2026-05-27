@@ -9,13 +9,11 @@
 
 .home-main-content {
   flex: 1;
-  max-width: 1300px;
-  margin: 0 auto;
   width: 100%;
-  padding: 2.2rem 3rem 4rem;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
 }
 
 /* ─── Premium Fintech Hero Banner Redesign (Roadoz Style) ─── */
@@ -40,9 +38,9 @@
 }
 
 .hero-inner-container {
-  max-width: 1300px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 3rem;
+  padding: 0 4rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -217,6 +215,27 @@
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.16);
   z-index: 2;
   position: relative;
+  animation: hero-image-float-morph 10s infinite ease-in-out;
+  will-change: transform, border-radius;
+}
+
+@keyframes hero-image-float-morph {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    border-radius: 50%;
+  }
+  25% {
+    transform: translateY(-10px) rotate(0.6deg);
+    border-radius: 48% 52% 47% 53% / 52% 47% 53% 48%;
+  }
+  50% {
+    transform: translateY(-20px) rotate(1.4deg);
+    border-radius: 45% 55% 48% 52% / 54% 46% 54% 46%;
+  }
+  75% {
+    transform: translateY(-9px) rotate(0.8deg);
+    border-radius: 52% 48% 52% 48% / 48% 52% 48% 52%;
+  }
 }
 
 /* ─── Floating Geometric Shapes (InstaMoney Aesthetic) ─── */
@@ -1077,56 +1096,89 @@
   }
 }
 
-/* ─── CreditSea-Style HomePage Full-Width Calculator Section ─── */
+/* ─── Premium Light-Themed LendoGo Universal Full-Page Split Calculator Section ─── */
 .home-calculator-section {
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.home-calculator-card {
-  background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 28px;
-  padding: 40px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  color: #f3f4f6;
-  position: relative;
-  overflow: hidden;
-  animation: modalSlideReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.home-emi-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.home-emi-header h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #3b82f6 0%, #00d2ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.home-emi-grid {
+.home-calculator-layout {
   display: grid;
-  grid-template-columns: 1.25fr 1fr;
-  gap: 32px;
-  align-items: start;
+  grid-template-columns: 1fr;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 4rem;
+  box-sizing: border-box;
+  background: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .home-emi-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+@media (max-width: 1024px) {
+  .home-calculator-layout {
+    padding: 60px 2rem;
   }
 }
 
-/* Sliders Column */
+/* Left Column: Universal Calculator Panel (Clean Page Background, No Card Outlines) */
+.home-calculator-panel {
+  background: #ffffff;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .home-calculator-panel {
+    padding: 30px 20px;
+  }
+}
+
+.home-emi-header-wrapper {
+  margin-bottom: 35px;
+}
+
+.home-emi-header h2 {
+  font-size: 2.2rem;
+  font-weight: 850;
+  letter-spacing: -1px;
+  font-family: 'Outfit', sans-serif;
+  background: linear-gradient(135deg, var(--primary) 0%, #002b80 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+
+.home-emi-subheader {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Calculator Workspace: Sliders and SVG Donut Side-By-Side */
+.home-calculator-workspace {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .home-calculator-workspace {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+/* Sliders Grid */
 .home-emi-sliders-col {
   display: flex;
   flex-direction: column;
@@ -1134,48 +1186,62 @@
 }
 
 .home-emi-slider-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
   padding: 16px 20px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-emi-slider-card:hover {
+  border-color: rgba(0, 102, 255, 0.18);
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 102, 255, 0.03);
 }
 
 .home-emi-slider-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .home-emi-slider-title {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: #9ca3af;
-  letter-spacing: 0.2px;
+  color: #334155;
+  font-family: 'Outfit', sans-serif;
 }
 
 .home-emi-input-wrapper {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 4px 10px;
+  transition: border-color 0.2s ease;
+}
+
+.home-emi-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
 }
 
 .home-emi-currency-symbol {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: #64748b;
+  font-weight: 700;
   margin-right: 4px;
 }
 
 .home-emi-number-input {
   background: transparent;
   border: none;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
-  width: 78px;
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 850;
+  width: 90px;
   outline: none;
   text-align: right;
   font-family: 'Outfit', sans-serif;
@@ -1185,13 +1251,13 @@
   width: 55px;
 }
 
-/* Sliders input styling */
+/* Premium Range Sliders styling */
 .home-emi-range-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 5px;
+  background: #e2e8f0;
   border-radius: 6px;
   outline: none;
   margin: 10px 0;
@@ -1201,38 +1267,36 @@
 .home-emi-range-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   background: #ffffff;
-  border: 3px solid #3b82f6;
+  border: 4px solid var(--primary);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
-  transition: transform 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.3);
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 .home-emi-range-slider::-webkit-slider-thumb:hover {
   transform: scale(1.25);
+  background: #f1f5f9;
 }
 
 .home-emi-slider-ticks {
   display: flex;
   justify-content: space-between;
   font-size: 0.72rem;
-  color: #6b7280;
-  margin-top: 6px;
-  padding: 0 2px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 2px;
 }
 
-/* Visual Column */
+/* Visual SVG Chart Column */
 .home-emi-visual-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 20px;
-  padding: 24px;
+  justify-content: center;
 }
 
 .home-emi-chart-wrapper {
@@ -1240,55 +1304,96 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  cursor: pointer;
 }
 
-.home-emi-donut-chart {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
+.home-emi-donut-chart-svg-container {
+  width: 200px;
+  height: 200px;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   margin-bottom: 16px;
-  transition: all 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-emi-chart-wrapper:hover .home-emi-donut-chart-svg-container {
+  transform: scale(1.04);
+}
+
+.home-emi-svg-circle {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 24px rgba(0, 102, 255, 0.02));
+}
+
+.circle-track {
+  stroke: #f1f5f9;
+}
+
+.circle-principal {
+  transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.circle-interest {
+  transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1), stroke-dashoffset 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .home-emi-donut-hole {
-  width: 114px;
-  height: 114px;
-  background: #0f172a;
+  position: absolute;
+  width: 144px;
+  height: 144px;
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 2;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.01), inset 0 2px 4px rgba(0,0,0,0.005);
+  padding: 10px;
+  text-align: center;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.home-emi-donut-hole.holding {
+  background: rgba(240, 246, 255, 0.98);
+  box-shadow: 0 8px 30px rgba(0, 102, 255, 0.1), inset 0 2px 4px rgba(0,0,0,0.01);
 }
 
 .home-donut-center-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #9ca3af;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  font-weight: 700;
   margin-bottom: 2px;
 }
 
 .home-donut-center-value {
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 850;
-  color: #ffffff;
+  color: #0f172a;
+  font-family: 'Outfit', sans-serif;
+  margin-bottom: 2px;
+}
+
+.home-donut-center-sub {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 .home-emi-chart-legend {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px 20px;
   font-size: 0.78rem;
-  color: #9ca3af;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 8px;
 }
 
 .home-legend-item {
@@ -1298,85 +1403,969 @@
 }
 
 .home-legend-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   display: inline-block;
 }
 
 .home-legend-dot.principal {
-  background: #10b981;
+  background: var(--primary);
 }
 
 .home-legend-dot.interest {
-  background: #3b82f6;
+  background: #10b981;
 }
 
-/* Dynamic breakdown table */
+/* Horizontal Details Table Cards Grid (Planted Below Workspace) */
 .home-emi-details-table {
   width: 100%;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 14px;
-  margin-bottom: 20px;
+  border-top: 1px solid rgba(0, 102, 255, 0.08);
+  padding-top: 30px;
+  margin-top: 35px;
 }
 
-.home-emi-table-row {
+.home-emi-details-table-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .home-emi-details-table-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .home-emi-details-table-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-emi-table-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  font-size: 0.85rem;
-  color: #9ca3af;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
-.home-emi-table-row.total-highlight {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: 6px;
-  padding-top: 10px;
+.home-emi-table-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 102, 255, 0.12);
+  background: #ffffff;
 }
 
-.home-emi-table-row.total-highlight .home-emi-row-label {
-  font-weight: 800;
-  color: #3b82f6;
-  font-size: 0.9rem;
+.home-emi-table-card .home-emi-row-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+  font-weight: 700;
 }
 
-.home-emi-table-row.total-highlight .home-emi-row-value {
-  font-weight: 850;
-  color: #3b82f6;
+.home-emi-table-card .home-emi-row-value {
   font-size: 1.15rem;
+  font-weight: 850;
+  color: #0f172a;
+  font-family: 'Outfit', sans-serif;
 }
 
-.btn-home-apply-now {
-  background: #3b82f6;
-  border: none;
-  color: #ffffff;
-  padding: 12px 24px;
-  border-radius: 12px;
+.home-emi-table-card .home-emi-row-value.text-blue {
+  color: var(--primary);
+}
+
+.home-emi-table-card .home-emi-row-value.text-green {
+  color: #10b981;
+}
+
+.home-emi-table-card .home-emi-row-value.text-indigo {
+  color: #4f46e5;
+}
+
+.home-emi-table-card.total-highlight {
+  background: rgba(0, 102, 255, 0.03);
+  border-color: rgba(0, 102, 255, 0.12);
+}
+
+/* Right Column: Full-Bleed Picture Column Showcasing laon_cal.jpg */
+.home-calculator-right-banner {
+  position: relative;
+  width: 100%;
+  height: 620px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+}
+
+.banner-full-bleed-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center; /* Align left to fully capture her hand and face without cutting off her finger */
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-calculator-right-banner:hover .banner-full-bleed-img {
+  transform: scale(1.02);
+}
+
+.banner-glow-gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(0, 102, 255, 0.03) 100%
+  );
+  pointer-events: none;
+}
+
+/* ─── Premium High-Fidelity LendoGO Auto Loans Showcase Section ─── */
+.auto-loan-section {
+  width: 100%;
+  position: relative;
+  background: transparent;
+  border-top: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.auto-loan-layout {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 100px 4rem;
+  box-sizing: border-box;
+  gap: 80px;
+  align-items: center;
+}
+
+/* Left Column: Overlapping Vehicles Canvas */
+.auto-loan-visual-col {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.auto-loan-visual-wrapper {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  box-sizing: border-box;
+}
+
+.auto-loan-car-container {
+  position: absolute;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  mix-blend-mode: multiply;
+}
+
+.sedan-container {
+  top: 15px;
+  left: 20px;
+  width: 50%;
+  z-index: 5;
+}
+
+.sedan-container:hover {
+  transform: scale(1.03);
+}
+
+.suv-container {
+  bottom: 5px;
+  left: 10px;
+  width: 70%;
+  z-index: 15;
+}
+
+.suv-container:hover {
+  transform: scale(1.03);
+}
+
+.accent-car-container {
+  bottom: 5px;
+  right: 15px;
+  width: 36%;
+  z-index: 8;
+  opacity: 0.88;
+}
+
+.accent-car-container:hover {
+  transform: scale(1.03);
+  opacity: 1;
+}
+
+.auto-loan-vehicle-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+/* Headlight Glow Micro-Animations */
+.car-headlight {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  pointer-events: none;
+  z-index: 25;
+  animation: headlight-cycle 3s infinite ease-in-out;
+}
+
+.headlight-beam {
+  position: absolute;
+  width: 100px;
+  height: 60px;
+  background: radial-gradient(ellipse at left, rgba(254, 240, 138, 0.6) 0%, rgba(254, 240, 138, 0.2) 30%, rgba(254, 240, 138, 0) 70%);
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 24;
+  animation: headlight-beam-cycle 3s infinite ease-in-out;
+}
+
+/* SUV Headlight Coordinates */
+.suv-headlight-1 {
+  top: 48%;
+  left: 31%;
+}
+.suv-headlight-1 .headlight-beam {
+  transform: rotate(202deg);
+}
+
+.suv-headlight-2 {
+  top: 50%;
+  left: 10.5%;
+}
+.suv-headlight-2 .headlight-beam {
+  transform: rotate(202deg);
+}
+
+/* Sedan Headlight Coordinates */
+.sedan-headlight-1 {
+  top: 46%;
+  left: 27.5%;
+}
+.sedan-headlight-1 .headlight-beam {
+  transform: rotate(202deg);
+}
+
+.sedan-headlight-2 {
+  top: 48%;
+  left: 8.5%;
+}
+.sedan-headlight-2 .headlight-beam {
+  transform: rotate(202deg);
+}
+
+@keyframes headlight-cycle {
+  0%, 100%, 10% {
+    opacity: 0;
+    box-shadow: 0 0 0px transparent;
+  }
+  30%, 75% {
+    opacity: 0.95;
+    box-shadow: 0 0 8px #fef08a, 0 0 16px #fef08a, 0 0 32px #eab308;
+  }
+}
+
+@keyframes headlight-beam-cycle {
+  0%, 100%, 15% {
+    opacity: 0;
+  }
+  35%, 70% {
+    opacity: 1;
+  }
+}
+
+/* Layered Floating Status Indicators (Fintech Grade) */
+.floating-status-card {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 20px;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 170px;
+  pointer-events: auto;
+}
+
+.card-payment {
+  top: -10px;
+  left: 10px;
+  z-index: 20;
+}
+
+.card-financing {
+  bottom: 180px;
+  right: 20px;
+  z-index: 25;
+}
+
+.floating-card-title {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.floating-card-value {
+  font-size: 1.35rem;
+  font-weight: 850;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.2;
+}
+
+.floating-card-value.text-purple {
+  color: #7c3aed;
+}
+
+.floating-card-value.text-indigo {
+  color: #4f46e5;
+}
+
+.floating-card-unit {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.floating-card-subtext {
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: #94a3b8;
+}
+
+/* Hover Floating Animations */
+.animate-float-slow {
+  animation: floatCardSlow 6s infinite ease-in-out;
+}
+
+.animate-float-reverse {
+  animation: floatCardReverse 6s infinite ease-in-out;
+}
+
+@keyframes floatCardSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes floatCardReverse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+.auto-loan-footnote-disclaimer {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 24px;
+  text-align: left;
+}
+
+/* Right Column: Content Grid */
+.auto-loan-details-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.auto-loan-overhead-badge {
+  background-color: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+  padding: 0.4rem 1.1rem;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 1.4rem;
+}
+
+.auto-loan-headline {
+  font-size: 2.5rem;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.25;
+  margin: 0 0 1.2rem 0;
+  letter-spacing: -0.03em;
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.auto-loan-paragraph {
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0 0 2.2rem 0;
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Dynamic Checkmark Feature List */
+.auto-loan-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.4rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auto-loan-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feature-checkmark-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.feature-item-text {
   font-size: 0.95rem;
   font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  width: 100%;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
-  text-align: center;
+  color: #334155;
+  font-family: 'Outfit', sans-serif;
 }
 
-.btn-home-apply-now:hover {
-  background: #2563eb;
-  transform: translateY(-1.5px);
-  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3);
-}
-
-.btn-home-apply-now.btn-reset {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Dynamic Action Button */
+.btn-auto-loan-cta {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
   color: #ffffff;
-  margin-top: 16px;
-  box-shadow: none;
+  border: none;
+  padding: 16px 44px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Outfit', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.btn-home-apply-now.btn-reset:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: none;
+.btn-auto-loan-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.3);
+  background: linear-gradient(135deg, #6d28d9 0%, #3b82f6 100%);
+}
+
+.btn-auto-loan-cta:active {
+  transform: translateY(0);
+}
+
+/* ─── Responsive Media Queries ─── */
+@media (max-width: 1024px) {
+  .auto-loan-layout {
+    grid-template-columns: 1fr;
+    gap: 60px;
+    padding: 60px 2rem;
+  }
+  
+  .auto-loan-details-col {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .auto-loan-feature-list {
+    align-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .auto-loan-visual-wrapper {
+    height: 340px;
+  }
+  
+  .sedan-img {
+    width: 48%;
+  }
+  
+  .suv-img {
+    width: 65%;
+  }
+
+  .floating-status-card {
+    padding: 10px 14px;
+    min-width: 140px;
+  }
+  
+  .floating-card-value {
+    font-size: 1.1rem;
+  }
+  
+  .card-financing {
+    bottom: 150px;
+  }
+  
+  .auto-loan-headline {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auto-loan-visual-wrapper {
+    height: 280px;
+  }
+  
+  .sedan-img {
+    width: 52%;
+    top: 5px;
+  }
+  
+  .suv-img {
+    width: 70%;
+    bottom: 0px;
+  }
+  
+  .card-payment {
+    top: -15px;
+    left: 0;
+  }
+  
+  .card-financing {
+    bottom: 120px;
+    right: 0;
+  }
+}
+
+/* ─── Premium High-Fidelity Business Funding & Brand Trust Section ─── */
+.business-funding-section {
+  width: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #f2faf8 100%);
+  border-top: 1px solid #e2e8f0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.business-funding-layout {
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 100px 4rem 80px 4rem;
+  box-sizing: border-box;
+  gap: 80px;
+  align-items: center;
+}
+
+/* Left Column: Details */
+.business-funding-details-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.business-funding-headline {
+  font-size: 2.7rem;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.2;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.04em;
+  font-family: 'Outfit', sans-serif;
+}
+
+.business-funding-paragraph {
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0 0 2.2rem 0;
+  font-family: 'Outfit', sans-serif;
+}
+
+.btn-business-funding-cta {
+  background: #0066ff;
+  color: #ffffff;
+  border: none;
+  padding: 18px 52px;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 102, 255, 0.25);
+  transition: all 0.25s ease;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.btn-business-funding-cta:hover {
+  background: #0052cc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.35);
+}
+
+.business-funding-duration-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+}
+
+.business-funding-duration-indicator svg {
+  flex-shrink: 0;
+}
+
+.duration-text {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #10b981;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Right Column: Visual Laptop Canvas */
+.business-funding-visual-col {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.business-funding-visual-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+}
+
+.laptop-showcase-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 30px 60px rgba(15, 23, 42, 0.08));
+  animation: typing-wobble 0.25s infinite linear;
+  will-change: transform;
+}
+
+/* Typing Keypress Sparks (Fingertip Ripple Effects) */
+.typing-spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.85); /* Electric Violet/Indigo glow */
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8), 0 0 16px rgba(99, 102, 241, 0.4);
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+}
+
+/* Coordinates corresponding exactly to the hand fingertip typing positions on the keyboard */
+.tap-left-1 { top: 56.5%; left: 42.5%; animation: type-tap-a 1.4s infinite ease-out; }
+.tap-left-2 { top: 54.0%; left: 44.5%; animation: type-tap-b 1.8s infinite ease-out; }
+.tap-left-3 { top: 53.0%; left: 46.5%; animation: type-tap-c 1.2s infinite ease-out; }
+.tap-left-4 { top: 55.0%; left: 48.0%; animation: type-tap-d 1.6s infinite ease-out; }
+
+.tap-right-1 { top: 55.0%; left: 51.5%; animation: type-tap-b 1.3s infinite ease-out; }
+.tap-right-2 { top: 53.0%; left: 53.5%; animation: type-tap-a 1.9s infinite ease-out; }
+.tap-right-3 { top: 54.0%; left: 55.5%; animation: type-tap-d 1.5s infinite ease-out; }
+.tap-right-4 { top: 56.5%; left: 57.0%; animation: type-tap-c 1.7s infinite ease-out; }
+
+@keyframes typing-wobble {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(0.3px, 0.2px); }
+  40% { transform: translate(-0.2px, -0.3px); }
+  60% { transform: translate(0.2px, -0.2px); }
+  80% { transform: translate(-0.3px, 0.3px); }
+}
+
+@keyframes type-tap-a {
+  0%, 15%, 35%, 100% { opacity: 0; transform: scale(0.3); }
+  20%, 30% { opacity: 0.95; transform: scale(1.8); box-shadow: 0 0 12px rgba(99, 102, 241, 0.95), 0 0 24px rgba(99, 102, 241, 0.6); }
+}
+
+@keyframes type-tap-b {
+  0%, 40%, 60%, 100% { opacity: 0; transform: scale(0.3); }
+  45%, 55% { opacity: 0.95; transform: scale(1.8); box-shadow: 0 0 12px rgba(99, 102, 241, 0.95), 0 0 24px rgba(99, 102, 241, 0.6); }
+}
+
+@keyframes type-tap-c {
+  0%, 5%, 25%, 100% { opacity: 0; transform: scale(0.3); }
+  10%, 20% { opacity: 0.95; transform: scale(1.8); box-shadow: 0 0 12px rgba(99, 102, 241, 0.95), 0 0 24px rgba(99, 102, 241, 0.6); }
+}
+
+@keyframes type-tap-d {
+  0%, 65%, 85%, 100% { opacity: 0; transform: scale(0.3); }
+  70%, 80% { opacity: 0.95; transform: scale(1.8); box-shadow: 0 0 12px rgba(99, 102, 241, 0.95), 0 0 24px rgba(99, 102, 241, 0.6); }
+}
+
+/* Floating Laptop Overlays */
+.floating-funding-slider-card {
+  position: absolute;
+  top: -20px;
+  left: -40px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 18px 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  z-index: 10;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.slider-card-label {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slider-card-value {
+  font-size: 1.6rem;
+  font-weight: 850;
+  color: #0f172a;
+  font-family: 'Outfit', sans-serif;
+}
+
+.slider-card-track-wrapper {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slider-card-track-line {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+}
+
+.slider-card-track-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #7c3aed;
+  border-radius: 3px;
+}
+
+.slider-card-track-thumb {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  background: #7c3aed;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.slider-card-track-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  font-weight: 650;
+  color: #94a3b8;
+}
+
+.floating-money-badge {
+  position: absolute;
+  top: 45px;
+  right: -20px;
+  filter: drop-shadow(0 10px 20px rgba(16, 185, 129, 0.15));
+  z-index: 15;
+  transition: transform 0.3s ease;
+}
+
+.floating-money-badge:hover {
+  transform: scale(1.1);
+}
+
+.floating-invoice-status-card {
+  position: absolute;
+  bottom: 80px;
+  right: -25px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+  z-index: 15;
+}
+
+.invoice-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invoice-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.invoice-status-dot.green {
+  background: #10b981;
+}
+
+/* Corporate Brand Trust Logo Bar */
+.brand-trust-bar {
+  width: 100%;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 35px 0;
+  margin-top: 40px;
+  box-sizing: border-box;
+}
+
+.brand-trust-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 4rem;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.trust-bar-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* Infinite Scrolling Logo Marquee Container */
+.brand-trust-marquee {
+  flex: 1;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  padding: 5px 0;
+}
+
+.marquee-track-logos {
+  display: flex;
+  width: max-content;
+  gap: 60px;
+}
+
+.marquee-group-logos {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  animation: infiniteScrollLogos 20s linear infinite;
+}
+
+.brand-trust-marquee:hover .marquee-group-logos {
+  animation-play-state: paused;
+}
+
+@keyframes infiniteScrollLogos {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.trust-logo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-weight: 750;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.75;
+}
+
+.trust-logo-item:hover {
+  color: #0f172a;
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.trust-logo-icon {
+  color: currentColor;
+}
+
+/* ─── Responsive Queries for Business Funding ─── */
+@media (max-width: 1024px) {
+  .business-funding-layout {
+    grid-template-columns: 1fr;
+    gap: 60px;
+    padding: 60px 2rem;
+  }
+  
+  .business-funding-details-col {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .brand-trust-container {
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 2rem;
+  }
+  
+  .brand-trust-marquee {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .business-funding-headline {
+    font-size: 2.2rem;
+  }
+  
+  .floating-funding-slider-card {
+    min-width: 200px;
+    padding: 12px 16px;
+    top: -10px;
+    left: -10px;
+  }
+  
+  .slider-card-value {
+    font-size: 1.3rem;
+  }
+  
+  .floating-invoice-status-card {
+    bottom: 40px;
+    right: -10px;
+  }
 }

@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ParallaxShapes from '../../components/ParallaxShapes/ParallaxShapes';
+import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import './LoanApplyPage.css';
 
 const STEPS = [
@@ -62,8 +64,11 @@ const LoanApplyLayout = ({ children }) => {
   );
 
   return (
-    <div className="loan-apply-page">
-      <header className="loan-progress-header">
+    <div className="loan-apply-page" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Dynamic ambient moving shapes background */}
+      <ParallaxShapes preset="side-decor" />
+
+      <header className="loan-progress-header" style={{ position: 'relative', zIndex: 2 }}>
         <div
           className="loan-progress-logo"
           onClick={() => navigate('/home')}
@@ -94,8 +99,10 @@ const LoanApplyLayout = ({ children }) => {
         </div>
       </header>
 
-      <main className="loan-step-content">
-        {children}
+      <main className="loan-step-content" style={{ position: 'relative', zIndex: 2 }}>
+        <ScrollReveal key={location.pathname} variant="fade-left" duration={0.9}>
+          {children}
+        </ScrollReveal>
       </main>
     </div>
   );

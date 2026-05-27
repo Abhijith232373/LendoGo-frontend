@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
+import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
+import ParallaxShapes from '../../components/ParallaxShapes/ParallaxShapes';
 import { JOBS } from './jobsData';
 import './JobListingsPage.css';
 
@@ -127,42 +129,55 @@ const JobListingsPage = () => {
   const filtered = filter === 'All' ? JOBS : JOBS.filter((j) => j.dept === filter);
 
   return (
-    <div className="jl-page-wrapper">
+    <div className="jl-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <Navbar />
 
+      {/* Dynamic ambient moving shapes background */}
+      <ParallaxShapes preset="side-decor" />
+
       {/* ── page header ── */}
-      <header className="jl-page-header">
-        <div className="jl-header-inner">
-          <span className="jl-header-eyebrow">LendoGO Careers</span>
-          <h1 className="jl-header-title">Current Openings</h1>
-          <p className="jl-header-sub">
-            {JOBS.length} open roles · Join us and help build India's most
-            trusted digital lending platform
-          </p>
-        </div>
+      <header className="jl-page-header" style={{ position: 'relative', zIndex: 2 }}>
+        <ScrollReveal variant="fade-up">
+          <div className="jl-header-inner">
+            <span className="jl-header-eyebrow">LendoGO Careers</span>
+            <h1 className="jl-header-title">Current Openings</h1>
+            <p className="jl-header-sub">
+              {JOBS.length} open roles · Join us and help build India's most
+              trusted digital lending platform
+            </p>
+          </div>
+        </ScrollReveal>
       </header>
 
       {/* ── filter bar ── */}
-      <div className="jl-filter-bar">
-        <div className="jl-filter-inner">
-          {depts.map((d) => (
-            <button
-              key={d}
-              className={`jl-filter-btn ${filter === d ? 'jl-filter-btn--active' : ''}`}
-              onClick={() => setFilter(d)}
-            >
-              {d}
-            </button>
-          ))}
-          <span className="jl-result-count">{filtered.length} role{filtered.length !== 1 ? 's' : ''}</span>
-        </div>
+      <div className="jl-filter-bar" style={{ position: 'relative', zIndex: 2 }}>
+        <ScrollReveal variant="fade-up" delay={0.05}>
+          <div className="jl-filter-inner">
+            {depts.map((d) => (
+              <button
+                key={d}
+                className={`jl-filter-btn ${filter === d ? 'jl-filter-btn--active' : ''}`}
+                onClick={() => setFilter(d)}
+              >
+                {d}
+              </button>
+            ))}
+            <span className="jl-result-count">{filtered.length} role{filtered.length !== 1 ? 's' : ''}</span>
+          </div>
+        </ScrollReveal>
       </div>
 
       {/* ── listings ── */}
-      <main className="jl-listings">
+      <main className="jl-listings" style={{ position: 'relative', zIndex: 2 }}>
         <div className="jl-listings-inner">
-          {filtered.map((job) => (
-            <JobCard key={job.id} job={job} />
+          {filtered.map((job, index) => (
+            <ScrollReveal 
+              key={job.id} 
+              variant="fade-up" 
+              delay={(index % 3) * 0.08}
+            >
+              <JobCard job={job} />
+            </ScrollReveal>
           ))}
         </div>
       </main>

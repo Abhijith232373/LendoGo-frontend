@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
+import ParallaxShapes from '../../components/ParallaxShapes/ParallaxShapes';
 import aboutHeroImg from '../../../assets/about_hero.png';
 import './AboutPage.css';
 
@@ -97,12 +98,13 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="about-page-wrapper">
+    <div className="about-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <Navbar />
 
       {/* ── HERO SECTION ── */}
-      <section className="about-hero">
-        <div className="about-hero-container">
+      <section className="about-hero" style={{ position: 'relative', overflow: 'hidden' }}>
+        <ParallaxShapes preset="hero" />
+        <div className="about-hero-container" style={{ position: 'relative', zIndex: 2 }}>
           <div className="about-hero-left reveal-on-scroll fade-in-left">
             <span className="about-badge">MEET LENDOGO ⚡</span>
             <h1 className="about-hero-title">
@@ -139,8 +141,9 @@ const AboutPage = () => {
       </section>
 
       {/* ── WHY WE ARE DIFFERENT (THE 5 PILLARS) ── */}
-      <section className="about-diff">
-        <div className="section-container">
+      <section className="about-diff" style={{ position: 'relative', overflow: 'hidden' }}>
+        <ParallaxShapes preset="side-decor" />
+        <div className="section-container" style={{ position: 'relative', zIndex: 2 }}>
           <div className="section-header reveal-on-scroll fade-in-up">
             <span className="section-pretitle">OUR ADVANTAGE</span>
             <h2 className="section-title">What Makes LendoGo Different?</h2>
@@ -192,8 +195,9 @@ const AboutPage = () => {
       </section>
 
       {/* ── TERMS OF TRUST (BUILD IN OUR TERMS) ── */}
-      <section className="about-trust">
-        <div className="section-container">
+      <section className="about-trust" style={{ position: 'relative', overflow: 'hidden' }}>
+        <ParallaxShapes preset="side-decor" />
+        <div className="section-container" style={{ position: 'relative', zIndex: 2 }}>
           <div className="trust-split">
             <div className="trust-left reveal-on-scroll fade-in-left">
               <span className="section-pretitle">OUR CODE</span>

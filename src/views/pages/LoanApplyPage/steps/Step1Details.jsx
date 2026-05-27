@@ -189,7 +189,7 @@ const Step1Details = () => {
             type="button"
             className="btn-step-prev"
             onClick={() => navigate('/home')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 24px', fontSize: '0.82rem', fontWeight: 700, color: '#64748b', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 28px', fontSize: '0.86rem', fontWeight: 700, color: '#64748b', cursor: 'pointer' }}
           >
             &lt; CANCEL
           </button>
@@ -199,7 +199,7 @@ const Step1Details = () => {
             className="btn-step-next"
             disabled={!isValid}
             onClick={handleContinue}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isValid ? '#1d4ed8' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '12px 28px', fontSize: '0.82rem', fontWeight: 700, color: isValid ? '#ffffff' : '#94a3b8', cursor: isValid ? 'pointer' : 'not-allowed', boxShadow: isValid ? '0 4px 12px rgba(29,78,216,0.15)' : 'none', transition: 'all 0.2s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isValid ? '#1d4ed8' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '14px 32px', fontSize: '0.86rem', fontWeight: 700, color: isValid ? '#ffffff' : '#94a3b8', cursor: isValid ? 'pointer' : 'not-allowed', boxShadow: isValid ? '0 4px 12px rgba(29,78,216,0.15)' : 'none', transition: 'all 0.2s' }}
           >
             NEXT STEP &gt;
           </button>

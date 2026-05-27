@@ -50,6 +50,19 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  animation: avatar-breathe-float 6s infinite ease-in-out;
+  will-change: transform, border-radius;
+}
+
+@keyframes avatar-breathe-float {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    border-radius: 50%;
+  }
+  50% {
+    transform: scale(1.04) translateY(-5px);
+    border-radius: 47% 53% 48% 52% / 52% 48% 53% 47%;
+  }
 }
 
 .user-photo-upload-badge {

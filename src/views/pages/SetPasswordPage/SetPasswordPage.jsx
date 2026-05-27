@@ -2,19 +2,24 @@ import React from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import SetPasswordForm from '../../components/SetPasswordForm/SetPasswordForm';
 import Footer from '../../components/Footer/Footer';
+import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
+import ParallaxShapes from '../../components/ParallaxShapes/ParallaxShapes';
 import passwordImg from '../../../assets/password.jpg';
 import './SetPasswordPage.css';
 
 const SetPasswordPage = () => {
   return (
-    <div className="sppage-wrapper">
+    <div className="sppage-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <Navbar />
 
-      <main className="sppage-main-content">
+      {/* Dynamic ambient moving shapes background */}
+      <ParallaxShapes preset="hero" />
+
+      <main className="sppage-main-content" style={{ position: 'relative', zIndex: 2 }}>
         <section className="sppage-hero-section">
 
           {/* ── Left: Image ── */}
-          <div className="sppage-hero-left">
+          <ScrollReveal variant="fade-right" className="sppage-hero-left">
             <div className="sppage-img-block">
               <img
                 src={passwordImg}
@@ -33,12 +38,12 @@ const SetPasswordPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* ── Right: Form ── */}
-          <div className="sppage-hero-right">
+          <ScrollReveal variant="fade-left" className="sppage-hero-right">
             <SetPasswordForm />
-          </div>
+          </ScrollReveal>
 
         </section>
       </main>
