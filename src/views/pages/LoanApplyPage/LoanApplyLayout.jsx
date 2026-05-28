@@ -100,7 +100,7 @@ const LoanApplyLayout = ({ children }) => {
       </header>
 
       <main className="loan-step-content" style={{ position: 'relative', zIndex: 2 }}>
-        <ScrollReveal key={location.pathname} variant="fade-left" duration={0.9}>
+        <ScrollReveal key={location.pathname} variant="fade-left" duration={0.9} style={{ width: '100%', maxWidth: '1120px', margin: '0 auto' }}>
           {children}
         </ScrollReveal>
       </main>

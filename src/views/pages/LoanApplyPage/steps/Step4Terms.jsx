@@ -1,47 +1,46 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoanApplyLayout from '../LoanApplyLayout';
 import { useLoanApplication } from '../LoanApplicationContext';
 
 const TERMS_TEXT = `
-LENDOGO LENDING PLATFORM TERMS & CONDITIONS
+LENDOGO FINANCIAL SERVICES & DIGITAL LOAN AGREEMENT
 
+Lending Partners: RBI-Registered Non-Banking Financial Companies (NBFCs)
+Authorized Platform Operator: LendoGo Capital Facilitation Suite
 Effective Date: January 1, 2026
-Lending Partner: Registered NBFCs under RBI Guidelines
 
-1. SCOPE OF SERVICES
-LendoGo is a digital lending facilitation platform operated to connect qualified applicants with registered Non-Banking Financial Companies (NBFCs) and institutional lenders. By submitting this application, you authorize LendoGo to share your credentials with authorized partner NBFCs for credit score retrieval and loan underwriting purposes.
+1. SCOPE OF FACILITATION & DIGITAL CONSENT
+LendoGo is an authorized digital lending platform that connects qualified applicants with registered Non-Banking Financial Companies (NBFCs). By checking the confirmation box below, you explicitly grant consent to LendoGo and its partnering financial institutions to retrieve your credit bureau scores (including CIBIL, Experian, Equifax) and verify your KYC credentials through secure government databases.
 
-2. LOAN TERMS & INTEREST CHARGES
-Interest rates are determined dynamically based on the credit appraisal matrix. Fixed interest rates range from 8.5% to 18% per annum. An upfront administrative processing fee of up to 2% may be deducted from the sanctioned disbursement amount. Loan repayment periods are structured under fixed monthly EMI installments as authorized.
+2. LOAN PRICING, INTEREST STRUCTURE, AND PROCESSING FEES
+a) NOMINAL INTEREST RATES: Fixed annual interest rates are calculated dynamically based on individual credit appraisal matrices, ranging strictly from 8.5% to 18% per annum (APR).
+b) ONE-TIME PROCESSING FEE: An upfront administrative processing and documentation fee of up to 2% of the sanctioned loan amount (subject to applicable taxes/GST) is deducted directly from the sanctioned principal before disbursement to your bank account.
+c) PREPAYMENT FORECLOSURE: No hidden foreclosure or prepayment penalties will be levied if you choose to prepay your active credit balance.
 
-3. PAYMENT AND AUTODEBIT NACH MANDATE
-By checking the agreement box below, you explicitly grant consent for registering a National Automated Clearing House (NACH) auto-debit mandate on your linked bank account. EMIs will be automatically debited on the designated monthly due date. Failed auto-debit transactions due to insufficient funds will incur standard bounce charges of ₹500 per attempt.
+3. THE ADVANTAGES OF EARLY OR ON-TIME REPAYMENT (GOOD PRACTICE)
+Repaying your monthly installments strictly BEFORE or ON the scheduled due date is highly beneficial to your financial profile:
+- CIBIL SCORE AMPLIFICATION: Prompt repayment acts as a primary positive credit history builder, significantly boosting your CIBIL and Experian credit ratings.
+- ELEVATED FUTURE CREDIT LINES: Users with zero delayed payments are automatically upgraded to higher loan categories, unlocking instant credit limits of up to ₹15 Lakhs.
+- FAST-TRACKED AUTOMATED APPROVALS: Future applications will bypass manual verification queues, securing instant disbursement in under 5 minutes.
+- LOWER PROMOTIONAL INTEREST RATES: Building a strong loyalty history unlocks exclusive low-interest promotional offers on subsequent borrowing cycles.
 
-4. CREDIT BUREAU DISCLOSURE
-LendoGo and its lending partners are legally mandated to report all repayment behaviors, including delays, defaults, and prepayments, to registered Credit Information Companies (CIBIL, Experian, Equifax, CRIF High Mark) in compliance with the Credit Information Companies Regulation Act.
+4. SEVERE FINANCIAL & LEGAL CONSEQUENCES OF LATE PAYMENTS AND DEFAULT
+Failing to settle your dues on or before the due date constitutes a material breach of this agreement. The consequences are highly severe:
+a) SEVERE CREDIT SCORE DAMAGE (CIBIL RUINATION): LendoGo and its partners are legally bound to report all default behaviors to all registered credit bureaus (CIBIL, Experian, Equifax, CRIF). A single late payment or auto-debit failure will severely damage your credit profile (credit score will lose). This will completely block you from acquiring home loans, education loans, vehicle financing, or commercial credit cards from any bank or financial institution in India.
+b) COMPOUND DUE INCREMENTATION (PENALTY ACCRUAL): Any outstanding balance past the due date will immediately and automatically increment on a daily compounding basis. Default interest rates of up to 36% per annum will be applied to the unpaid principal, alongside flat collection penalty fees and administrative overdue charges.
+c) IMMEDIATE ACCOUNT SUSPENSION & REPEAT ISSUES: If an auto-debit bounces or a payment is delayed, LendoGo will flag your account. Repeating the issue (failing multiple EMI cycles) will lead to immediate, permanent freezing and suspension of your LendoGo account, preventing any future borrowing.
+d) SYSTEMIC BLACKLISTING & LEGAL ACTION: Persistent delays or failure to resolve pending dues will result in your details being added to a national defaulter blacklist. Partner NBFCs reserve the right to initiate institutional debt recovery proceedings and legal action under Section 138 of the Negotiable Instruments Act.
 
-5. GRIEVANCE REDRESSAL MECHANISM
-In case of any discrepancies, disputes, or grievances related to disbursement, interest calculations, or collections, please contact our dedicated LendoGo Grievance Cell at support@lendogo.com. Standard response time is 48 working hours.
-
---------------------------------------------------
-LENDOGO DATA PRIVACY POLICY & UIDAI DISCLOSURE
-
-1. DATA COLLECTION AND ENCRYPTION
-LendoGo is committed to protecting your personal information. All uploaded documents (Aadhaar, PAN, Live Selfie, Property Slips, Income Proofs) are immediately encrypted using AES-256 protocols before being stored on secure ISO 27001 certified LendoGo servers based within Indian territories. LendoGo never sells, rents, or shares your personal details with third-party marketing agencies.
-
-2. UIDAI AADHAAR CONSENT AND KYC
-By uploading your Aadhaar front and back documents, you grant LendoGo the permission to verify your identity credentials via secure UIDAI offline verification modules. This data is used solely to confirm your address, legal name, and date of birth in accordance with Prevention of Money Laundering (PML) Rules.
+5. NATIONAL AUTO-DEBIT (NACH/ECS) MANDATE & DEBIT BOUNCING
+By confirming this agreement, you authorize LendoGo and its lending partners to register a secure National Automated Clearing House (NACH) auto-debit mandate on your linked salary or savings account. Monthly EMIs will be debited automatically. If a debit attempt fails due to "Insufficient Funds" or "Account Blocked," your linked bank will charge standard bounce fees, and LendoGo will levy an administrative failed-debit fee of ₹500 per attempt.
 `;
 
 const Step4Terms = () => {
-  const navigate  = useNavigate();
-  const canvasRef = useRef(null);
+  const navigate = useNavigate();
   const {
     completedSteps,
     termsAccepted, setTermsAccepted,
-    signature, setSignature,
-    hasDrawnSignature, setHasDrawnSignature,
     markStepComplete,
   } = useLoanApplication();
 
@@ -57,46 +56,7 @@ const Step4Terms = () => {
     }
   };
 
-  const [isDrawing, setIsDrawing] = useState(false);
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.strokeStyle = '#1d4ed8';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }, []);
-
-  const getCoords = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
-    if (e.touches?.[0]) return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
-
-  const startDraw = (e) => {
-    setIsDrawing(true);
-    const { x, y } = getCoords(e);
-    canvasRef.current.getContext('2d').beginPath();
-    canvasRef.current.getContext('2d').moveTo(x, y);
-  };
-
-  const draw = (e) => {
-    if (!isDrawing) return;
-    const { x, y } = getCoords(e);
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    setHasDrawnSignature(true);
-  };
-
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    setHasDrawnSignature(false);
-  };
-
-  const canContinue = termsAccepted && (hasDrawnSignature || signature.trim().length > 2);
+  const canContinue = termsAccepted && scrolledToBottom;
 
   const handleContinue = () => {
     markStepComplete('step4');
@@ -114,85 +74,57 @@ const Step4Terms = () => {
 
   return (
     <LoanApplyLayout>
-      <div className="loan-step-card compact-card shadow-sm">
-        {/* Step Title Row */}
-        <div className="step-card-header-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
+      <div className="loan-step-card compact-card shadow-sm" style={{ width: '100%', maxWidth: '1120px', minHeight: '515px', margin: '0 auto', fontFamily: "'Outfit', sans-serif" }}>
+        {/* Step Title Row Matching Step 1 */}
+        <div className="step-card-header-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
           <PaperOutlineIcon />
           <h2 className="step-card-title-flat" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>
             4. Agreement Setup
           </h2>
         </div>
 
-        {/* Scrollable Box */}
-        <div className="terms-scroll-box" onScroll={handleTermsScroll} style={{ height: '140px', padding: '12px 16px', fontSize: '0.78rem', marginBottom: '8px' }}>
+        {/* Spacious Scrollable Agreement Box */}
+        <div className="terms-scroll-box" onScroll={handleTermsScroll} style={{ height: '240px', padding: '16px 20px', fontSize: '0.88rem', marginBottom: '12px', border: '1px solid #cbd5e1', borderRadius: '10px', background: '#fafbff', overflowY: 'auto' }}>
           {TERMS_TEXT.trim().split('\n\n').map((para, i) => {
-            const isHeading = /^[A-Z0-9\s.-]+$/.test(para.trim());
+            const isHeading = /^[A-Z0-9\s.,()&-]+$/.test(para.trim());
             return isHeading
-              ? <h4 key={i} style={{ fontSize: '0.8rem', fontWeight: 800, margin: '10px 0 4px', color: '#0f172a' }}>{para.trim()}</h4>
-              : <p key={i} style={{ margin: '0 0 6px', color: '#475569', lineHeight: '1.5' }}>{para.trim()}</p>;
+              ? <h4 key={i} style={{ fontSize: '0.94rem', fontWeight: 800, margin: '14px 0 6px', color: '#0f172a' }}>{para.trim()}</h4>
+              : <p key={i} style={{ margin: '0 0 10px', color: '#475569', lineHeight: '1.6' }}>{para.trim()}</p>;
           })}
         </div>
 
-        {!scrolledToBottom && (
-          <p className="terms-must-scroll-note" style={{ fontSize: '0.7rem', margin: '0 0 8px', color: '#d97706' }}>
-            * Please scroll to the bottom of the agreement window to activate the checkbox.
+        {/* Dynamic Scroll Notice */}
+        {!scrolledToBottom ? (
+          <p className="terms-must-scroll-note" style={{ fontSize: '0.76rem', margin: '0 0 12px', color: '#d97706', fontWeight: 700 }}>
+            * Please scroll to the bottom of the terms box above to activate the agreement checkbox.
+          </p>
+        ) : (
+          <p style={{ fontSize: '0.76rem', margin: '0 0 12px', color: '#10b981', fontWeight: 700 }}>
+            ✓ Terms fully read. You may now check the box and proceed to loan approval.
           </p>
         )}
 
         {/* Agree Checkbox */}
-        <label className="terms-checkbox-row" style={{ gap: '8px', marginBottom: '12px', fontSize: '0.78rem' }}>
+        <label className="terms-checkbox-row" style={{ gap: '10px', marginBottom: '16px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', cursor: scrolledToBottom ? 'pointer' : 'not-allowed' }}>
           <input
             type="checkbox"
             checked={termsAccepted}
             disabled={!scrolledToBottom}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            style={{ width: '16px', height: '16px' }}
+            style={{ width: '18px', height: '18px', cursor: scrolledToBottom ? 'pointer' : 'not-allowed' }}
           />
-          <span>
-            I agree to the LendoGo Terms & Conditions, UIDAI Aadhaar consent, and data encryption policies.
+          <span style={{ fontWeight: 700, color: scrolledToBottom ? '#1e293b' : '#64748b', lineHeight: '1.4' }}>
+            I confirm that I have read all terms, understanding early-payment positive score benefits and late due increment/suspension penalty rules.
           </span>
         </label>
 
-        {/* E-Sign Pad */}
-        <div className="esign-canvas-row" style={{ marginBottom: '4px' }}>
-          <span className="esign-section-title" style={{ fontSize: '0.72rem' }}>Draw secure signature</span>
-          {hasDrawnSignature && (
-            <button type="button" className="btn-clear-sign" onClick={clearCanvas} style={{ fontSize: '0.7rem' }}>Clear Signature</button>
-          )}
-        </div>
-        <canvas
-          ref={canvasRef}
-          width={560}
-          height={64}
-          className="esign-canvas"
-          style={{ height: '64px', border: '1.5px solid #e2e8f0', borderRadius: '8px', background: '#fafbff' }}
-          onMouseDown={startDraw}
-          onMouseMove={draw}
-          onMouseUp={() => setIsDrawing(false)}
-          onMouseLeave={() => setIsDrawing(false)}
-          onTouchStart={startDraw}
-          onTouchMove={draw}
-          onTouchEnd={() => setIsDrawing(false)}
-        />
-
-        <div className="or-divider" style={{ margin: '8px 0', fontSize: '0.64rem' }}>OR ENTER LEGAL NAME TO E-SIGN</div>
-
-        <input
-          type="text"
-          className="typed-sign-input"
-          placeholder="e.g. Rahul Sharma"
-          value={signature}
-          onChange={(e) => setSignature(e.target.value)}
-          style={{ height: '40px', padding: '8px 12px', fontSize: '0.88rem' }}
-        />
-
-        {/* Action Bar */}
-        <div className="step-navigation-bar" style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '20px', marginTop: '20px' }}>
+        {/* Premium Action Bar Matching Step 1 Sizing */}
+        <div className="step-navigation-bar" style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '12px', marginTop: 'auto' }}>
           <button
             type="button"
             className="btn-step-prev"
             onClick={() => navigate('/loan/apply/kyc')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 24px', fontSize: '0.82rem', fontWeight: 700, color: '#64748b', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px 20px', fontSize: '0.82rem', fontWeight: 700, color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' }}
           >
             &lt; PREVIOUS
           </button>
@@ -202,9 +134,9 @@ const Step4Terms = () => {
             className="btn-step-next"
             disabled={!canContinue}
             onClick={handleContinue}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: canContinue ? '#1d4ed8' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '12px 28px', fontSize: '0.82rem', fontWeight: 700, color: canContinue ? '#ffffff' : '#94a3b8', cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 12px rgba(29,78,216,0.15)' : 'none', transition: 'all 0.2s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: canContinue ? '#0f172a' : '#cbd5e1', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '0.82rem', fontWeight: 700, color: canContinue ? '#ffffff' : '#94a3b8', cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 12px rgba(15,23,42,0.15)' : 'none', transition: 'all 0.2s' }}
           >
-            SUBMIT &gt;
+            CONFIRM & SUBMIT &gt;
           </button>
         </div>
       </div>

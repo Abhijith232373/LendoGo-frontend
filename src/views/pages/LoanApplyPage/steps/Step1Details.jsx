@@ -73,7 +73,7 @@ const Step1Details = () => {
     <LoanApplyLayout>
       <div className="loan-step-card compact-card shadow-sm">
         {/* Roadoz Style Header Row */}
-        <div className="step-card-header-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
+        <div className="step-card-header-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
           <UserOutlineIcon />
           <h2 className="step-card-title-flat" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>
             1. Personal Setup
@@ -184,7 +184,7 @@ const Step1Details = () => {
         </div>
 
         {/* Roadoz Style Navigation Action Bar */}
-        <div className="step-navigation-bar" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+        <div className="step-navigation-bar" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
           <button
             type="button"
             className="btn-step-prev"
@@ -199,7 +199,7 @@ const Step1Details = () => {
             className="btn-step-next"
             disabled={!isValid}
             onClick={handleContinue}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isValid ? '#1d4ed8' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '14px 32px', fontSize: '0.86rem', fontWeight: 700, color: isValid ? '#ffffff' : '#94a3b8', cursor: isValid ? 'pointer' : 'not-allowed', boxShadow: isValid ? '0 4px 12px rgba(29,78,216,0.15)' : 'none', transition: 'all 0.2s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isValid ? '#0f172a' : '#e2e8f0', border: 'none', borderRadius: '8px', padding: '14px 32px', fontSize: '0.86rem', fontWeight: 700, color: isValid ? '#ffffff' : '#94a3b8', cursor: isValid ? 'pointer' : 'not-allowed', boxShadow: isValid ? '0 4px 12px rgba(15,23,42,0.15)' : 'none', transition: 'all 0.2s' }}
           >
             NEXT STEP &gt;
           </button>
