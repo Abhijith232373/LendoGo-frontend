@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoanApplyLayout from '../LoanApplyLayout';
 import { useLoanApplication } from '../LoanApplicationContext';
+import { apiClient } from '../../../../utils/apiClient';
 
 const TERMS_TEXT = `
 LENDOGO FINANCIAL SERVICES & DIGITAL LOAN AGREEMENT
@@ -42,6 +43,10 @@ const Step4Terms = () => {
     completedSteps,
     termsAccepted, setTermsAccepted,
     markStepComplete,
+    fullName, dob, email, phone, city, stateName, pincode,
+    loanAmount, tenure,
+    aadhaarFront, aadhaarBack, panCard, liveSelfie, incomeProof, employmentType, monthlyIncome,
+    loanType,
   } = useLoanApplication();
 
   useEffect(() => {
@@ -49,6 +54,9 @@ const Step4Terms = () => {
   }, []);
 
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const handleTermsScroll = (e) => {
     const el = e.target;
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
@@ -58,9 +66,90 @@ const Step4Terms = () => {
 
   const canContinue = termsAccepted && scrolledToBottom;
 
-  const handleContinue = () => {
-    markStepComplete('step4');
-    navigate('/loan/apply/disbursal');
+  const handleFinalSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+
+      // Append text parameters
+      formData.append('principal_amount', String(loanAmount));
+      formData.append('tenure_months', String(tenure));
+      formData.append('monthly_income', String(monthlyIncome || ''));
+      formData.append('full_name', fullName);
+      formData.append('dob', dob);
+      formData.append('email', email);
+      formData.append('mobile_number', phone);
+      formData.append('city', city);
+      formData.append('state', stateName);
+      formData.append('pincode', pincode);
+      formData.append('employment_status', employmentType || '');
+      
+      const isLowTrack = loanType === 'instant' || loanType === 'credit-builder' || loanType === 'micro';
+      formData.append('loan_track', isLowTrack ? 'low' : 'high');
+      formData.append('product_category', loanType || 'personal');
+
+      // Helper to convert custom base64 state object to native File object
+      const getFileFromState = (stateValue, defaultName) => {
+        if (!stateValue) return null;
+        if (stateValue instanceof File || stateValue instanceof Blob) {
+          return stateValue;
+        }
+        if (stateValue && stateValue.url) {
+          try {
+            const arr = stateValue.url.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], stateValue.name || defaultName, { type: mime });
+          } catch (e) {
+            console.error('Error converting base64 data to File:', e);
+            return null;
+          }
+        }
+        return null;
+      };
+
+      // Append files if uploaded
+      const liveSelfieFile = getFileFromState(liveSelfie, 'live_selfie.png');
+      if (liveSelfieFile) formData.append('live_selfie', liveSelfieFile);
+
+      const aadhaarFrontFile = getFileFromState(aadhaarFront, 'aadhaar_front.png');
+      if (aadhaarFrontFile) formData.append('aadhaar_front', aadhaarFrontFile);
+
+      const aadhaarBackFile = getFileFromState(aadhaarBack, 'aadhaar_back.png');
+      if (aadhaarBackFile) formData.append('aadhaar_back', aadhaarBackFile);
+
+      const panCardFile = getFileFromState(panCard, 'pan_card.png');
+      if (panCardFile) formData.append('pan_card', panCardFile);
+
+      const bankStatementFile = getFileFromState(incomeProof, 'bank_statement.pdf');
+      if (bankStatementFile) formData.append('bank_statement', bankStatementFile);
+
+      // Submit API call
+      const response = await apiClient('/loans/apply', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response && response.reference_number) {
+        markStepComplete('step4');
+        navigate('/loan/apply/disbursal', {
+          state: { reference_number: response.reference_number }
+        });
+      } else {
+        throw new Error('Server response did not include reference number.');
+      }
+    } catch (err) {
+      console.error('Final Loan Submit Error:', err);
+      setError(err.message || 'Something went wrong during submission. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const PaperOutlineIcon = () => (
@@ -105,26 +194,35 @@ const Step4Terms = () => {
         )}
 
         {/* Agree Checkbox */}
-        <label className="terms-checkbox-row" style={{ gap: '10px', marginBottom: '16px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', cursor: scrolledToBottom ? 'pointer' : 'not-allowed' }}>
+        <label className="terms-checkbox-row" style={{ gap: '10px', marginBottom: '16px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', cursor: (scrolledToBottom && !loading) ? 'pointer' : 'not-allowed' }}>
           <input
             type="checkbox"
             checked={termsAccepted}
-            disabled={!scrolledToBottom}
+            disabled={!scrolledToBottom || loading}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            style={{ width: '18px', height: '18px', cursor: scrolledToBottom ? 'pointer' : 'not-allowed' }}
+            style={{ width: '18px', height: '18px', cursor: (scrolledToBottom && !loading) ? 'pointer' : 'not-allowed' }}
           />
           <span style={{ fontWeight: 700, color: scrolledToBottom ? '#1e293b' : '#64748b', lineHeight: '1.4' }}>
             I confirm that I have read all terms, understanding early-payment positive score benefits and late due increment/suspension penalty rules.
           </span>
         </label>
 
+        {/* Error alert if submission failed */}
+        {error && (
+          <div style={{ background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#b91c1c', padding: '12px 16px', borderRadius: '10px', fontSize: '0.84rem', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+            <span>Error: {error}</span>
+          </div>
+        )}
+
         {/* Premium Action Bar Matching Step 1 Sizing */}
         <div className="step-navigation-bar" style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '12px', marginTop: 'auto' }}>
           <button
             type="button"
             className="btn-step-prev"
+            disabled={loading}
             onClick={() => navigate('/loan/apply/kyc')}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px 20px', fontSize: '0.82rem', fontWeight: 700, color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px 20px', fontSize: '0.82rem', fontWeight: 700, color: '#64748b', cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: loading ? 0.6 : 1 }}
           >
             &lt; PREVIOUS
           </button>
@@ -132,11 +230,11 @@ const Step4Terms = () => {
           <button
             type="button"
             className="btn-step-next"
-            disabled={!canContinue}
-            onClick={handleContinue}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: canContinue ? '#0f172a' : '#cbd5e1', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '0.82rem', fontWeight: 700, color: canContinue ? '#ffffff' : '#94a3b8', cursor: canContinue ? 'pointer' : 'not-allowed', boxShadow: canContinue ? '0 4px 12px rgba(15,23,42,0.15)' : 'none', transition: 'all 0.2s' }}
+            disabled={!canContinue || loading}
+            onClick={handleFinalSubmit}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: (canContinue && !loading) ? '#0f172a' : '#cbd5e1', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '0.82rem', fontWeight: 700, color: (canContinue && !loading) ? '#ffffff' : '#94a3b8', cursor: (canContinue && !loading) ? 'pointer' : 'not-allowed', boxShadow: (canContinue && !loading) ? '0 4px 12px rgba(15,23,42,0.15)' : 'none', transition: 'all 0.2s' }}
           >
-            CONFIRM & SUBMIT &gt;
+            {loading ? 'SUBMITTING...' : 'CONFIRM & SUBMIT >'}
           </button>
         </div>
       </div>

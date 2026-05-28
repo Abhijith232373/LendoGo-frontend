@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LoanApplyLayout from '../LoanApplyLayout';
 import { useLoanApplication } from '../LoanApplicationContext';
 
@@ -12,6 +12,9 @@ const AUDIT_STEPS = [
 
 const Step5Disbursal = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const referenceNumberFromState = location.state?.reference_number;
+
   const {
     completedSteps,
     loanAmount, tenure, interestRate, emi,
@@ -19,13 +22,13 @@ const Step5Disbursal = () => {
   } = useLoanApplication();
 
   useEffect(() => {
-    if (!completedSteps.step4) navigate('/loan/apply/terms');
+    if (!completedSteps.step4 && !referenceNumberFromState) navigate('/loan/apply/terms');
   }, []);
 
   const [checkedKeys, setCheckedKeys] = useState([]);
   const [currentMsg, setCurrentMsg]   = useState(0);
   const [done, setDone]               = useState(false);
-  const [refNumber]                   = useState(() => 'LG-' + Math.floor(100000 + Math.random() * 900000));
+  const [refNumber]                   = useState(() => referenceNumberFromState || 'LG-' + Math.floor(100000 + Math.random() * 900000));
 
   useEffect(() => {
     if (done) return;
