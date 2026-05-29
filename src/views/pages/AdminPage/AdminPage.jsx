@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useAdminController } from './hooks/useAdminController';
 import './AdminPage.css';
 
 // Import Modular Components
@@ -7,310 +7,265 @@ import AdminSidebar from './components/AdminSidebar';
 import AdminTopbar from './components/AdminTopbar';
 import DashboardTab from './components/DashboardTab';
 import UserManagementTab from './components/UserManagementTab';
-import LoanRequestsTab from './components/LoanRequestsTab';
-import LoanApprovalsTab from './components/LoanApprovalsTab';
+import LoanApplicationsTab from './components/LoanApplicationsTab';
+import KYCVerificationsTab from './components/KYCVerificationsTab';
+import RolePermissionsTab from './components/RolePermissionsTab';
+import AssignRolesTab from './components/AssignRolesTab';
 import CareersManagementTab from './components/CareersManagementTab';
 import CustomerCareTab from './components/CustomerCareTab';
-import StaffManagementTab from './components/StaffManagementTab';
 import WebConfigurationTab from './components/WebConfigurationTab';
 import AuditLogsTab from './components/AuditLogsTab';
 import AdminSettingsTab from './components/AdminSettingsTab';
 
 const AdminPage = () => {
-  const navigate = useNavigate();
-
-  // Theme & Navigation States
-  const [darkMode, setDarkMode] = useState(true);
-  const [activeTab, setActiveTab] = useState('Dashboard');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Sliders & Web Config States
-  const [minCreditScore, setMinCreditScore] = useState(650);
-  const [baseInterestRate, setBaseInterestRate] = useState(14);
-  const [isSignupsEnabled, setIsSignupsEnabled] = useState(true);
-  const [isConsultationsEnabled, setIsConsultationsEnabled] = useState(true);
-
-  // Simulated Global Financial Ledger States
-  const [activeBalance, setActiveBalance] = useState(3259800);
-  const [disbursedCapital, setDisbursedCapital] = useState(4528450);
-
-  // ─── ADMIN PERSONAL DETAIL STATES ───
-  const [adminAvatar, setAdminAvatar] = useState('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
-  const [adminName, setAdminName] = useState('Admin Flow');
-  const [adminEmail, setAdminEmail] = useState('admin.flow@lendogo.com');
-
-  // ─── INPUT STATES FOR SETTINGS FORMS ───
-  const [emailInput, setEmailInput] = useState('admin.flow@lendogo.com');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [transferEmail, setTransferEmail] = useState('');
-  const [transferKey, setTransferKey] = useState('');
-
-  // 1. Audit Logs Dataset State
-  const [auditLogs, setAuditLogs] = useState([
-    { id: 1, timestamp: '2026-05-25 15:42:01', user: 'System Sentinel', action: 'KYC Auto-Sync completed successfully', type: 'info' },
-    { id: 2, timestamp: '2026-05-25 14:15:30', user: 'Lending Officer (Admin)', action: 'Interest rate minimum index set to 14%', type: 'info' },
-    { id: 3, timestamp: '2026-05-25 11:20:10', user: 'Security Bot', action: 'Failed login warning: 3 incorrect attempts for user test@lendo.go', type: 'warning' },
-    { id: 4, timestamp: '2026-05-25 09:05:12', user: 'System Sentinel', action: 'Cron Ledger backup archived to cloud container', type: 'success' }
-  ]);
-
-  const addAuditLog = (action, type = 'info') => {
-    const now = new Date();
-    const timeStr = now.toISOString().replace('T', ' ').substring(0, 19);
-    setAuditLogs(prev => [
-      { id: Date.now(), timestamp: timeStr, user: 'Lending Officer (Admin)', action, type },
-      ...prev
-    ]);
-  };
-
-  // 2. User Directory dataset
-  const [users, setUsers] = useState([
-    { id: 'USR-8812', name: 'Rahul S.', email: 'rahul.s@gmail.com', PAN: 'APM***32P', rating: 'Low Risk', status: 'Active', joined: 'Jan 12, 2026' },
-    { id: 'USR-9021', name: 'Aarav Mehta', email: 'aarav.m@yahoo.com', PAN: 'BFK***91K', rating: 'Low Risk', status: 'Active', joined: 'Feb 18, 2026' },
-    { id: 'USR-3042', name: 'Priya Kapoor', email: 'priya.k@gmail.com', PAN: 'DKL***84D', rating: 'Medium Risk', status: 'Active', joined: 'Mar 05, 2026' },
-    { id: 'USR-6651', name: 'Sneha Rao', email: 'sneha.rao@hotmail.com', PAN: 'CPS***74S', rating: 'High Risk', status: 'Active', joined: 'Apr 24, 2026' },
-    { id: 'USR-1190', name: 'Kabir Das', email: 'kabir.d@outlook.com', PAN: 'GMS***15M', rating: 'Low Risk', status: 'Suspended', joined: 'May 02, 2026' }
-  ]);
-
-  const handleToggleUserStatus = (userId, userName, currentStatus) => {
-    const nextStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: nextStatus } : u));
-    addAuditLog(`User ${userName} (${userId}) status updated to ${nextStatus}`, nextStatus === 'Suspended' ? 'warning' : 'success');
-  };
-
-  // 3. Interactive Loan Requests Dataset
-  const [loanRequests, setLoanRequests] = useState([
-    { id: 'REQ-104', name: 'Devendra P.', type: 'Personal Loan', amount: 150000, PAN: 'AR***44P', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-209', name: 'Ananya Sen', type: 'Business Loan', amount: 500000, PAN: 'BR***18K', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-312', name: 'Gaurav Gill', type: 'Auto Loan', amount: 350000, PAN: 'DR***92D', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-455', name: 'Megha Varma', type: 'Home Loan', amount: 1200000, PAN: 'CR***07S', riskScore: null, auditState: 'idle' }
-  ]);
-
-  // Simulated Audit Scoring Model
-  const handleRunRiskAudit = (reqId) => {
-    setLoanRequests(prev => prev.map(r => r.id === reqId ? { ...r, auditState: 'scanning' } : r));
-    
-    setTimeout(() => {
-      const generatedScore = Math.floor(Math.random() * (850 - 580 + 1)) + 580; // between 580 and 850
-      setLoanRequests(prev => prev.map(r => {
-        if (r.id === reqId) {
-          return {
-            ...r,
-            riskScore: generatedScore,
-            auditState: 'completed'
-          };
-        }
-        return r;
-      }));
-      addAuditLog(`Risk analysis compiled for request ${reqId}. Calculated Credit Score: ${generatedScore}`, 'info');
-    }, 1500);
-  };
-
-  // Decision Handlers
-  const handleApproveLoan = (request) => {
-    const newApproval = {
-      id: `LN-${Math.floor(10000 + Math.random() * 90000)}`,
-      name: request.name,
-      type: request.type,
-      amount: request.amount,
-      rate: baseInterestRate,
-      date: new Date().toLocaleDateString(),
-      status: 'Pre-Approved'
-    };
-    
-    setApprovedLoans(prev => [newApproval, ...prev]);
-    setLoanRequests(prev => prev.filter(r => r.id !== request.id));
-    setActiveBalance(prev => prev + request.amount);
-    setDisbursedCapital(prev => prev + request.amount);
-    setLiveMarquee(prev => [
-      { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
-      ...prev
-    ]);
-    
-    addAuditLog(`Sanctioned loan approval for ${request.name}. Disbursed Capital: ₹${request.amount.toLocaleString()}`, 'success');
-    alert(`Loan ${request.id} successfully approved and moved to disbursements ledger.`);
-  };
-
-  const handleRejectLoan = (reqId, name) => {
-    setLoanRequests(prev => prev.filter(r => r.id !== reqId));
-    addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
-    alert(`Application ${reqId} rejected.`);
-  };
-
-  // 4. Approved/Sanctioned Loans Dataset
-  const [approvedLoans, setApprovedLoans] = useState([
-    { id: 'LN-99120', name: 'Rahul S.', type: 'Personal Loan', amount: 150000, rate: 14, date: '05/17/2026', status: 'Disbursed' },
-    { id: 'LN-84092', name: 'Aarav Mehta', type: 'Business Loan', amount: 500000, rate: 12, date: '05/10/2026', status: 'Disbursed' },
-    { id: 'LN-44219', name: 'Priya Kapoor', type: 'Auto Loan', amount: 350000, rate: 13, date: '04/28/2026', status: 'Disbursed' },
-    { id: 'LN-77401', name: 'Sneha Rao', type: 'Home Loan', amount: 1200000, rate: 11, date: '04/15/2026', status: 'Disbursed' }
-  ]);
-
-  // 5. Careers & Recruiting Dataset
-  const [careersOpenings, setCareersOpenings] = useState([
-    { id: 'JOB-01', title: 'Senior Credit Analyst', dept: 'Risk Assessment', type: 'Full-Time', status: 'Open', applicants: 12 },
-    { id: 'JOB-02', title: 'Loan Officer', dept: 'Customer Sanctions', type: 'Full-Time', status: 'Open', applicants: 8 },
-    { id: 'JOB-03', title: 'Lead Compliance Architect', dept: 'Legal Operations', type: 'Full-Time', status: 'Closed', applicants: 4 }
-  ]);
-
-  const [jobApplications, setJobApplications] = useState([
-    { id: 'APP-901', name: 'Rohan Sharma', email: 'rohan.s@gmail.com', role: 'Senior Credit Analyst', applied: '2026-05-24', status: 'Reviewing' },
-    { id: 'APP-402', name: 'Divya Iyer', email: 'divya.iyer@outlook.com', role: 'Loan Officer', applied: '2026-05-22', status: 'Shortlisted' },
-    { id: 'APP-105', name: 'Vikram Seth', email: 'vikram.seth@yahoo.com', role: 'Senior Credit Analyst', applied: '2026-05-20', status: 'Interviewing' },
-    { id: 'APP-339', name: 'Nisha Varma', email: 'nisha.v@gmail.com', role: 'Lead Compliance Architect', applied: '2026-05-18', status: 'Rejected' }
-  ]);
-
-  const handleToggleJobStatus = (jobId, title, currentStatus) => {
-    const nextStatus = currentStatus === 'Open' ? 'Closed' : 'Open';
-    setCareersOpenings(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus } : j));
-    addAuditLog(`Job opening '${title}' (${jobId}) status set to ${nextStatus}`, 'info');
-  };
-
-  const handleUpdateApplicantStatus = (appId, applicantName, nextStatus) => {
-    setJobApplications(prev => prev.map(a => a.id === appId ? { ...a, status: nextStatus } : a));
-    addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
-  };
-
-  // 6. Customer Care Consultation Logs State
-  const [consultations, setConsultations] = useState([
-    { id: 'TKT-1081', name: 'Amit Roy', email: 'amit.roy@gmail.com', phone: '+91 98765 43210', date: '2026-05-25', status: 'Pending', type: 'Personal Loan Advisor' },
-    { id: 'TKT-1044', name: 'Sonal Sen', email: 'sonal.sen@yahoo.com', phone: '+91 88472 90123', date: '2026-05-24', status: 'Contacted', type: 'Business Credit Builder' },
-    { id: 'TKT-0931', name: 'Vijay K.', email: 'vijay.k@outlook.com', phone: '+91 76543 21098', date: '2026-05-21', status: 'Contacted', type: 'Home Loan Refinancing' }
-  ]);
-
-  const handleResolveTicket = (ticketId, customerName) => {
-    setConsultations(prev => prev.map(c => c.id === ticketId ? { ...c, status: 'Contacted' } : c));
-    addAuditLog(`Consultation ticket ${ticketId} for ${customerName} marked resolved.`, 'success');
-  };
-
-  // 7. Staff Management State
-  const [staffMembers, setStaffMembers] = useState([
-    { name: 'Admin Flow', email: 'admin.flow@lendogo.com', role: 'Lending Officer', status: 'Active', clearance: 'L3 Admin' },
-    { name: 'Nikhil Nair', email: 'nikhil.n@lendogo.com', role: 'Credit Underwriter', status: 'Active', clearance: 'L2 Compliance' },
-    { name: 'Sameer Sen', email: 'sameer.s@lendogo.com', role: 'Verification Agent', status: 'Away', clearance: 'L1 Operations' }
-  ]);
-
-  const [newStaffName, setNewStaffName] = useState('');
-  const [newStaffEmail, setNewStaffEmail] = useState('');
-  const [newStaffRole, setNewStaffRole] = useState('Verification Agent');
-
-  const handleAddStaff = (e) => {
-    e.preventDefault();
-    if (!newStaffName || !newStaffEmail) return;
-    
-    const newStaff = {
-      name: newStaffName,
-      email: newStaffEmail,
-      role: newStaffRole,
-      status: 'Active',
-      clearance: newStaffRole === 'Credit Underwriter' ? 'L2 Compliance' : 'L1 Operations'
-    };
-    
-    setStaffMembers(prev => [...prev, newStaff]);
-    addAuditLog(`Created new staff account for ${newStaffName} (${newStaffRole})`, 'success');
-    setNewStaffName('');
-    setNewStaffEmail('');
-  };
-
-  // 8. Live Marquee approvals
-  const [liveMarquee, setLiveMarquee] = useState([
-    { name: 'Rahul S. (PAN: A****32P)', type: 'Personal Loan', amount: '₹1,50,000', status: '⚡' },
-    { name: 'Aarav M. (PAN: B****91K)', type: 'Business Loan', amount: '₹5,00,000', status: '💼' },
-    { name: 'Priya K. (PAN: D****84D)', type: 'Auto Loan', amount: '₹3,50,000', status: '🚗' },
-    { name: 'Sneha R. (PAN: C****74S)', type: 'Home Loan', amount: '₹12,00,000', status: '🏠' }
-  ]);
-
-  // Web Config save success alert
-  const [showConfigSuccess, setShowConfigSuccess] = useState(false);
-  const handleSaveWebConfig = () => {
-    setShowConfigSuccess(true);
-    addAuditLog(`System web configurations saved: Min Credit Score set to ${minCreditScore}, Base Rate set to ${baseInterestRate}%.`, 'success');
-    setTimeout(() => setShowConfigSuccess(false), 3000);
-  };
-
-  // ─── SETTINGS HANDLERS ───
-
-  // 1. Simulated Custom Photo Upload
-  const handleSimulatePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setAdminAvatar(uploadEvent.target.result);
-        addAuditLog('Admin updated profile picture via custom image upload', 'info');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // 2. Email Address Change
-  const handleUpdateAdminEmail = (e) => {
-    e.preventDefault();
-    if (!emailInput.trim()) return;
-    setAdminEmail(emailInput);
-    addAuditLog(`Admin email updated to ${emailInput}`, 'info');
-    alert(`Lending Officer email successfully set to ${emailInput}.`);
-  };
-
-  // 3. Password Reset
-  const handleUpdateAdminPassword = (e) => {
-    e.preventDefault();
-    if (!currentPassword) {
-      alert('Please enter your current password.');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      alert('Confirm password does not match new password.');
-      return;
-    }
-    if (newPassword.length < 8) {
-      alert('Password must be at least 8 characters long.');
-      return;
-    }
-    addAuditLog('Admin administrative password updated successfully', 'success');
-    alert('Administrative credentials updated successfully.');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-  };
-
-  // 4. Platform Ownership Transfer
-  const handleTransferOwnership = (e) => {
-    e.preventDefault();
-    if (!transferEmail || !transferKey) {
-      alert('Please fill out all transfer verification details.');
-      return;
-    }
-    const confirmed = window.confirm(
-      `⚠️ CRITICAL DESTRUCTIVE TRIGGER ⚠️\n\nAre you absolutely sure you want to transfer total LendoGo platform ownership to ${transferEmail}?\n\nThis action is irreversible and will immediately revoke your credentials, record this event in the compliance log, and sign you out.`
-    );
-    if (confirmed) {
-      addAuditLog(`SYSTEM CLEARANCE TRANSFER: Platform master ownership transferred to ${transferEmail}`, 'warning');
-      alert(`Master ownership successfully assigned to ${transferEmail}. Closing your session.`);
-      handleAdminLogout();
-    }
-  };
-
-  // 5. System Logout
-  const handleAdminLogout = () => {
-    // Clear user data from local storage
-    localStorage.removeItem('lendogo_user');
-    alert('Logged out from Admin Dashboard successfully.');
-    // Redirect to landing page
-    navigate('/');
-  };
+  const {
+    darkMode, setDarkMode,
+    activeTab, setActiveTab,
+    searchQuery, setSearchQuery,
+    sidebarCollapsed, setSidebarCollapsed,
+    minCreditScore, setMinCreditScore,
+    baseInterestRate, setBaseInterestRate,
+    isSignupsEnabled, setIsSignupsEnabled,
+    isConsultationsEnabled, setIsConsultationsEnabled,
+    activeBalance,
+    disbursedCapital,
+    adminAvatar,
+    adminName, setAdminName,
+    adminEmail,
+    emailInput, setEmailInput,
+    currentPassword, setCurrentPassword,
+    newPassword, setNewPassword,
+    confirmPassword, setConfirmPassword,
+    transferEmail, setTransferEmail,
+    transferKey, setTransferKey,
+    auditLogs, setAuditLogs,
+    users,
+    kycList,
+    loanRequests,
+    approvedLoans,
+    careersOpenings,
+    jobApplications,
+    consultations,
+    staffMembers,
+    newStaffName, setNewStaffName,
+    newStaffEmail, setNewStaffEmail,
+    newStaffRole, setNewStaffRole,
+    liveMarquee,
+    showConfigSuccess,
+    handleToggleUserStatus,
+    handleCreateUser,
+    handleUpdateUser,
+    handleDeleteUser,
+    handleApproveKYC,
+    handleRejectKYC,
+    handleRunRiskAudit,
+    handleApproveLoan,
+    handleRejectLoan,
+    handleDisburseMoney,
+    handleToggleJobStatus,
+    handleCreateJobOpening,
+    handleUpdateApplicantStatus,
+    handleRechargeWallet,
+    handleResolveTicket,
+    handleAddStaff,
+    handleUpdateStaffRole,
+    handleSaveWebConfig,
+    handleSimulatePhotoUpload,
+    handleUpdateAdminEmail,
+    handleUpdateAdminPassword,
+    handleTransferOwnership,
+    handleAdminLogout
+  } = useAdminController();
 
   const navItems = [
-    { name: 'Dashboard', icon: '📊' },
-    { name: 'User Management', icon: '👥' },
-    { name: 'Loan Requests', icon: '📥' },
-    { name: 'Loan Approvals', icon: '✅' },
-    { name: 'Careers Management', icon: '💼' },
-    { name: 'Customer Care', icon: '📞' },
-    { name: 'Staff Management', icon: '👮' },
-    { name: 'Web Configuration', icon: '🌐' },
-    { name: 'Audit Logs', icon: '🔒' },
-    { name: 'Admin Settings', icon: '⚙️' }
+    { 
+      name: 'Dashboard', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="9"/>
+          <rect x="14" y="3" width="7" height="5"/>
+          <rect x="14" y="12" width="7" height="9"/>
+          <rect x="3" y="16" width="7" height="5"/>
+        </svg>
+      )
+    },
+    { 
+      name: 'Loan Applications', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      )
+    },
+    { 
+      name: 'KYC Verifications', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M12 8v4"/>
+          <path d="M12 16h.01"/>
+        </svg>
+      )
+    },
+    {
+      name: 'Administrative',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      ),
+      isGroup: true,
+      subItems: [
+        { 
+          name: 'User Management', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Role Permissions', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="7.5" cy="15.5" r="5.5"/>
+              <path d="m21 2-9.6 9.6"/>
+              <path d="m15.5 7.5 3 3M17 6l3 3"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Assign Roles', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <line x1="19" y1="8" x2="19" y2="14"/>
+              <line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Activity Logs', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+          )
+        }
+      ]
+    },
+    { 
+      name: 'Careers Management', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      ),
+      isGroup: true,
+      subItems: [
+        {
+          name: 'View Applications',
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          )
+        },
+        {
+          name: 'Post Job Openings',
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          )
+        }
+      ]
+    },
+    { 
+      name: 'Customer Care', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      ),
+      isGroup: true,
+      subItems: [
+        { 
+          name: 'Free Consultation', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Chat Support', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Due Date Reminders', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Overdue & Collections', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          )
+        }
+      ]
+    },
+    { 
+      name: 'Web Configuration', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      )
+    },
+    { 
+      name: 'Admin Settings', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      )
+    }
   ];
 
   const filteredUsers = users.filter(u => 
@@ -348,7 +303,7 @@ const AdminPage = () => {
         </div>
       </div>
 
-      <div className="admin-main-container">
+      <div className={`admin-main-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         
         {/* Sidebar Component */}
         <AdminSidebar 
@@ -357,6 +312,8 @@ const AdminPage = () => {
           setActiveTab={setActiveTab}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
+          collapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
         />
 
         {/* ── MAIN DASHBOARD CONTENT AREA ── */}
@@ -371,6 +328,7 @@ const AdminPage = () => {
             adminAvatar={adminAvatar}
             adminName={adminName}
             adminEmail={adminEmail}
+            handleRechargeWallet={handleRechargeWallet}
           />
 
           <div className="dashboard-scroll-container">
@@ -388,42 +346,75 @@ const AdminPage = () => {
               <UserManagementTab 
                 filteredUsers={filteredUsers}
                 handleToggleUserStatus={handleToggleUserStatus}
+                handleCreateUser={handleCreateUser}
+                handleUpdateUser={handleUpdateUser}
+                handleDeleteUser={handleDeleteUser}
               />
             )}
 
-            {activeTab === 'Loan Requests' && (
-              <LoanRequestsTab 
+            {activeTab === 'Loan Applications' && (
+              <LoanApplicationsTab 
                 loanRequests={loanRequests}
                 handleRunRiskAudit={handleRunRiskAudit}
                 handleApproveLoan={handleApproveLoan}
                 handleRejectLoan={handleRejectLoan}
-              />
-            )}
-
-            {activeTab === 'Loan Approvals' && (
-              <LoanApprovalsTab 
                 approvedLoans={approvedLoans}
+                handleDisburseMoney={handleDisburseMoney}
               />
             )}
 
-            {activeTab === 'Careers Management' && (
+            {activeTab === 'KYC Verifications' && (
+              <KYCVerificationsTab 
+                kycList={kycList}
+                handleApproveKYC={handleApproveKYC}
+                handleRejectKYC={handleRejectKYC}
+              />
+            )}
+
+            {activeTab === 'View Applications' && (
               <CareersManagementTab 
                 careersOpenings={careersOpenings}
                 handleToggleJobStatus={handleToggleJobStatus}
                 jobApplications={jobApplications}
                 handleUpdateApplicantStatus={handleUpdateApplicantStatus}
+                showOnly="applications"
               />
             )}
 
-            {activeTab === 'Customer Care' && (
+            {activeTab === 'Post Job Openings' && (
+              <CareersManagementTab 
+                careersOpenings={careersOpenings}
+                handleToggleJobStatus={handleToggleJobStatus}
+                jobApplications={jobApplications}
+                handleUpdateApplicantStatus={handleUpdateApplicantStatus}
+                handleCreateJobOpening={handleCreateJobOpening}
+                showOnly="jobs"
+              />
+            )}
+
+            {(activeTab === 'Customer Care' || 
+              activeTab === 'Free Consultation' || 
+              activeTab === 'Chat Support' || 
+              activeTab === 'Due Date Reminders' || 
+              activeTab === 'Overdue & Collections') && (
               <CustomerCareTab 
                 consultations={consultations}
                 handleResolveTicket={handleResolveTicket}
+                showOnly={
+                  activeTab === 'Free Consultation' ? 'consultation' :
+                  activeTab === 'Chat Support' ? 'chat' :
+                  activeTab === 'Due Date Reminders' ? 'reminders' :
+                  activeTab === 'Overdue & Collections' ? 'collections' : undefined
+                }
               />
             )}
 
-            {activeTab === 'Staff Management' && (
-              <StaffManagementTab 
+            {activeTab === 'Role Permissions' && (
+              <RolePermissionsTab />
+            )}
+
+            {activeTab === 'Assign Roles' && (
+              <AssignRolesTab 
                 handleAddStaff={handleAddStaff}
                 newStaffName={newStaffName}
                 setNewStaffName={setNewStaffName}
@@ -432,6 +423,7 @@ const AdminPage = () => {
                 newStaffRole={newStaffRole}
                 setNewStaffRole={setNewStaffRole}
                 staffMembers={staffMembers}
+                handleUpdateStaffRole={handleUpdateStaffRole}
               />
             )}
 
@@ -450,7 +442,7 @@ const AdminPage = () => {
               />
             )}
 
-            {activeTab === 'Audit Logs' && (
+            {(activeTab === 'Audit Logs' || activeTab === 'Activity Logs') && (
               <AuditLogsTab 
                 auditLogs={auditLogs}
                 setAuditLogs={setAuditLogs}

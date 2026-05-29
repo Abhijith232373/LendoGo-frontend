@@ -1,23 +1,23 @@
 import { Route } from 'react-router-dom';
-import SignInPage      from '../../views/pages/SignInPage/SignInPage';
-import SignUpPage      from '../../views/pages/SignUpPage/SignUpPage';
-import SetPasswordPage from '../../views/pages/SetPasswordPage/SetPasswordPage';
-import CareersPage     from '../../views/pages/CareersPage/CareersPage';
-import JobListingsPage from '../../views/pages/JobListingsPage/JobListingsPage';
-import JobApplyPage    from '../../views/pages/JobApplyPage/JobApplyPage';
-import AboutPage       from '../../views/pages/AboutPage/AboutPage';
-import BlogPage        from '../../views/pages/BlogPage/BlogPage';
+import SignInPage      from '../../views/pages/UserUI/SignInPage/SignInPage';
+import SignUpPage      from '../../views/pages/UserUI/SignUpPage/SignUpPage';
+import SetPasswordPage from '../../views/pages/UserUI/SetPasswordPage/SetPasswordPage';
+import CareersPage     from '../../views/pages/UserUI/CareersPage/CareersPage';
+import JobListingsPage from '../../views/pages/UserUI/JobListingsPage/JobListingsPage';
+import JobApplyPage    from '../../views/pages/UserUI/JobApplyPage/JobApplyPage';
+import AboutPage       from '../../views/pages/UserUI/AboutPage/AboutPage';
+import BlogPage        from '../../views/pages/UserUI/BlogPage/BlogPage';
 import AdminPage       from '../../views/pages/AdminPage/AdminPage';
-import HomePage        from '../../views/pages/HomePage/HomePage';
-import UserProfilePage from '../../views/pages/UserProfilePage/UserProfilePage';
+import HomePage        from '../../views/pages/UserUI/HomePage/HomePage';
+import UserProfilePage from '../../views/pages/UserUI/UserProfilePage/UserProfilePage';
 
 // Loan Apply Flow — context wraps all 5 steps
-import { LoanApplicationProvider } from '../../views/pages/LoanApplyPage/LoanApplicationContext';
-import Step1Details  from '../../views/pages/LoanApplyPage/steps/Step1Details';
-import Step2Offer     from '../../views/pages/LoanApplyPage/steps/Step2Offer';
-import Step3KYC       from '../../views/pages/LoanApplyPage/steps/Step3KYC';
-import Step4Terms     from '../../views/pages/LoanApplyPage/steps/Step4Terms';
-import Step5Disbursal from '../../views/pages/LoanApplyPage/steps/Step5Disbursal';
+import { LoanApplicationProvider } from '../../views/pages/UserUI/LoanApplyPage/LoanApplicationContext';
+import Step1Details  from '../../views/pages/UserUI/LoanApplyPage/steps/Step1Details';
+import Step2Offer     from '../../views/pages/UserUI/LoanApplyPage/steps/Step2Offer';
+import Step3KYC       from '../../views/pages/UserUI/LoanApplyPage/steps/Step3KYC';
+import Step4Terms     from '../../views/pages/UserUI/LoanApplyPage/steps/Step4Terms';
+import Step5Disbursal from '../../views/pages/UserUI/LoanApplyPage/steps/Step5Disbursal';
 
 /**
  * Root router — combines all domain route groups.

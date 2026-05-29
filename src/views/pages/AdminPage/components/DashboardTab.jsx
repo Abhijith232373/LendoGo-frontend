@@ -68,8 +68,13 @@ const DashboardTab = ({ activeBalance, disbursedCapital, setActiveTab }) => {
         </div>
 
         <div className="grid-card robo-advisor-card">
-          <div className="advisor-content">
-            <div className="advisor-logo">🔒</div>
+          <div className="advisor-content" style={{ textAlign: 'center' }}>
+            <div className="advisor-logo" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', borderRadius: '50%', backgroundColor: 'rgba(0, 102, 255, 0.1)', color: '#0066ff', marginBottom: '16px' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
             <h3>Audit & Verification Index</h3>
             <p>Run automated PAN checks and background system integrity reports directly in the requests tab.</p>
             <button className="btn-advisor-action" onClick={() => setActiveTab('Loan Requests')}>
