@@ -1,0 +1,227 @@
+/* ─── LOAN REQUEST CARDS ─── */
+.requests-grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.request-card {
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.request-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.req-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.req-id-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--admin-text-light);
+  background-color: var(--admin-input);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.req-type-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  background-color: rgba(0, 102, 255, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+}
+
+.req-card-body h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+}
+
+.req-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.detail-lbl {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--admin-text-light);
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.detail-val {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.audit-state-box {
+  background-color: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 56px;
+}
+
+.audit-state-box.idle {
+  color: var(--admin-text-light);
+}
+
+.audit-state-box.scanning {
+  color: var(--primary);
+}
+
+.mini-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 102, 255, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.audit-state-box.completed {
+  background-color: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.score-badge-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.score-badge-circle strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.score-badge-circle span {
+  font-size: 0.55rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.score-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.score-level {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.score-desc p {
+  font-size: 0.7rem;
+  color: var(--admin-text-light);
+  line-height: 1.3;
+}
+
+.req-card-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: auto;
+}
+
+.btn-req-audit {
+  width: 100%;
+  background-color: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  padding: 0.7rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-req-audit:hover {
+  background-color: var(--admin-hover);
+}
+
+.btn-decision {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-decision.approve {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-decision.approve:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-decision.reject {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.btn-decision.reject:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.empty-state-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.empty-state-card span {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

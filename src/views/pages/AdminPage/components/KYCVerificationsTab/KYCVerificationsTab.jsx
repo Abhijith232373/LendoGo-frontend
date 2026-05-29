@@ -1,8 +1,173 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import "./KYCVerificationsTab.css";
+import { apiClient } from '../../../../../utils/apiClient';
 
-const KYCVerificationsTab = ({ kycList, handleApproveKYC, handleRejectKYC }) => {
+const KYCVerificationsTab = () => {
+  const [kycList, setKycList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedKyc, setSelectedKyc] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
+
+  const fetchKycList = async () => {
+    // Probe the correct active applications & KYC route from backend
+    const routesToTry = [
+      '/admin/applications',
+      '/admin/kyc-verifications',
+      '/admin/all-kycs',
+      '/admin/kycs',
+      '/admin/kyc',
+      '/admin/all-kyc'
+    ];
+
+    let lastError = null;
+    let res = null;
+
+    for (const route of routesToTry) {
+      try {
+        console.log(`Probing KYC backend route: ${route}`);
+        res = await apiClient(route);
+        if (res) {
+          console.log(`Successfully connected and received response from: ${route}`);
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        console.warn(`Route ${route} failed:`, err.message);
+      }
+    }
+
+    if (!res) {
+      console.error("Could not connect to any PostgreSQL KYC database paths:", lastError);
+      setKycList([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const rawKyc = res?.data || res || [];
+      const normalized = rawKyc.map(k => {
+        const dateVal = k.created_at || k.submitted_date || k.submittedDate || k.createdAt;
+        
+        // If it is a nested GORM model LoanApplication, parse relations dynamically:
+        if (k.kyc_documents || k.financial_details) {
+          const statusVal = k.status === 'APPROVED' ? 'Verified' : (k.status === 'REJECTED' ? 'Rejected' : 'Pending');
+          return {
+            ...k,
+            id: String(k.id || ''),
+            userId: String(k.user_id || ''),
+            name: k.full_name || 'Unknown',
+            email: k.email || '',
+            PAN: k.kyc_documents?.pan_card_path ? k.kyc_documents.pan_card_path.split('/').pop() : 'Attached',
+            track: k.loan_track === 'high' ? 'Premium Suite' : 'Micro-Credit',
+            status: statusVal,
+            submittedDate: dateVal ? new Date(dateVal).toLocaleDateString() : '',
+            employmentType: k.financial_details?.employment_status || 'Salaried',
+            monthlyIncome: Number(k.financial_details?.monthly_income || 0),
+            riskRating: k.financial_details?.monthly_income > 100000 ? 'Low Risk' : (k.financial_details?.monthly_income > 40000 ? 'Medium Risk' : 'High Risk'),
+            
+            // Nested document paths mapped directly to the inspect viewer cards
+            liveSelfie: k.kyc_documents?.live_selfie_path || '',
+            aadhaarFront: k.kyc_documents?.aadhaar_front_path || '',
+            aadhaarBack: k.kyc_documents?.aadhaar_back_path || '',
+            panCard: k.kyc_documents?.pan_card_path || '',
+            incomeProof: k.financial_details?.bank_statement_path || '',
+            propertyDoc: k.financial_details?.property_agreemnt_path || '',
+            registrationDoc: k.financial_details?.income_proof_path || ''
+          };
+        }
+
+        // Standard flat columns fallback:
+        return {
+          ...k,
+          id: String(k.id || k.ID || k.Id || ''),
+          userId: String(k.user_id || k.userId || k.UserId || ''),
+          name: k.name || k.fullName || k.full_name || 'Unknown',
+          email: k.email || '',
+          PAN: k.PAN || k.pan || k.panCard || '',
+          track: k.track || 'Micro-Credit',
+          status: k.status || 'Pending',
+          submittedDate: dateVal ? new Date(dateVal).toLocaleDateString() : '',
+          employmentType: k.employment_type || k.employmentType || 'Salaried',
+          monthlyIncome: Number(k.monthly_income || k.monthlyIncome || 0),
+          riskRating: k.risk_rating || k.riskRating || 'Medium Risk'
+        };
+      });
+      setKycList(normalized);
+    } catch (err) {
+      console.error("Error normalizing database records:", err);
+      setKycList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchKycList();
+  }, []);
+
+  const onApprove = async (kycId, userName) => {
+    const endpoints = [
+      { path: `/admin/applications/${kycId}/status`, method: 'PATCH', body: JSON.stringify({ status: 'APPROVED' }) },
+      { path: `/admin/kyc-verifications/${kycId}/approve`, method: 'PATCH' },
+      { path: `/admin/kyc/${kycId}/approve`, method: 'PATCH' }
+    ];
+
+    let success = false;
+    let lastError = null;
+
+    for (const ep of endpoints) {
+      try {
+        await apiClient(ep.path, {
+          method: ep.method,
+          body: ep.body
+        });
+        success = true;
+        break;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    if (success) {
+      setKycList(prev => prev.map(k => k.id === kycId ? { ...k, status: 'Verified' } : k));
+      alert(`KYC verification successfully approved for ${userName}.`);
+    } else {
+      console.error("Failed to approve KYC on PostgreSQL backend:", lastError);
+      alert(`Failed to approve KYC for ${userName}. Please check your backend connection.`);
+    }
+  };
+
+  const onReject = async (kycId, userName) => {
+    const endpoints = [
+      { path: `/admin/applications/${kycId}/status`, method: 'PATCH', body: JSON.stringify({ status: 'REJECTED' }) },
+      { path: `/admin/kyc-verifications/${kycId}/reject`, method: 'PATCH' },
+      { path: `/admin/kyc/${kycId}/reject`, method: 'PATCH' }
+    ];
+
+    let success = false;
+    let lastError = null;
+
+    for (const ep of endpoints) {
+      try {
+        await apiClient(ep.path, {
+          method: ep.method,
+          body: ep.body
+        });
+        success = true;
+        break;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    if (success) {
+      setKycList(prev => prev.map(k => k.id === kycId ? { ...k, status: 'Rejected' } : k));
+      alert(`KYC verification successfully rejected for ${userName}.`);
+    } else {
+      console.error("Failed to reject KYC on PostgreSQL backend:", lastError);
+      alert(`Failed to reject KYC for ${userName}. Please check your backend connection.`);
+    }
+  };
 
   // Filter & Search & Export States
   const [statusFilter, setStatusFilter] = useState('All');
@@ -26,17 +191,24 @@ const KYCVerificationsTab = ({ kycList, handleApproveKYC, handleRejectKYC }) => 
   };
 
   const getDocUrl = (docKey) => {
-    // Generate simulated premium-looking mock documents
-    const mockDocs = {
-      liveSelfie: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80',
-      aadhaarFront: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80',
-      aadhaarBack: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=600&q=80',
-      panCard: 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?auto=format&fit=crop&w=600&q=80',
-      incomeProof: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-      propertyDoc: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-      registrationDoc: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-    };
-    return mockDocs[docKey];
+    // 1. Resolve column value dynamically from camelCase or snake_case matching keys in selectedKyc
+    const dbValue = selectedKyc?.[docKey] || selectedKyc?.[docKey.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)];
+    
+    if (dbValue && typeof dbValue === 'string') {
+      // If it is already a complete URI (HTTP link or Base64 data-uri), use it as is!
+      if (dbValue.startsWith('http') || dbValue.startsWith('data:')) {
+        return dbValue;
+      }
+      // If it is a relative storage path or file reference, prefix it with your backend host
+      const BACKEND_BASE = 'http://localhost:8080';
+      if (dbValue.startsWith('/')) {
+        return `${BACKEND_BASE}${dbValue}`;
+      }
+      return `${BACKEND_BASE}/${dbValue}`;
+    }
+
+    // 2. No mock fallback image - returns empty if no file uploaded
+    return '';
   };
 
   const activeDocs = (kyc) => {
@@ -269,6 +441,10 @@ const KYCVerificationsTab = ({ kycList, handleApproveKYC, handleRejectKYC }) => 
     return matchesStatus && matchesTrack && matchesSearch;
   });
 
+  if (loading) {
+    return <div className="text-white p-8">Loading real compliance KYC applications...</div>;
+  }
+
   return (
     <div className="tab-pane-container animate-fade-in">
       <div className="section-header-row">
@@ -439,10 +615,6 @@ const KYCVerificationsTab = ({ kycList, handleApproveKYC, handleRejectKYC }) => 
                     <strong className="meta-val text-primary">₹{(selectedKyc.monthlyIncome || 54000).toLocaleString('en-IN')}</strong>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-lbl">PAN Number</span>
-                    <strong className="meta-val"><code>{selectedKyc.PAN || 'BCP***94K'}</code></strong>
-                  </div>
-                  <div className="meta-item">
                     <span className="meta-lbl">Risk Classification</span>
                     <strong className="meta-val">{selectedKyc.riskRating || 'Low Risk'}</strong>
                   </div>
@@ -495,7 +667,7 @@ const KYCVerificationsTab = ({ kycList, handleApproveKYC, handleRejectKYC }) => 
                 className="btn-decision reject"
                 disabled={selectedKyc.status === 'Verified'}
                 onClick={() => {
-                  handleRejectKYC(selectedKyc.id, selectedKyc.name);
+                  onReject(selectedKyc.id, selectedKyc.name);
                   setSelectedKyc(null);
                 }}
               >
@@ -505,7 +677,7 @@ const KYCVerificationsTab = ({ kycList, handleApproveKYC, handleRejectKYC }) => 
                 className="btn-decision approve"
                 disabled={selectedKyc.status === 'Verified'}
                 onClick={() => {
-                  handleApproveKYC(selectedKyc.id, selectedKyc.name);
+                  onApprove(selectedKyc.id, selectedKyc.name);
                   setSelectedKyc(null);
                 }}
               >

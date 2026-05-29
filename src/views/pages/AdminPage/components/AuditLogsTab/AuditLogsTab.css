@@ -1,0 +1,95 @@
+/* ─── PLATFORM SECURITY AUDIT LEDGER ─── */
+.audit-ledger-box {
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.ledger-header-row {
+  background-color: var(--admin-sidebar);
+  border-bottom: 1.5px solid var(--admin-border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--admin-text-light);
+  letter-spacing: 0.05em;
+}
+
+.btn-clear-logs {
+  background: none;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 0.35rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-clear-logs:hover {
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.audit-scroll-ledger {
+  max-height: 480px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.log-item-row {
+  display: flex;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 0.82rem;
+  font-family: monospace;
+  gap: 1rem;
+  align-items: center;
+}
+
+.log-item-row:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: var(--admin-text-light);
+  flex-shrink: 0;
+}
+
+.log-badge-type {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+  width: 65px;
+  text-align: center;
+}
+
+.log-badge-type.info { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.log-badge-type.success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+.log-badge-type.warning { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.log-operator {
+  color: var(--primary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.log-action {
+  color: var(--admin-text);
+  word-break: break-all;
+}
+
+.empty-ledger-view {
+  padding: 3rem;
+  text-align: center;
+  color: var(--admin-text-light);
+}

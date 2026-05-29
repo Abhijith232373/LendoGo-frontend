@@ -1,0 +1,127 @@
+/* ─── DOUBLE SUBTABS (CAREERS/STAFF) ─── */
+.double-subtab-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.sub-panel {
+  flex: 1;
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 1.5; }
+
+.sub-panel h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  border-bottom: 2px solid var(--admin-border);
+  padding-bottom: 0.6rem;
+  color: var(--admin-text);
+}
+
+.btn-action-toggle-job {
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action-toggle-job:hover {
+  background-color: var(--admin-hover);
+}
+
+.applicant-profile-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.applicant-profile-cell span {
+  font-size: 0.72rem;
+  color: var(--admin-text-light);
+  margin-top: 0.1rem;
+}
+
+.recru-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.recru-status.reviewing { background-color: rgba(107, 114, 128, 0.1); color: #6b7280; }
+.recru-status.shortlisted { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.recru-status.interviewing { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.recru-status.rejected { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.applicant-status-select {
+  background-color: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  padding: 0.35rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  outline: none;
+}
+
+/* Staff form and fields */
+.staff-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-input-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--admin-text-light);
+}
+
+.staff-field {
+  background-color: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.staff-field:focus {
+  border-color: var(--primary);
+}
+
+.btn-add-staff-submit {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-staff-submit:hover {
+  background-color: var(--primary-hover);
+}

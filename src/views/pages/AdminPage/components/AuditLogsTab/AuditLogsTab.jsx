@@ -1,4 +1,5 @@
 import React from 'react';
+import "./AuditLogsTab.css";
 
 const AuditLogsTab = ({ auditLogs, setAuditLogs }) => {
   return (

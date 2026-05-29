@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import LoanRequestsTab from './LoanRequestsTab';
-import LoanApprovalsTab from './LoanApprovalsTab';
+import "./LoanApplicationsTab.css";
+import LoanRequestsTab from '../LoanRequestsTab/LoanRequestsTab';
+import LoanApprovalsTab from '../LoanApprovalsTab/LoanApprovalsTab';
 
 const LoanApplicationsTab = ({ 
   loanRequests, 

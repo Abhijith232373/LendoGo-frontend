@@ -3,19 +3,19 @@ import { useAdminController } from './hooks/useAdminController';
 import './AdminPage.css';
 
 // Import Modular Components
-import AdminSidebar from './components/AdminSidebar';
-import AdminTopbar from './components/AdminTopbar';
-import DashboardTab from './components/DashboardTab';
-import UserManagementTab from './components/UserManagementTab';
-import LoanApplicationsTab from './components/LoanApplicationsTab';
-import KYCVerificationsTab from './components/KYCVerificationsTab';
-import RolePermissionsTab from './components/RolePermissionsTab';
-import AssignRolesTab from './components/AssignRolesTab';
-import CareersManagementTab from './components/CareersManagementTab';
-import CustomerCareTab from './components/CustomerCareTab';
-import WebConfigurationTab from './components/WebConfigurationTab';
-import AuditLogsTab from './components/AuditLogsTab';
-import AdminSettingsTab from './components/AdminSettingsTab';
+import AdminSidebar from './components/AdminSidebar/AdminSidebar';
+import AdminTopbar from './components/AdminTopbar/AdminTopbar';
+import DashboardTab from './components/DashboardTab/DashboardTab';
+import UserManagementTab from './components/UserManagementTab/UserManagementTab';
+import LoanApplicationsTab from './components/LoanApplicationsTab/LoanApplicationsTab';
+import KYCVerificationsTab from './components/KYCVerificationsTab/KYCVerificationsTab';
+import RolePermissionsTab from './components/RolePermissionsTab/RolePermissionsTab';
+import AssignRolesTab from './components/AssignRolesTab/AssignRolesTab';
+import CareersManagementTab from './components/CareersManagementTab/CareersManagementTab';
+import CustomerCareTab from './components/CustomerCareTab/CustomerCareTab';
+import WebConfigurationTab from './components/WebConfigurationTab/WebConfigurationTab';
+import AuditLogsTab from './components/AuditLogsTab/AuditLogsTab';
+import AdminSettingsTab from './components/AdminSettingsTab/AdminSettingsTab';
 
 const AdminPage = () => {
   const {

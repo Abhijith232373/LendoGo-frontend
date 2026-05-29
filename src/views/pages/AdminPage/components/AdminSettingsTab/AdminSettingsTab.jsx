@@ -1,4 +1,5 @@
 import React from 'react';
+import "./AdminSettingsTab.css";
 
 const AdminSettingsTab = ({
   adminAvatar,

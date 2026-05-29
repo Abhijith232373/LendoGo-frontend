@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import "./AdminSidebar.css";
 
 const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode, collapsed, setCollapsed }) => {
   const [expandedGroups, setExpandedGroups] = useState({ Administrative: true });

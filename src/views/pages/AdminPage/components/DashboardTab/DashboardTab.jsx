@@ -1,4 +1,5 @@
 import React from 'react';
+import "./DashboardTab.css";
 
 const DashboardTab = ({ activeBalance, disbursedCapital, setActiveTab }) => {
   return (
