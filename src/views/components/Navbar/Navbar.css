@@ -311,6 +311,23 @@
   outline: none;
 }
 
+.navbar-avatar-btn img,
+.mobile-avatar-badge img {
+  animation: navbar-avatar-float 5s infinite ease-in-out;
+  will-change: transform, border-radius;
+}
+
+@keyframes navbar-avatar-float {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    border-radius: 50%;
+  }
+  50% {
+    transform: scale(1.05) translateY(-1.5px) rotate(1deg);
+    border-radius: 48% 52% 49% 51% / 51% 49% 52% 48%;
+  }
+}
+
 .navbar-avatar-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 102, 255, 0.35);
