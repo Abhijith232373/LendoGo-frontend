@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiClient } from '../../../../../utils/apiClient';
 import "./LoanApplicationsTab.css";
 import LoanRequestsTab from '../LoanRequestsTab/LoanRequestsTab';
 import LoanApprovalsTab from '../LoanApprovalsTab/LoanApprovalsTab';
@@ -12,6 +13,35 @@ const LoanApplicationsTab = ({
   handleDisburseMoney
 }) => {
   const [activeSubTab, setActiveSubTab] = useState('pending');
+
+  // Fetch rejected logs from real PostgreSQL DB on mount
+  useEffect(() => {
+    const fetchRejected = async () => {
+      try {
+        const res = await apiClient('/admin/applications');
+        const data = res?.data || res || [];
+        const dbRejected = data
+          .filter(app => app.status === 'REJECTED')
+          .map(app => ({
+            id: app.id || '',
+            name: app.full_name || 'Unknown',
+            email: app.email || '',
+            type: app.product_category || app.loan_track || 'Personal Loan',
+            amount: app.principal_amount || 0,
+            reason: 'Credit scoring models indicated high-risk default ratio or document discrepancy.',
+            date: app.updated_at ? new Date(app.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+          }));
+        setRejectedLoans(prev => {
+          const existingIds = new Set(prev.map(item => item.id));
+          const filteredDb = dbRejected.filter(item => !existingIds.has(item.id));
+          return [...prev, ...filteredDb];
+        });
+      } catch (err) {
+        console.error("Failed to load rejected loans from DB:", err);
+      }
+    };
+    fetchRejected();
+  }, []);
 
   // Interactive Modals States
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -31,29 +61,29 @@ const LoanApplicationsTab = ({
   const [rejectedExportFormat, setRejectedExportFormat] = useState('csv');
 
   // Rejected logs local state storage
-  const [rejectedLoans, setRejectedLoans] = useState([
-    { 
-      id: 'REJ-904', 
-      name: 'Rohan Joshi', 
-      email: 'rohan.j@yahoo.com', 
-      type: 'Personal Loan', 
-      amount: 150000, 
-      reason: 'Credit scoring models indicated high-risk default ratio (Debt-to-Income exceeds 55%).', 
-      date: '2026-05-28' 
-    },
-    { 
-      id: 'REJ-411', 
-      name: 'Kirti Sen', 
-      email: 'kirti.s@gmail.com', 
-      type: 'Business Loan', 
-      amount: 800000, 
-      reason: 'Insufficient asset collateral papers and business tax statements mismatch.', 
-      date: '2026-05-27' 
-    }
-  ]);
+  const [rejectedLoans, setRejectedLoans] = useState([]);
 
   // Mock document mapping
   const getDocUrl = (docKey) => {
+    // If we have a real backend model preloaded in selectedRequest.raw
+    if (selectedRequest?.raw) {
+      const kyc = selectedRequest.raw.kyc_documents;
+      const fin = selectedRequest.raw.financial_details;
+      
+      const docMapping = {
+        liveSelfie: kyc?.live_selfie_path,
+        aadhaarFront: kyc?.aadhaar_front_path,
+        aadhaarBack: kyc?.aadhaar_back_path,
+        panCard: kyc?.pan_card_path,
+        bankStatements: fin?.bank_statement_path
+      };
+      
+      if (docMapping[docKey]) {
+        return docMapping[docKey];
+      }
+    }
+
+    // Fallback to high-quality placeholders if data is not uploaded
     const mockDocs = {
       liveSelfie: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&h=300&q=80',
       aadhaarFront: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80',
@@ -528,17 +558,23 @@ const LoanApplicationsTab = ({
                     </strong>
                   </div>
                   <div className="detail-card">
-                    <span className="detail-label">PAN Identifier</span>
-                    <span className="detail-value text-mono">{selectedRequest.PAN}</span>
+                    <span className="detail-label">Loan Configuration</span>
+                    <span className="detail-value" style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>
+                      {selectedRequest.tenureMonths || 12} Months @ {selectedRequest.interestRate || 14}%
+                    </span>
                   </div>
+                  
                   <div className="detail-card">
                     <span className="detail-label">Employment Status</span>
-                    <span className="detail-value">Salaried</span>
+                    <span className="detail-value">{selectedRequest.employmentType || 'Salaried'}</span>
                   </div>
                   <div className="detail-card">
                     <span className="detail-label">Estimated Income</span>
-                    <span className="detail-value">₹65,000 / month</span>
+                    <span className="detail-value">
+                      {selectedRequest.monthlyIncome ? `₹${selectedRequest.monthlyIncome.toLocaleString('en-IN')} / month` : 'N/A'}
+                    </span>
                   </div>
+                  
                   <div className="detail-card">
                     <span className="detail-label">Bureau Risk Index</span>
                     <span className={`detail-value score-text ${selectedRequest.riskScore >= 700 ? 'excellent' : selectedRequest.riskScore >= 600 ? 'good' : 'poor'}`}>
@@ -547,19 +583,24 @@ const LoanApplicationsTab = ({
                   </div>
                   <div className="detail-card">
                     <span className="detail-label">Compliance Clearance</span>
-                    <span className={`detail-value status-text verified`}>
-                      KYC Verified
+                    <span className={`detail-value status-text ${selectedRequest.riskScore ? 'verified' : 'pending'}`}>
+                      {selectedRequest.riskScore ? 'KYC Verified' : 'Awaiting Audit'}
                     </span>
                   </div>
-                </div>
-
-                <div className="detail-card" style={{ flex: 1 }}>
-                  <span className="detail-label">Credit Audit Remarks</span>
-                  <span className="detail-value history-box" style={{ marginTop: '6px', maxHeight: '90px', overflowY: 'auto' }}>
-                    {selectedRequest.riskScore 
-                      ? `Risk assessment compiled calculation verified safely. Calculated risk category: ${selectedRequest.riskScore >= 700 ? 'Safe Account' : 'Moderate Credit Risk'}. KYC matches tax registration database.`
-                      : 'Audit assessment pending. Run credit audit evaluation model to compile official score.'}
-                  </span>
+                  
+                  <div className="detail-card">
+                    <span className="detail-label">Mobile Number</span>
+                    <span className="detail-value">{selectedRequest.mobileNumber || 'N/A'}</span>
+                  </div>
+                  <div className="detail-card">
+                    <span className="detail-label">Email Address</span>
+                    <span className="detail-value" style={{ wordBreak: 'break-all', fontSize: '0.78rem' }}>{selectedRequest.email || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="detail-card" style={{ gridColumn: 'span 2' }}>
+                    <span className="detail-label">Date of Birth</span>
+                    <span className="detail-value">{selectedRequest.dob || 'N/A'}</span>
+                  </div>
                 </div>
               </div>
 

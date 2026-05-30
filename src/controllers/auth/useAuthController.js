@@ -61,7 +61,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = () => {
-    localStorage.removeItem('lendogo_user');
+    // Purge all cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date(0).toUTCString() + ";path=/");
+    });
+    // Purge all localStorage keys to leave no trace of previous user data
+    localStorage.clear();
     setUser(new UserModel({}));
   };
 

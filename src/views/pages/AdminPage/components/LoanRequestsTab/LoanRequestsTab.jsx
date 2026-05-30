@@ -282,10 +282,6 @@ const LoanRequestsTab = ({
                     <span className="detail-lbl">Requested Sum</span>
                     <strong className="detail-val text-primary">₹{req.amount.toLocaleString('en-IN')}</strong>
                   </div>
-                  <div>
-                    <span className="detail-lbl">Tax Registry PAN</span>
-                    <strong className="detail-val"><code>{req.PAN}</code></strong>
-                  </div>
                 </div>
 
                 {/* Risk Audit Progress / Score */}

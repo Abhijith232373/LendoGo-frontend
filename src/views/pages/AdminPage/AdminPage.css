@@ -161,6 +161,10 @@
   width: 100%;
   margin-bottom: 32px;
   gap: 12px;
+  background-color: transparent !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 0 !important;
 }
 
 .sidebar-brand-group {

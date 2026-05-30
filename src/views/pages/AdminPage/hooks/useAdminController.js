@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../../../../utils/apiClient';
 
 export const useAdminController = () => {
   const navigate = useNavigate();
@@ -51,13 +52,107 @@ export const useAdminController = () => {
   };
 
   // 2. User Directory dataset
-  const [users, setUsers] = useState([
-    { id: 'USR-8812', name: 'Rahul S.', email: 'rahul.s@gmail.com', PAN: 'APM***32P', rating: 'Low Risk', status: 'Active', creditScore: 780, loanHistory: '3 Loans (2 Active, 1 Closed)', joined: '2026-01-12' },
-    { id: 'USR-9021', name: 'Aarav Mehta', email: 'aarav.m@yahoo.com', PAN: 'BFK***91K', rating: 'Low Risk', status: 'Active', creditScore: 795, loanHistory: '1 Loan (Active)', joined: '2026-02-18' },
-    { id: 'USR-3042', name: 'Priya Kapoor', email: 'priya.k@gmail.com', PAN: 'DKL***84D', rating: 'Medium Risk', status: 'Active', creditScore: 680, loanHistory: '2 Loans (Closed)', joined: '2026-03-05' },
-    { id: 'USR-6651', name: 'Sneha Rao', email: 'sneha.rao@hotmail.com', PAN: 'CPS***74S', rating: 'High Risk', status: 'Active', creditScore: 590, loanHistory: '4 Loans (3 Closed, 1 Default)', joined: '2026-04-24' },
-    { id: 'USR-1190', name: 'Kabir Das', email: 'kabir.d@outlook.com', PAN: 'GMS***15M', rating: 'Low Risk', status: 'Blocked', creditScore: 720, loanHistory: 'None', joined: '2026-05-02' }
-  ]);
+  const [users, setUsers] = useState([]);
+
+  // 3. Interactive Loan Requests Dataset
+  const [loanRequests, setLoanRequests] = useState([]);
+
+  // 4. Approved/Sanctioned Loans Dataset
+  const [approvedLoans, setApprovedLoans] = useState([]);
+
+  // Keep audited scores in local memory or track them dynamically to prevent resetting them on page shifts
+  const [auditedScores, setAuditedScores] = useState({});
+
+  const fetchUsers = async () => {
+    try {
+      const res = await apiClient('/admin/all-users');
+      const data = res?.data || res || [];
+      const normalized = data.map(u => ({
+        id: u.id || '',
+        name: u.full_name || u.FullName || 'Unknown',
+        email: u.email || '',
+        PAN: u.PAN || u.pan || 'Attached',
+        rating: u.rating || 'Low Risk',
+        status: u.status || 'Active',
+        creditScore: u.creditScore || 750,
+        loanHistory: u.loanHistory || 'None',
+        joined: u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'
+      }));
+      setUsers(normalized);
+    } catch (err) {
+      console.error("Failed to fetch users from database:", err);
+    }
+  };
+
+  const fetchApplications = async () => {
+    try {
+      const res = await apiClient('/admin/applications');
+      const data = res?.data || res || [];
+      
+      const requests = [];
+      const approved = [];
+
+      data.forEach(app => {
+        let docPAN = 'Attached';
+        if (app.kyc_documents?.pan_card_path) {
+          const filenameWithParams = app.kyc_documents.pan_card_path.split('/').pop() || '';
+          const filename = filenameWithParams.split('?')[0] || '';
+          if (filename) {
+            docPAN = filename.length > 20 ? `${filename.substring(0, 16)}...` : filename;
+          }
+        }
+
+        const normalizedApp = {
+          id: app.id || '',
+          referenceNumber: app.reference_number || app.id || '',
+          name: app.full_name || 'Unknown',
+          type: app.product_category || app.loan_track || 'Personal Loan',
+          amount: app.principal_amount || 0,
+          PAN: docPAN,
+          riskScore: auditedScores[app.id]?.riskScore || app.riskScore || null,
+          auditState: auditedScores[app.id]?.auditState || app.auditState || 'idle',
+          dob: app.dob || '',
+          email: app.email || '',
+          mobileNumber: app.mobile_number || '',
+          address: app.address || '',
+          city: app.city || '',
+          state: app.state || '',
+          pincode: app.pincode || '',
+          tenureMonths: app.tenure_months || 12,
+          interestRate: app.interest_rate || 14,
+          estimatedEmi: app.estimated_emi || 0,
+          employmentType: app.financial_details?.employment_status || 'Salaried',
+          monthlyIncome: app.financial_details?.monthly_income || 0,
+          raw: app
+        };
+
+        if (app.status === 'APPROVED' || app.status === 'DISBURSED') {
+          approved.push({
+            id: app.id || '',
+            name: app.full_name || 'Unknown',
+            type: app.product_category || app.loan_track || 'Personal Loan',
+            amount: app.principal_amount || 0,
+            rate: app.interest_rate || 14,
+            date: app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A',
+            status: app.status === 'DISBURSED' ? 'Disbursed' : 'Pre-Approved',
+            raw: app
+          });
+        } else if (app.status === 'UNDER_REVIEW') {
+          requests.push(normalizedApp);
+        }
+      });
+
+      setLoanRequests(requests);
+      setApprovedLoans(approved);
+    } catch (err) {
+      console.error("Failed to fetch applications from database:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchApplications();
+  }, [auditedScores]);
 
   const handleToggleUserStatus = (userId, userName, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';
@@ -80,111 +175,99 @@ export const useAdminController = () => {
     addAuditLog(`User ${userName} (${userId}) deleted from system`, 'warning');
   };
 
-  // KYC Verification Dataset & Handlers
-  const [kycList, setKycList] = useState([
-    { id: 'KYC-8812', userId: 'USR-8812', name: 'Rahul S.', email: 'rahul.s@gmail.com', PAN: 'APM***32P', track: 'Micro-Credit', status: 'Pending', submittedDate: 'May 25, 2026', employmentType: 'Salaried', monthlyIncome: 45000, riskRating: 'Low Risk' },
-    { id: 'KYC-9021', userId: 'USR-9021', name: 'Aarav Mehta', email: 'aarav.m@yahoo.com', PAN: 'BFK***91K', track: 'Elite Asset Funding', status: 'Pending', submittedDate: 'May 26, 2026', employmentType: 'Business Owner', monthlyIncome: 185000, riskRating: 'Low Risk' },
-    { id: 'KYC-3042', userId: 'USR-3042', name: 'Priya Kapoor', email: 'priya.k@gmail.com', PAN: 'DKL***84D', track: 'Micro-Credit', status: 'Verified', submittedDate: 'May 24, 2026', employmentType: 'Salaried', monthlyIncome: 65000, riskRating: 'Medium Risk' },
-    { id: 'KYC-6651', userId: 'USR-6651', name: 'Sneha Rao', email: 'sneha.rao@hotmail.com', PAN: 'CPS***74S', track: 'Elite Asset Funding', status: 'Pending', submittedDate: 'May 27, 2026', employmentType: 'Self-Employed', monthlyIncome: 95000, riskRating: 'High Risk' }
-  ]);
+  // KYC Verification Dataset & Handlers (kept for interface match, though KYCVerificationsTab handles it internally)
+  const [kycList, setKycList] = useState([]);
 
   const handleApproveKYC = (kycId, userName) => {
-    setKycList(prev => prev.map(k => k.id === kycId ? { ...k, status: 'Verified' } : k));
     addAuditLog(`KYC verification approved for ${userName} (${kycId})`, 'success');
     alert(`KYC verification successfully approved for ${userName}.`);
   };
 
   const handleRejectKYC = (kycId, userName) => {
-    setKycList(prev => prev.map(k => k.id === kycId ? { ...k, status: 'Rejected' } : k));
     addAuditLog(`KYC verification rejected/returned for ${userName} (${kycId})`, 'warning');
     alert(`KYC verification rejected/returned for ${userName}.`);
   };
 
-  // 3. Interactive Loan Requests Dataset
-  const [loanRequests, setLoanRequests] = useState([
-    { id: 'REQ-104', name: 'Devendra P.', type: 'Personal Loan', amount: 150000, PAN: 'AR***44P', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-209', name: 'Ananya Sen', type: 'Business Loan', amount: 500000, PAN: 'BR***18K', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-312', name: 'Gaurav Gill', type: 'Auto Loan', amount: 350000, PAN: 'DR***92D', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-455', name: 'Megha Varma', type: 'Home Loan', amount: 1200000, PAN: 'CR***07S', riskScore: null, auditState: 'idle' }
-  ]);
-
   // Simulated Audit Scoring Model
   const handleRunRiskAudit = (reqId) => {
     setLoanRequests(prev => prev.map(r => r.id === reqId ? { ...r, auditState: 'scanning' } : r));
+    setAuditedScores(prev => ({
+      ...prev,
+      [reqId]: { auditState: 'scanning', riskScore: null }
+    }));
     
     setTimeout(() => {
       const generatedScore = Math.floor(Math.random() * (850 - 580 + 1)) + 580;
-      setLoanRequests(prev => prev.map(r => {
-        if (r.id === reqId) {
-          return {
-            ...r,
-            riskScore: generatedScore,
-            auditState: 'completed'
-          };
-        }
-        return r;
+      setAuditedScores(prev => ({
+        ...prev,
+        [reqId]: { auditState: 'completed', riskScore: generatedScore }
       }));
       addAuditLog(`Risk analysis compiled for request ${reqId}. Calculated Credit Score: ${generatedScore}`, 'info');
     }, 1500);
   };
 
   // Decision Handlers
-  const handleApproveLoan = (request) => {
-    const newApproval = {
-      id: `LN-${Math.floor(10000 + Math.random() * 90000)}`,
-      name: request.name,
-      type: request.type,
-      amount: request.amount,
-      rate: baseInterestRate,
-      date: new Date().toLocaleDateString(),
-      status: 'Pre-Approved'
-    };
-    
-    setApprovedLoans(prev => [newApproval, ...prev]);
-    setLoanRequests(prev => prev.filter(r => r.id !== request.id));
-    setActiveBalance(prev => prev + request.amount);
-    setDisbursedCapital(prev => prev + request.amount);
-    setLiveMarquee(prev => [
-      { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
-      ...prev
-    ]);
-    
-    addAuditLog(`Sanctioned loan approval for ${request.name}. Disbursed Capital: ₹${request.amount.toLocaleString()}`, 'success');
-    alert(`Loan ${request.id} successfully approved and moved to disbursements ledger.`);
+  const handleApproveLoan = async (request) => {
+    try {
+      await apiClient(`/admin/applications/${request.id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'APPROVED' })
+      });
+      
+      addAuditLog(`Sanctioned loan approval for ${request.name}. Disbursed Capital: ₹${request.amount.toLocaleString()}`, 'success');
+      alert(`Loan successfully approved and moved to disbursements ledger.`);
+      
+      setActiveBalance(prev => prev + request.amount);
+      setDisbursedCapital(prev => prev + request.amount);
+      setLiveMarquee(prev => [
+        { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
+        ...prev
+      ]);
+
+      fetchApplications();
+    } catch (err) {
+      console.error("Failed to approve loan:", err);
+      alert(`Failed to approve loan: ${err.message}`);
+    }
   };
 
-  const handleRejectLoan = (reqId, name) => {
-    setLoanRequests(prev => prev.filter(r => r.id !== reqId));
-    addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
-    alert(`Application ${reqId} rejected.`);
+  const handleRejectLoan = async (reqId, name) => {
+    try {
+      await apiClient(`/admin/applications/${reqId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'REJECTED' })
+      });
+      addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
+      alert(`Application ${reqId} rejected.`);
+      fetchApplications();
+    } catch (err) {
+      console.error("Failed to reject loan application:", err);
+      alert(`Failed to reject application: ${err.message}`);
+    }
   };
 
-  const handleDisburseMoney = (loanId, feeAmount) => {
+  const handleDisburseMoney = async (loanId, feeAmount) => {
     const loan = approvedLoans.find(l => l.id === loanId);
     if (!loan) return;
 
     const netAmount = loan.amount - feeAmount;
 
-    // Deduct net payout from operational reserves
-    setActiveBalance(prev => Math.max(0, prev - netAmount));
+    try {
+      await apiClient(`/admin/applications/${loanId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'DISBURSED' })
+      });
 
-    // Update loan status to Disbursed and save ledger breakdown
-    setApprovedLoans(prev => prev.map(l => 
-      l.id === loanId 
-        ? { ...l, status: 'Disbursed', feeCharged: feeAmount, netDisbursed: netAmount } 
-        : l
-    ));
+      setActiveBalance(prev => Math.max(0, prev - netAmount));
 
-    addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
+      addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
+      alert(`Loan disbursed successfully.`);
+      fetchApplications();
+    } catch (err) {
+      console.error("Failed to disburse money:", err);
+      alert(`Failed to disburse money: ${err.message}`);
+    }
   };
-
-  // 4. Approved/Sanctioned Loans Dataset
-  const [approvedLoans, setApprovedLoans] = useState([
-    { id: 'LN-99120', name: 'Rahul S.', type: 'Personal Loan', amount: 150000, rate: 14, date: '05/17/2026', status: 'Pre-Approved' },
-    { id: 'LN-84092', name: 'Aarav Mehta', type: 'Business Loan', amount: 500000, rate: 12, date: '05/10/2026', status: 'Pre-Approved' },
-    { id: 'LN-44219', name: 'Priya Kapoor', type: 'Auto Loan', amount: 350000, rate: 13, date: '04/28/2026', status: 'Disbursed' },
-    { id: 'LN-77401', name: 'Sneha Rao', type: 'Home Loan', amount: 1200000, rate: 11, date: '04/15/2026', status: 'Disbursed' }
-  ]);
 
   // 5. Careers & Recruiting Dataset
   const [careersOpenings, setCareersOpenings] = useState([
