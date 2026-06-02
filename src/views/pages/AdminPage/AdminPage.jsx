@@ -77,6 +77,70 @@ const AdminPage = () => {
     handleAdminLogout
   } = useAdminController();
 
+  // Toast Notification System
+  const [toasts, setToasts] = React.useState([]);
+
+  const showToast = React.useCallback((message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type, isExiting: false }]);
+
+    // Slide out after 3.7 seconds (so it transitions nicely before removal)
+    setTimeout(() => {
+      setToasts((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, isExiting: true } : t))
+      );
+    }, 3700);
+
+    // Remove from DOM after 4 seconds
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  }, []);
+
+  // Intercept window.alert
+  React.useEffect(() => {
+    const originalAlert = window.alert;
+
+    window.alert = (message) => {
+      if (!message) return;
+      let type = 'info';
+      const msgLower = message.toLowerCase();
+      if (
+        msgLower.includes('success') ||
+        msgLower.includes('approve') ||
+        msgLower.includes('disburse') ||
+        msgLower.includes('recharge') ||
+        msgLower.includes('resolved') ||
+        msgLower.includes('settled') ||
+        msgLower.includes('updated') ||
+        msgLower.includes('set to')
+      ) {
+        type = 'success';
+      } else if (
+        msgLower.includes('fail') ||
+        msgLower.includes('error') ||
+        msgLower.includes('reject') ||
+        msgLower.includes('invalid') ||
+        msgLower.includes('not match') ||
+        msgLower.includes('must be')
+      ) {
+        type = 'error';
+      } else if (
+        msgLower.includes('warning') ||
+        msgLower.includes('clear') ||
+        msgLower.includes('privileges')
+      ) {
+        type = 'warning';
+      }
+
+      showToast(message, type);
+    };
+
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, [showToast]);
+
   const navItems = [
     { 
       name: 'Dashboard', 
@@ -477,6 +541,60 @@ const AdminPage = () => {
 
           </div>
         </main>
+      </div>
+
+      {/* ── TOAST NOTIFICATIONS CONTAINER ── */}
+      <div className="admin-toast-container">
+        {toasts.map((t) => (
+          <div 
+            key={t.id} 
+            className={`admin-toast-card ${t.type} ${t.isExiting ? 'exit' : ''}`}
+          >
+            <div className="toast-icon-wrap">
+              {t.type === 'success' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+              {t.type === 'error' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              )}
+              {t.type === 'warning' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              )}
+              {t.type === 'info' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              )}
+            </div>
+
+            <div className="toast-message-content">
+              {t.message}
+            </div>
+
+            <button 
+              className="toast-close-btn" 
+              onClick={() => setToasts((prev) => prev.filter((item) => item.id !== t.id))}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+
+            <div className="toast-progress-bar" />
+          </div>
+        ))}
       </div>
 
     </div>

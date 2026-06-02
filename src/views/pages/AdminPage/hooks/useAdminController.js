@@ -17,9 +17,9 @@ export const useAdminController = () => {
   const [isSignupsEnabled, setIsSignupsEnabled] = useState(true);
   const [isConsultationsEnabled, setIsConsultationsEnabled] = useState(true);
 
-  // Simulated Global Financial Ledger States
-  const [activeBalance, setActiveBalance] = useState(3259800);
-  const [disbursedCapital, setDisbursedCapital] = useState(4528450);
+  // Dynamic Global Financial Ledger States
+  const [activeBalance, setActiveBalance] = useState(0);
+  const [disbursedCapital, setDisbursedCapital] = useState(0);
 
   // Admin Personal Detail States
   const [adminAvatar, setAdminAvatar] = useState('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
@@ -63,6 +63,20 @@ export const useAdminController = () => {
   // Keep audited scores in local memory or track them dynamically to prevent resetting them on page shifts
   const [auditedScores, setAuditedScores] = useState({});
 
+  // 6. Customer Care Consultation Logs State
+  const [consultations, setConsultations] = useState([]);
+
+  const fetchWalletBalance = async () => {
+    try {
+      const res = await apiClient('/admin/wallet/balance');
+      if (res && typeof res.balance !== 'undefined') {
+        setActiveBalance(res.balance);
+      }
+    } catch (err) {
+      console.error("Failed to fetch wallet balance:", err);
+    }
+  };
+
   const fetchUsers = async () => {
     try {
       const res = await apiClient('/admin/all-users');
@@ -84,6 +98,28 @@ export const useAdminController = () => {
     }
   };
 
+  const fetchConsultations = async () => {
+    try {
+      const res = await apiClient('/admin/consultations');
+      const data = res?.data || res || [];
+      
+      const calledIds = JSON.parse(localStorage.getItem('lendogo_called_consultations') || '[]');
+      
+      const mapped = data.map(item => ({
+        id: item.ID || item.id,
+        name: item.FullName || item.full_name || 'N/A',
+        email: item.Email || item.email || 'N/A',
+        phone: item.PhoneNumber || item.phone_number || 'N/A',
+        date: item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString() : 'N/A',
+        status: calledIds.includes(item.ID || item.id) ? 'Called' : 'Pending',
+        type: 'Free Consultation'
+      }));
+      setConsultations(mapped);
+    } catch (err) {
+      console.error("Failed to fetch consultations:", err);
+    }
+  };
+
   const fetchApplications = async () => {
     try {
       const res = await apiClient('/admin/applications');
@@ -91,6 +127,7 @@ export const useAdminController = () => {
       
       const requests = [];
       const approved = [];
+      let totalDisbursed = 0;
 
       data.forEach(app => {
         let docPAN = 'Attached';
@@ -137,6 +174,9 @@ export const useAdminController = () => {
             status: app.status === 'DISBURSED' ? 'Disbursed' : 'Pre-Approved',
             raw: app
           });
+          if (app.status === 'DISBURSED') {
+            totalDisbursed += app.principal_amount || 0;
+          }
         } else if (app.status === 'UNDER_REVIEW') {
           requests.push(normalizedApp);
         }
@@ -144,6 +184,7 @@ export const useAdminController = () => {
 
       setLoanRequests(requests);
       setApprovedLoans(approved);
+      setDisbursedCapital(totalDisbursed);
     } catch (err) {
       console.error("Failed to fetch applications from database:", err);
     }
@@ -152,6 +193,8 @@ export const useAdminController = () => {
   useEffect(() => {
     fetchUsers();
     fetchApplications();
+    fetchWalletBalance();
+    fetchConsultations();
   }, [auditedScores]);
 
   const handleToggleUserStatus = (userId, userName, currentStatus) => {
@@ -214,17 +257,16 @@ export const useAdminController = () => {
         body: JSON.stringify({ status: 'APPROVED' })
       });
       
-      addAuditLog(`Sanctioned loan approval for ${request.name}. Disbursed Capital: ₹${request.amount.toLocaleString()}`, 'success');
+      addAuditLog(`Sanctioned loan approval for ${request.name}. Reference: ${request.referenceNumber}`, 'success');
       alert(`Loan successfully approved and moved to disbursements ledger.`);
       
-      setActiveBalance(prev => prev + request.amount);
-      setDisbursedCapital(prev => prev + request.amount);
       setLiveMarquee(prev => [
         { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
         ...prev
       ]);
 
       fetchApplications();
+      await fetchWalletBalance();
     } catch (err) {
       console.error("Failed to approve loan:", err);
       alert(`Failed to approve loan: ${err.message}`);
@@ -258,7 +300,7 @@ export const useAdminController = () => {
         body: JSON.stringify({ status: 'DISBURSED' })
       });
 
-      setActiveBalance(prev => Math.max(0, prev - netAmount));
+      await fetchWalletBalance();
 
       addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
       alert(`Loan disbursed successfully.`);
@@ -358,9 +400,69 @@ export const useAdminController = () => {
     addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
   };
 
-  const handleRechargeWallet = (amount) => {
-    setActiveBalance(prev => prev + amount);
-    addAuditLog(`Admin wallet recharged by ₹${amount.toLocaleString('en-IN')}`, 'success');
+  const handleRechargeWallet = async (amount) => {
+    try {
+      // 1. Create Razorpay Order on backend
+      const orderData = await apiClient('/admin/wallet/create-order', {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      });
+
+      if (!orderData || !orderData.order_id) {
+        throw new Error("Failed to create Razorpay order.");
+      }
+
+      // 2. Configure and Open Razorpay Checkout modal
+      const options = {
+        key: "rzp_test_SvWORMMdaUGuZO", // Public Key ID from backend
+        amount: orderData.amount, // Amount in Paise
+        currency: "INR",
+        name: "LendoGo Admin Capital",
+        description: `Wallet Recharge: ₹${amount.toLocaleString('en-IN')}`,
+        order_id: orderData.order_id,
+        handler: async function (response) {
+          try {
+            // 3. Verify Payment signature on backend
+            const verifyData = await apiClient('/admin/wallet/verify-payment', {
+              method: 'POST',
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: amount // Actual INR amount to credit
+              })
+            });
+
+            // 4. Update balance state and log audit
+            await fetchWalletBalance();
+            addAuditLog(`Admin wallet recharged by ₹${amount.toLocaleString('en-IN')} via Razorpay (Order ID: ${orderData.order_id})`, 'success');
+            alert(verifyData.message || "Admin Wallet recharged successfully!");
+          } catch (verifyErr) {
+            console.error("Razorpay verification error:", verifyErr);
+            alert(`Payment verification failed: ${verifyErr.message}`);
+          }
+        },
+        prefill: {
+          name: adminName,
+          email: adminEmail,
+        },
+        theme: {
+          color: "#0066ff"
+        },
+        modal: {
+          ondismiss: function () {
+            console.log("Razorpay Checkout dismissed.");
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.error("Razorpay recharge failed:", err);
+      alert(`Recharge failed: ${err.message}`);
+    }
   };
 
   const handleCreateJobOpening = (job) => {
@@ -383,16 +485,16 @@ export const useAdminController = () => {
     addAuditLog(`Job opening '${job.title}' (${newId}) created successfully`, 'success');
   };
 
-  // 6. Customer Care Consultation Logs State
-  const [consultations, setConsultations] = useState([
-    { id: 'TKT-1081', name: 'Amit Roy', email: 'amit.roy@gmail.com', phone: '+91 98765 43210', date: '2026-05-25', status: 'Pending', type: 'Personal Loan Advisor' },
-    { id: 'TKT-1044', name: 'Sonal Sen', email: 'sonal.sen@yahoo.com', phone: '+91 88472 90123', date: '2026-05-24', status: 'Contacted', type: 'Business Credit Builder' },
-    { id: 'TKT-0931', name: 'Vijay K.', email: 'vijay.k@outlook.com', phone: '+91 76543 21098', date: '2026-05-21', status: 'Contacted', type: 'Home Loan Refinancing' }
-  ]);
-
   const handleResolveTicket = (ticketId, customerName) => {
-    setConsultations(prev => prev.map(c => c.id === ticketId ? { ...c, status: 'Contacted' } : c));
-    addAuditLog(`Consultation ticket ${ticketId} for ${customerName} marked resolved.`, 'success');
+    const calledIds = JSON.parse(localStorage.getItem('lendogo_called_consultations') || '[]');
+    if (!calledIds.includes(ticketId)) {
+      calledIds.push(ticketId);
+      localStorage.setItem('lendogo_called_consultations', JSON.stringify(calledIds));
+    }
+    
+    setConsultations(prev => prev.map(c => c.id === ticketId ? { ...c, status: 'Called' } : c));
+    addAuditLog(`Consultation request for ${customerName} has been processed and marked as Called.`, 'success');
+    alert(`Consultation request for ${customerName} marked as Called successfully!`);
   };
 
   // 7. Staff Management State

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import "./AdminTopbar.css";
 
 const AdminTopbar = ({ 
@@ -11,23 +11,35 @@ const AdminTopbar = ({
   adminEmail,
   handleRechargeWallet
 }) => {
-  
+  const [isRechargeOpen, setIsRechargeOpen] = useState(false);
+  const [rechargeAmount, setRechargeAmount] = useState('');
+  const [errorText, setErrorText] = useState('');
+
   const handleRechargeClick = (e) => {
     e.stopPropagation();
-    const amtStr = prompt("Enter wallet recharge amount (₹):", "1000000");
-    if (!amtStr) return;
-    
+    setRechargeAmount('1000000'); // Default to 10 Lakhs
+    setErrorText('');
+    setIsRechargeOpen(true);
+  };
+
+  const handlePresetClick = (amount) => {
+    setRechargeAmount(amount.toString());
+    setErrorText('');
+  };
+
+  const handleModalSubmit = (e) => {
+    e.preventDefault();
     // Clean any user input formatting like commas
-    const cleanedAmt = amtStr.replace(/,/g, '').trim();
+    const cleanedAmt = rechargeAmount.replace(/,/g, '').trim();
     const amt = parseFloat(cleanedAmt);
     
     if (isNaN(amt) || amt <= 0) {
-      alert("Invalid amount entered. Please enter a valid positive numeric value.");
+      setErrorText("Please enter a valid positive numeric value.");
       return;
     }
     
     handleRechargeWallet(amt);
-    alert(`Wallet successfully recharged by ₹${amt.toLocaleString('en-IN')}.00!`);
+    setIsRechargeOpen(false);
   };
 
   return (
@@ -129,6 +141,78 @@ const AdminTopbar = ({
           </div>
         </div>
       </div>
+
+      {/* Render the Custom Recharge Modal */}
+      {isRechargeOpen && (
+        <div className="recharge-modal-backdrop" onClick={() => setIsRechargeOpen(false)}>
+          <div className="recharge-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="recharge-modal-header-wrap">
+              <div className="recharge-modal-header">
+                <h3 className="recharge-modal-title">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                  </svg>
+                  Recharge Capital
+                </h3>
+                <button className="recharge-modal-close-btn" onClick={() => setIsRechargeOpen(false)}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              <p className="recharge-modal-subtitle">Add capital reserves to the system disbursement wallet via Razorpay secure checkout.</p>
+            </div>
+
+            <div className="recharge-current-balance">
+              <span className="current-balance-label">Available Reserves</span>
+              <span className="current-balance-value">₹{activeBalance.toLocaleString('en-IN')}.00</span>
+            </div>
+
+            <form onSubmit={handleModalSubmit}>
+              <div className="recharge-input-group">
+                <label className="recharge-input-label">Recharge Amount (₹)</label>
+                <div className="recharge-input-container">
+                  <span className="recharge-input-prefix">₹</span>
+                  <input
+                    type="text"
+                    className="recharge-amount-input"
+                    value={rechargeAmount}
+                    onChange={(e) => {
+                      setRechargeAmount(e.target.value);
+                      setErrorText('');
+                    }}
+                    placeholder="Enter amount"
+                    autoFocus
+                  />
+                </div>
+                {errorText && <span className="recharge-error-message">{errorText}</span>}
+              </div>
+
+              <div className="recharge-presets-grid">
+                <button type="button" className="preset-btn" onClick={() => handlePresetClick(100000)}>+ ₹1L</button>
+                <button type="button" className="preset-btn" onClick={() => handlePresetClick(500000)}>+ ₹5L</button>
+                <button type="button" className="preset-btn" onClick={() => handlePresetClick(1000000)}>+ ₹10L</button>
+                <button type="button" className="preset-btn" onClick={() => handlePresetClick(2500000)}>+ ₹25L</button>
+              </div>
+
+              <div className="recharge-actions">
+                <button type="button" className="recharge-btn-cancel" onClick={() => setIsRechargeOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="recharge-btn-submit">
+                  <span>Recharge via Razorpay</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
