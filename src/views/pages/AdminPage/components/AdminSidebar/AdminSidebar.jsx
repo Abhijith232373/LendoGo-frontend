@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "./AdminSidebar.css";
 
-const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode, collapsed, setCollapsed }) => {
+const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode, collapsed, setCollapsed, pendingChatCount = 0 }) => {
   const [expandedGroups, setExpandedGroups] = useState({ Administrative: true });
 
   // Auto-expand parent group if a sub-tab is set active globally
@@ -119,6 +119,9 @@ const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode
                           >
                             <span className="nav-sub-icon">{sub.icon}</span>
                             <span className="nav-sub-text">{sub.name}</span>
+                            {sub.name === 'Chat Support' && pendingChatCount > 0 && (
+                              <span className="sidebar-badge-chat-pending">{pendingChatCount}</span>
+                            )}
                           </button>
                         </li>
                       ))}

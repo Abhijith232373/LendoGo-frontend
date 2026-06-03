@@ -66,6 +66,54 @@ export const useAdminController = () => {
   // 6. Customer Care Consultation Logs State
   const [consultations, setConsultations] = useState([]);
 
+  // 6b. Customer Care Live Chats State
+  const [chats, setChats] = useState([
+    { 
+      id: 'CHT-882', 
+      client: 'Arjun Sharma', 
+      email: 'arjun@example.com', 
+      lastMsg: 'I need to check my loan eligibility for ₹5 Lakhs.', 
+      date: '10 mins ago', 
+      status: 'Active',
+      startTime: '03:10 PM',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80',
+      messages: [
+        { sender: 'user', text: 'Hello, I have submitted my details.', time: '10 mins ago' },
+        { sender: 'credy', text: 'Hi Arjun! How can I assist you?', time: '9 mins ago' },
+        { sender: 'user', text: 'I need to check my loan eligibility for ₹5 Lakhs.', time: '8 mins ago' }
+      ]
+    },
+    { 
+      id: 'CHT-199', 
+      client: 'Meera Nair', 
+      email: 'meera.nair@gmail.com', 
+      lastMsg: 'Thread closed by support agent.', 
+      date: '1 hour ago', 
+      status: 'Resolved',
+      startTime: '02:05 PM',
+      endTime: '03:05 PM',
+      duration: '60 mins',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80',
+      messages: [
+        { sender: 'user', text: 'Hi, I updated my details.', time: '1 hour ago' },
+        { sender: 'credy', text: 'Thank you for updating your profile details.', time: '55 mins ago' }
+      ]
+    },
+    { 
+      id: 'CHT-094', 
+      client: 'Gopal Das', 
+      email: 'gopal.das@yahoo.com', 
+      lastMsg: 'Is the auto loan disbursal instantaneous?', 
+      date: '3 hours ago', 
+      status: 'Active',
+      startTime: '12:15 PM',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80',
+      messages: [
+        { sender: 'user', text: 'Is the auto loan disbursal instantaneous?', time: '3 hours ago' }
+      ]
+    }
+  ]);
+
   const fetchWalletBalance = async () => {
     try {
       const res = await apiClient('/admin/wallet/balance');
@@ -661,6 +709,7 @@ export const useAdminController = () => {
     careersOpenings, setCareersOpenings,
     jobApplications, setJobApplications,
     consultations, setConsultations,
+    chats, setChats,
     staffMembers, setStaffMembers,
     newStaffName, setNewStaffName,
     newStaffEmail, setNewStaffEmail,

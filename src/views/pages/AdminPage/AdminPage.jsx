@@ -74,8 +74,12 @@ const AdminPage = () => {
     handleUpdateAdminEmail,
     handleUpdateAdminPassword,
     handleTransferOwnership,
-    handleAdminLogout
+    handleAdminLogout,
+    chats,
+    setChats
   } = useAdminController();
+
+  const pendingChatCount = chats ? chats.filter(c => c.status === 'Active').length : 0;
 
   // Toast Notification System
   const [toasts, setToasts] = React.useState([]);
@@ -378,6 +382,7 @@ const AdminPage = () => {
           setDarkMode={setDarkMode}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
+          pendingChatCount={pendingChatCount}
         />
 
         {/* ── MAIN DASHBOARD CONTENT AREA ── */}
@@ -464,6 +469,8 @@ const AdminPage = () => {
               <CustomerCareTab 
                 consultations={consultations}
                 handleResolveTicket={handleResolveTicket}
+                chats={chats}
+                setChats={setChats}
                 showOnly={
                   activeTab === 'Free Consultation' ? 'consultation' :
                   activeTab === 'Chat Support' ? 'chat' :
