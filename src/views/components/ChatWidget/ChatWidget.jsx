@@ -14,27 +14,94 @@ const ChatWidget = () => {
   const [isTyping, setIsTyping] = useState(false);
   
   const chatBodyRef = useRef(null);
+  const wsRef = useRef(null);
+  const clearTypingRef = useRef(null);
+  const typingThrottleRef = useRef(null);
 
   // Initialize and load chat history when user changes or logs in
   useEffect(() => {
     if (user && user.isAuthenticated && user.id) {
-      const storageKey = `lendogo_user_chat_messages_${user.id}`;
-      const savedMessages = localStorage.getItem(storageKey);
-      if (savedMessages) {
+      // No more fake local storage dummy threads!
+      setMessages([]);
+
+      // Open a WebSocket connection
+      const wsUrl = `ws://localhost:8080/api/ws/chat?user_id=${user.id}&role=user&name=${encodeURIComponent(user.name || user.full_name || '')}&email=${encodeURIComponent(user.email || '')}`;
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log("Customer Chat Widget WS connected for user", user.id);
+      };
+
+      ws.onmessage = (event) => {
         try {
-          setMessages(JSON.parse(savedMessages));
-        } catch (e) {
-          console.error("Error parsing saved chat messages:", e);
-          initializeDefaultChat();
+          const data = JSON.parse(event.data);
+          
+          if (data.text === 'SYS_TYPING') {
+            setIsTyping(true);
+            if (clearTypingRef.current) clearTimeout(clearTypingRef.current);
+            clearTypingRef.current = setTimeout(() => setIsTyping(false), 2000);
+            return;
+          }
+
+          setMessages(prev => {
+            setIsTyping(false); // Clear typing when message arrives
+            // Avoid duplicate appending if it's already the last message
+            const isDuplicate = prev.length > 0 && 
+              prev[prev.length - 1].text === data.text && 
+              (prev[prev.length - 1].sender === (data.is_from_admin ? 'credy' : 'user'));
+            
+            if (isDuplicate) return prev;
+
+            const newMsg = {
+              sender: data.is_from_admin ? 'credy' : 'user',
+              text: data.text,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            const updated = [...prev, newMsg];
+            
+            return updated;
+          });
+        } catch (err) {
+          console.error("Error parsing user WS message:", err);
         }
-      } else {
-        initializeDefaultChat();
-      }
+      };
+
+      ws.onclose = () => {
+        console.log("Customer Chat Widget WS disconnected");
+      };
+
+      return () => {
+        ws.close();
+      };
     } else {
       setMessages([]);
       setIsOpen(false);
     }
   }, [user]);
+
+  // 30-minute auto-clear inactivity timer
+  const lastActivityRef = useRef(Date.now());
+  
+  useEffect(() => {
+    // Update ref whenever messages change
+    if (messages.length > 0) {
+      lastActivityRef.current = Date.now();
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (messages.length > 0) {
+        const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+        if (timeSinceLastActivity >= 30 * 60 * 1000) { // 30 minutes
+          console.log("Chat cleared due to 30 minutes of inactivity.");
+          setMessages([]);
+        }
+      }
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [messages.length]);
 
   // Scroll to bottom whenever messages or typing state changes
   useEffect(() => {
@@ -43,31 +110,58 @@ const ChatWidget = () => {
     }
   }, [messages, isTyping, isOpen]);
 
-  const initializeDefaultChat = () => {
-    const defaultMsgs = [
-      {
-        id: 'msg-init-1',
-        sender: 'credy',
-        text: 'Hello! I am Credy, your virtual assistant.',
-        timestamp: new Date().toISOString()
-      },
-      {
-        id: 'msg-init-2',
-        sender: 'credy',
-        text: 'How can I help you today? You can ask me about your loan applications, repayment status, or check interest rates!',
-        timestamp: new Date().toISOString()
-      }
-    ];
-    setMessages(defaultMsgs);
-    if (user && user.id) {
-      localStorage.setItem(`lendogo_user_chat_messages_${user.id}`, JSON.stringify(defaultMsgs));
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+
+    const userMsg = {
+      sender: 'user',
+      text: inputValue,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages(prev => [...prev, userMsg]);
+    const sentText = inputValue;
+    setInputValue('');
+
+    // Send via WebSocket if open
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        text: sentText,
+        is_from_admin: false,
+        receiver_id: "0"
+      }));
+    }
+
+    // Trigger virtual reply if message matches a greeting and WebSocket is not connected
+    const queryText = sentText.toLowerCase().trim();
+    const isGreeting = ['hi', 'hello', 'hey', 'hy'].some(g => queryText.includes(g));
+    if (isGreeting && (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN)) {
+      setIsTyping(true);
+      setTimeout(() => {
+        const replyText = `Hello, ${user.name || 'User'}! I hope you are having a wonderful day. How can I assist you today?`;
+        
+        const credyReply = {
+          sender: 'credy',
+          text: replyText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, credyReply]);
+        setIsTyping(false);
+      }, 1000);
     }
   };
 
-  // Only render if user is authenticated/logged in, and is NOT on an admin page/role
-  if (!user || !user.isAuthenticated || user.role === 'admin' || location.pathname.startsWith('/admin')) {
-    return null;
-  }
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+    
+    // Broadcast typing signal every 1.5 seconds if actively typing
+    if (!typingThrottleRef.current && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ text: 'SYS_TYPING', is_from_admin: false, receiver_id: "0" }));
+      typingThrottleRef.current = setTimeout(() => {
+        typingThrottleRef.current = null;
+      }, 1500);
+    }
+  };
 
   const handleOpenChat = () => {
     setIsClosing(false);
@@ -83,51 +177,10 @@ const ChatWidget = () => {
     }, 490); // Matches the CSS transition duration
   };
 
-  const saveMessages = (updatedMsgs) => {
-    setMessages(updatedMsgs);
-    localStorage.setItem(`lendogo_user_chat_messages_${user.id}`, JSON.stringify(updatedMsgs));
-  };
-
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    const userMsg = {
-      id: `msg-user-${Date.now()}`,
-      sender: 'user',
-      text: inputValue,
-      timestamp: new Date().toISOString()
-    };
-
-    const updatedMsgs = [...messages, userMsg];
-    saveMessages(updatedMsgs);
-    const queryText = inputValue.toLowerCase().trim();
-    setInputValue('');
-
-    // Only trigger greeting response for basic greetings
-    const isGreeting = ['hi', 'hello', 'hey', 'hy'].some(g => queryText.includes(g));
-    if (isGreeting) {
-      simulateCredyResponse(updatedMsgs);
-    }
-  };
-
-  const simulateCredyResponse = (currentMsgs) => {
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const replyText = `Hello, ${user.name || 'User'}! I hope you are having a wonderful day. How can I assist you today?`;
-
-      const credyReply = {
-        id: `msg-credy-${Date.now()}`,
-        sender: 'credy',
-        text: replyText,
-        timestamp: new Date().toISOString()
-      };
-
-      setIsTyping(false);
-      saveMessages([...currentMsgs, credyReply]);
-    }, 1000);
-  };
+  // Only render if user is authenticated/logged in, and is NOT on an admin page/role
+  if (!user || !user.isAuthenticated || user.role === 'admin' || location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>
@@ -195,7 +248,7 @@ const ChatWidget = () => {
                 className="credy-chat-input" 
                 placeholder="Type your message.." 
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={handleInputChange}
                 maxLength={500}
               />
               <button 

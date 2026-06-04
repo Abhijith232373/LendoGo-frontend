@@ -66,53 +66,8 @@ export const useAdminController = () => {
   // 6. Customer Care Consultation Logs State
   const [consultations, setConsultations] = useState([]);
 
-  // 6b. Customer Care Live Chats State
-  const [chats, setChats] = useState([
-    { 
-      id: 'CHT-882', 
-      client: 'Arjun Sharma', 
-      email: 'arjun@example.com', 
-      lastMsg: 'I need to check my loan eligibility for ₹5 Lakhs.', 
-      date: '10 mins ago', 
-      status: 'Active',
-      startTime: '03:10 PM',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80',
-      messages: [
-        { sender: 'user', text: 'Hello, I have submitted my details.', time: '10 mins ago' },
-        { sender: 'credy', text: 'Hi Arjun! How can I assist you?', time: '9 mins ago' },
-        { sender: 'user', text: 'I need to check my loan eligibility for ₹5 Lakhs.', time: '8 mins ago' }
-      ]
-    },
-    { 
-      id: 'CHT-199', 
-      client: 'Meera Nair', 
-      email: 'meera.nair@gmail.com', 
-      lastMsg: 'Thread closed by support agent.', 
-      date: '1 hour ago', 
-      status: 'Resolved',
-      startTime: '02:05 PM',
-      endTime: '03:05 PM',
-      duration: '60 mins',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80',
-      messages: [
-        { sender: 'user', text: 'Hi, I updated my details.', time: '1 hour ago' },
-        { sender: 'credy', text: 'Thank you for updating your profile details.', time: '55 mins ago' }
-      ]
-    },
-    { 
-      id: 'CHT-094', 
-      client: 'Gopal Das', 
-      email: 'gopal.das@yahoo.com', 
-      lastMsg: 'Is the auto loan disbursal instantaneous?', 
-      date: '3 hours ago', 
-      status: 'Active',
-      startTime: '12:15 PM',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80',
-      messages: [
-        { sender: 'user', text: 'Is the auto loan disbursal instantaneous?', time: '3 hours ago' }
-      ]
-    }
-  ]);
+  // 6b. Customer Care Live Chats State (Purely Backend Driven)
+  const [chats, setChats] = useState([]);
 
   const fetchWalletBalance = async () => {
     try {
@@ -130,9 +85,10 @@ export const useAdminController = () => {
       const res = await apiClient('/admin/all-users');
       const data = res?.data || res || [];
       const normalized = data.map(u => ({
-        id: u.id || '',
+        id: u.ID || u.id || '',
         name: u.full_name || u.FullName || 'Unknown',
-        email: u.email || '',
+        email: u.Email || u.email || '',
+        avatar: u.Avatar || u.avatar || u.ProfilePicture || u.profile_picture || u.profile_image || '',
         PAN: u.PAN || u.pan || 'Attached',
         rating: u.rating || 'Low Risk',
         status: u.status || 'Active',
@@ -165,6 +121,60 @@ export const useAdminController = () => {
       setConsultations(mapped);
     } catch (err) {
       console.error("Failed to fetch consultations:", err);
+    }
+  };
+
+  const fetchChatSessions = async () => {
+    try {
+      const res = await apiClient('/admin/chats/sessions');
+      const sessions = res?.data || res || [];
+      
+      if (!Array.isArray(sessions)) return;
+
+      setChats(prev => {
+        const updated = [...prev];
+        sessions.forEach(session => {
+          const senderId = session.sender_id || session.sender?.ID;
+          if (!senderId) return;
+          
+          const chatId = `CHT-${senderId}`;
+          const existingIdx = updated.findIndex(c => c.id === chatId || c.userId === senderId);
+          
+          const clientName = session.sender?.full_name || session.sender?.FullName || 'Unknown User';
+          const clientEmail = session.sender?.email || session.sender?.Email || '';
+          const clientAvatar = session.sender?.Avatar || session.sender?.profile_picture || session.sender?.profile_image || '';
+
+          if (existingIdx !== -1) {
+            updated[existingIdx] = {
+              ...updated[existingIdx],
+              client: clientName,
+              email: clientEmail,
+              avatar: clientAvatar || updated[existingIdx].avatar
+            };
+          } else {
+            updated.push({
+              id: chatId,
+              userId: senderId,
+              client: clientName,
+              email: clientEmail,
+              avatar: clientAvatar,
+              lastMsg: session.message_text || 'New conversation started',
+              date: new Date(session.timestamp || session.CreatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              status: 'Active',
+              messages: [
+                {
+                  sender: 'user',
+                  text: session.message_text || 'Started conversation',
+                  time: new Date(session.timestamp || session.CreatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }
+              ]
+            });
+          }
+        });
+        return updated;
+      });
+    } catch (err) {
+      console.error("Failed to fetch admin chat sessions:", err);
     }
   };
 
@@ -243,7 +253,10 @@ export const useAdminController = () => {
     fetchApplications();
     fetchWalletBalance();
     fetchConsultations();
+    fetchChatSessions();
   }, [auditedScores]);
+
+  // No more local storage sync for live chats; it's handled by WS and REST API
 
   const handleToggleUserStatus = (userId, userName, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';

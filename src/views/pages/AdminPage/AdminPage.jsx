@@ -346,30 +346,7 @@ const AdminPage = () => {
   return (
     <div className={`admin-dashboard-wrapper ${darkMode ? 'dark-theme' : 'light-theme'}`}>
       
-      {/* ── TOP MARQUEE (LIVE APPROVAL TICKERS) ── */}
-      <div className="admin-marquee-bar">
-        <div className="marquee-label">
-          <span className="live-pulse" />
-          LIVE DISBURSEMENTS
-        </div>
-        <div className="marquee-content">
-          <div className="marquee-slider">
-            {liveMarquee.map((item, idx) => (
-              <span key={idx} className="marquee-item">
-                <span className="badge-bullet">{item.status}</span>
-                <strong>{item.name}</strong> approved for {item.type}: <span className="highlight-text">{item.amount}</span>
-              </span>
-            ))}
-            {/* Duplicate for infinite loop */}
-            {liveMarquee.map((item, idx) => (
-              <span key={`dup-${idx}`} className="marquee-item">
-                <span className="badge-bullet">{item.status}</span>
-                <strong>{item.name}</strong> approved for {item.type}: <span className="highlight-text">{item.amount}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+
 
       <div className={`admin-main-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         
@@ -471,6 +448,7 @@ const AdminPage = () => {
                 handleResolveTicket={handleResolveTicket}
                 chats={chats}
                 setChats={setChats}
+                users={users}
                 showOnly={
                   activeTab === 'Free Consultation' ? 'consultation' :
                   activeTab === 'Chat Support' ? 'chat' :
