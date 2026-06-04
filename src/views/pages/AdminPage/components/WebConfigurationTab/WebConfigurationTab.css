@@ -1,0 +1,106 @@
+/* ─── WEB CONFIGURATION SLIDERS ─── */
+.web-config-card-box {
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  padding: 2.2rem;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  margin-top: 1rem;
+}
+
+.config-success-banner {
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.config-row-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  border-bottom: 1px solid var(--admin-border);
+  padding-bottom: 1.5rem;
+}
+
+.config-row-item:last-of-type {
+  border-bottom: none;
+}
+
+.config-info-text {
+  flex: 1;
+}
+
+.config-info-text h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+
+.config-info-text p {
+  font-size: 0.78rem;
+  color: var(--admin-text-light);
+  line-height: 1.4;
+}
+
+.config-action-control {
+  flex-shrink: 0;
+}
+
+.range-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.config-slider-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 160px;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--admin-border);
+  outline: none;
+}
+
+.config-slider-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+}
+
+.slider-score-indicator {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+  width: 45px;
+}
+
+.btn-save-web-config {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.btn-save-web-config:hover {
+  background-color: var(--primary-hover);
+}

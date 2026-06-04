@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../../../../utils/apiClient';
 
 export const useAdminController = () => {
   const navigate = useNavigate();
@@ -16,9 +17,9 @@ export const useAdminController = () => {
   const [isSignupsEnabled, setIsSignupsEnabled] = useState(true);
   const [isConsultationsEnabled, setIsConsultationsEnabled] = useState(true);
 
-  // Simulated Global Financial Ledger States
-  const [activeBalance, setActiveBalance] = useState(3259800);
-  const [disbursedCapital, setDisbursedCapital] = useState(4528450);
+  // Dynamic Global Financial Ledger States
+  const [activeBalance, setActiveBalance] = useState(0);
+  const [disbursedCapital, setDisbursedCapital] = useState(0);
 
   // Admin Personal Detail States
   const [adminAvatar, setAdminAvatar] = useState('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
@@ -51,13 +52,211 @@ export const useAdminController = () => {
   };
 
   // 2. User Directory dataset
-  const [users, setUsers] = useState([
-    { id: 'USR-8812', name: 'Rahul S.', email: 'rahul.s@gmail.com', PAN: 'APM***32P', rating: 'Low Risk', status: 'Active', creditScore: 780, loanHistory: '3 Loans (2 Active, 1 Closed)', joined: '2026-01-12' },
-    { id: 'USR-9021', name: 'Aarav Mehta', email: 'aarav.m@yahoo.com', PAN: 'BFK***91K', rating: 'Low Risk', status: 'Active', creditScore: 795, loanHistory: '1 Loan (Active)', joined: '2026-02-18' },
-    { id: 'USR-3042', name: 'Priya Kapoor', email: 'priya.k@gmail.com', PAN: 'DKL***84D', rating: 'Medium Risk', status: 'Active', creditScore: 680, loanHistory: '2 Loans (Closed)', joined: '2026-03-05' },
-    { id: 'USR-6651', name: 'Sneha Rao', email: 'sneha.rao@hotmail.com', PAN: 'CPS***74S', rating: 'High Risk', status: 'Active', creditScore: 590, loanHistory: '4 Loans (3 Closed, 1 Default)', joined: '2026-04-24' },
-    { id: 'USR-1190', name: 'Kabir Das', email: 'kabir.d@outlook.com', PAN: 'GMS***15M', rating: 'Low Risk', status: 'Blocked', creditScore: 720, loanHistory: 'None', joined: '2026-05-02' }
-  ]);
+  const [users, setUsers] = useState([]);
+
+  // 3. Interactive Loan Requests Dataset
+  const [loanRequests, setLoanRequests] = useState([]);
+
+  // 4. Approved/Sanctioned Loans Dataset
+  const [approvedLoans, setApprovedLoans] = useState([]);
+
+  // Keep audited scores in local memory or track them dynamically to prevent resetting them on page shifts
+  const [auditedScores, setAuditedScores] = useState({});
+
+  // 6. Customer Care Consultation Logs State
+  const [consultations, setConsultations] = useState([]);
+
+  // 6b. Customer Care Live Chats State (Purely Backend Driven)
+  const [chats, setChats] = useState([]);
+
+  const fetchWalletBalance = async () => {
+    try {
+      const res = await apiClient('/admin/wallet/balance');
+      if (res && typeof res.balance !== 'undefined') {
+        setActiveBalance(res.balance);
+      }
+    } catch (err) {
+      console.error("Failed to fetch wallet balance:", err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await apiClient('/admin/all-users');
+      const data = res?.data || res || [];
+      const normalized = data.map(u => ({
+        id: u.ID || u.id || '',
+        name: u.full_name || u.FullName || 'Unknown',
+        email: u.Email || u.email || '',
+        avatar: u.Avatar || u.avatar || u.ProfilePicture || u.profile_picture || u.profile_image || '',
+        PAN: u.PAN || u.pan || 'Attached',
+        rating: u.rating || 'Low Risk',
+        status: u.status || 'Active',
+        creditScore: u.creditScore || 750,
+        loanHistory: u.loanHistory || 'None',
+        joined: u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'
+      }));
+      setUsers(normalized);
+    } catch (err) {
+      console.error("Failed to fetch users from database:", err);
+    }
+  };
+
+  const fetchConsultations = async () => {
+    try {
+      const res = await apiClient('/admin/consultations');
+      const data = res?.data || res || [];
+      
+      const calledIds = JSON.parse(localStorage.getItem('lendogo_called_consultations') || '[]');
+      
+      const mapped = data.map(item => ({
+        id: item.ID || item.id,
+        name: item.FullName || item.full_name || 'N/A',
+        email: item.Email || item.email || 'N/A',
+        phone: item.PhoneNumber || item.phone_number || 'N/A',
+        date: item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString() : 'N/A',
+        status: calledIds.includes(item.ID || item.id) ? 'Called' : 'Pending',
+        type: 'Free Consultation'
+      }));
+      setConsultations(mapped);
+    } catch (err) {
+      console.error("Failed to fetch consultations:", err);
+    }
+  };
+
+  const fetchChatSessions = async () => {
+    try {
+      const res = await apiClient('/admin/chats/sessions');
+      const sessions = res?.data || res || [];
+      
+      if (!Array.isArray(sessions)) return;
+
+      setChats(prev => {
+        const updated = [...prev];
+        sessions.forEach(session => {
+          const senderId = session.sender_id || session.sender?.ID;
+          if (!senderId) return;
+          
+          const chatId = `CHT-${senderId}`;
+          const existingIdx = updated.findIndex(c => c.id === chatId || c.userId === senderId);
+          
+          const clientName = session.sender?.full_name || session.sender?.FullName || 'Unknown User';
+          const clientEmail = session.sender?.email || session.sender?.Email || '';
+          const clientAvatar = session.sender?.Avatar || session.sender?.profile_picture || session.sender?.profile_image || '';
+
+          if (existingIdx !== -1) {
+            updated[existingIdx] = {
+              ...updated[existingIdx],
+              client: clientName,
+              email: clientEmail,
+              avatar: clientAvatar || updated[existingIdx].avatar
+            };
+          } else {
+            updated.push({
+              id: chatId,
+              userId: senderId,
+              client: clientName,
+              email: clientEmail,
+              avatar: clientAvatar,
+              lastMsg: session.message_text || 'New conversation started',
+              date: new Date(session.timestamp || session.CreatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              status: 'Active',
+              messages: [
+                {
+                  sender: 'user',
+                  text: session.message_text || 'Started conversation',
+                  time: new Date(session.timestamp || session.CreatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }
+              ]
+            });
+          }
+        });
+        return updated;
+      });
+    } catch (err) {
+      console.error("Failed to fetch admin chat sessions:", err);
+    }
+  };
+
+  const fetchApplications = async () => {
+    try {
+      const res = await apiClient('/admin/applications');
+      const data = res?.data || res || [];
+      
+      const requests = [];
+      const approved = [];
+      let totalDisbursed = 0;
+
+      data.forEach(app => {
+        let docPAN = 'Attached';
+        if (app.kyc_documents?.pan_card_path) {
+          const filenameWithParams = app.kyc_documents.pan_card_path.split('/').pop() || '';
+          const filename = filenameWithParams.split('?')[0] || '';
+          if (filename) {
+            docPAN = filename.length > 20 ? `${filename.substring(0, 16)}...` : filename;
+          }
+        }
+
+        const normalizedApp = {
+          id: app.id || '',
+          referenceNumber: app.reference_number || app.id || '',
+          name: app.full_name || 'Unknown',
+          type: app.product_category || app.loan_track || 'Personal Loan',
+          amount: app.principal_amount || 0,
+          PAN: docPAN,
+          riskScore: auditedScores[app.id]?.riskScore || app.riskScore || null,
+          auditState: auditedScores[app.id]?.auditState || app.auditState || 'idle',
+          dob: app.dob || '',
+          email: app.email || '',
+          mobileNumber: app.mobile_number || '',
+          address: app.address || '',
+          city: app.city || '',
+          state: app.state || '',
+          pincode: app.pincode || '',
+          tenureMonths: app.tenure_months || 12,
+          interestRate: app.interest_rate || 14,
+          estimatedEmi: app.estimated_emi || 0,
+          employmentType: app.financial_details?.employment_status || 'Salaried',
+          monthlyIncome: app.financial_details?.monthly_income || 0,
+          raw: app
+        };
+
+        if (app.status === 'APPROVED' || app.status === 'DISBURSED') {
+          approved.push({
+            id: app.id || '',
+            name: app.full_name || 'Unknown',
+            type: app.product_category || app.loan_track || 'Personal Loan',
+            amount: app.principal_amount || 0,
+            rate: app.interest_rate || 14,
+            date: app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A',
+            status: app.status === 'DISBURSED' ? 'Disbursed' : 'Pre-Approved',
+            raw: app
+          });
+          if (app.status === 'DISBURSED') {
+            totalDisbursed += app.principal_amount || 0;
+          }
+        } else if (app.status === 'UNDER_REVIEW') {
+          requests.push(normalizedApp);
+        }
+      });
+
+      setLoanRequests(requests);
+      setApprovedLoans(approved);
+      setDisbursedCapital(totalDisbursed);
+    } catch (err) {
+      console.error("Failed to fetch applications from database:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchApplications();
+    fetchWalletBalance();
+    fetchConsultations();
+    fetchChatSessions();
+  }, [auditedScores]);
+
+  // No more local storage sync for live chats; it's handled by WS and REST API
 
   const handleToggleUserStatus = (userId, userName, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';
@@ -80,111 +279,98 @@ export const useAdminController = () => {
     addAuditLog(`User ${userName} (${userId}) deleted from system`, 'warning');
   };
 
-  // KYC Verification Dataset & Handlers
-  const [kycList, setKycList] = useState([
-    { id: 'KYC-8812', userId: 'USR-8812', name: 'Rahul S.', email: 'rahul.s@gmail.com', PAN: 'APM***32P', track: 'Micro-Credit', status: 'Pending', submittedDate: 'May 25, 2026', employmentType: 'Salaried', monthlyIncome: 45000, riskRating: 'Low Risk' },
-    { id: 'KYC-9021', userId: 'USR-9021', name: 'Aarav Mehta', email: 'aarav.m@yahoo.com', PAN: 'BFK***91K', track: 'Elite Asset Funding', status: 'Pending', submittedDate: 'May 26, 2026', employmentType: 'Business Owner', monthlyIncome: 185000, riskRating: 'Low Risk' },
-    { id: 'KYC-3042', userId: 'USR-3042', name: 'Priya Kapoor', email: 'priya.k@gmail.com', PAN: 'DKL***84D', track: 'Micro-Credit', status: 'Verified', submittedDate: 'May 24, 2026', employmentType: 'Salaried', monthlyIncome: 65000, riskRating: 'Medium Risk' },
-    { id: 'KYC-6651', userId: 'USR-6651', name: 'Sneha Rao', email: 'sneha.rao@hotmail.com', PAN: 'CPS***74S', track: 'Elite Asset Funding', status: 'Pending', submittedDate: 'May 27, 2026', employmentType: 'Self-Employed', monthlyIncome: 95000, riskRating: 'High Risk' }
-  ]);
+  // KYC Verification Dataset & Handlers (kept for interface match, though KYCVerificationsTab handles it internally)
+  const [kycList, setKycList] = useState([]);
 
   const handleApproveKYC = (kycId, userName) => {
-    setKycList(prev => prev.map(k => k.id === kycId ? { ...k, status: 'Verified' } : k));
     addAuditLog(`KYC verification approved for ${userName} (${kycId})`, 'success');
     alert(`KYC verification successfully approved for ${userName}.`);
   };
 
   const handleRejectKYC = (kycId, userName) => {
-    setKycList(prev => prev.map(k => k.id === kycId ? { ...k, status: 'Rejected' } : k));
     addAuditLog(`KYC verification rejected/returned for ${userName} (${kycId})`, 'warning');
     alert(`KYC verification rejected/returned for ${userName}.`);
   };
 
-  // 3. Interactive Loan Requests Dataset
-  const [loanRequests, setLoanRequests] = useState([
-    { id: 'REQ-104', name: 'Devendra P.', type: 'Personal Loan', amount: 150000, PAN: 'AR***44P', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-209', name: 'Ananya Sen', type: 'Business Loan', amount: 500000, PAN: 'BR***18K', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-312', name: 'Gaurav Gill', type: 'Auto Loan', amount: 350000, PAN: 'DR***92D', riskScore: null, auditState: 'idle' },
-    { id: 'REQ-455', name: 'Megha Varma', type: 'Home Loan', amount: 1200000, PAN: 'CR***07S', riskScore: null, auditState: 'idle' }
-  ]);
-
   // Simulated Audit Scoring Model
   const handleRunRiskAudit = (reqId) => {
     setLoanRequests(prev => prev.map(r => r.id === reqId ? { ...r, auditState: 'scanning' } : r));
+    setAuditedScores(prev => ({
+      ...prev,
+      [reqId]: { auditState: 'scanning', riskScore: null }
+    }));
     
     setTimeout(() => {
       const generatedScore = Math.floor(Math.random() * (850 - 580 + 1)) + 580;
-      setLoanRequests(prev => prev.map(r => {
-        if (r.id === reqId) {
-          return {
-            ...r,
-            riskScore: generatedScore,
-            auditState: 'completed'
-          };
-        }
-        return r;
+      setAuditedScores(prev => ({
+        ...prev,
+        [reqId]: { auditState: 'completed', riskScore: generatedScore }
       }));
       addAuditLog(`Risk analysis compiled for request ${reqId}. Calculated Credit Score: ${generatedScore}`, 'info');
     }, 1500);
   };
 
   // Decision Handlers
-  const handleApproveLoan = (request) => {
-    const newApproval = {
-      id: `LN-${Math.floor(10000 + Math.random() * 90000)}`,
-      name: request.name,
-      type: request.type,
-      amount: request.amount,
-      rate: baseInterestRate,
-      date: new Date().toLocaleDateString(),
-      status: 'Pre-Approved'
-    };
-    
-    setApprovedLoans(prev => [newApproval, ...prev]);
-    setLoanRequests(prev => prev.filter(r => r.id !== request.id));
-    setActiveBalance(prev => prev + request.amount);
-    setDisbursedCapital(prev => prev + request.amount);
-    setLiveMarquee(prev => [
-      { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
-      ...prev
-    ]);
-    
-    addAuditLog(`Sanctioned loan approval for ${request.name}. Disbursed Capital: ₹${request.amount.toLocaleString()}`, 'success');
-    alert(`Loan ${request.id} successfully approved and moved to disbursements ledger.`);
+  const handleApproveLoan = async (request) => {
+    try {
+      await apiClient(`/admin/applications/${request.id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'APPROVED' })
+      });
+      
+      addAuditLog(`Sanctioned loan approval for ${request.name}. Reference: ${request.referenceNumber}`, 'success');
+      alert(`Loan successfully approved and moved to disbursements ledger.`);
+      
+      setLiveMarquee(prev => [
+        { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
+        ...prev
+      ]);
+
+      fetchApplications();
+      await fetchWalletBalance();
+    } catch (err) {
+      console.error("Failed to approve loan:", err);
+      alert(`Failed to approve loan: ${err.message}`);
+    }
   };
 
-  const handleRejectLoan = (reqId, name) => {
-    setLoanRequests(prev => prev.filter(r => r.id !== reqId));
-    addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
-    alert(`Application ${reqId} rejected.`);
+  const handleRejectLoan = async (reqId, name) => {
+    try {
+      await apiClient(`/admin/applications/${reqId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'REJECTED' })
+      });
+      addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
+      alert(`Application ${reqId} rejected.`);
+      fetchApplications();
+    } catch (err) {
+      console.error("Failed to reject loan application:", err);
+      alert(`Failed to reject application: ${err.message}`);
+    }
   };
 
-  const handleDisburseMoney = (loanId, feeAmount) => {
+  const handleDisburseMoney = async (loanId, feeAmount) => {
     const loan = approvedLoans.find(l => l.id === loanId);
     if (!loan) return;
 
     const netAmount = loan.amount - feeAmount;
 
-    // Deduct net payout from operational reserves
-    setActiveBalance(prev => Math.max(0, prev - netAmount));
+    try {
+      await apiClient(`/admin/applications/${loanId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'DISBURSED' })
+      });
 
-    // Update loan status to Disbursed and save ledger breakdown
-    setApprovedLoans(prev => prev.map(l => 
-      l.id === loanId 
-        ? { ...l, status: 'Disbursed', feeCharged: feeAmount, netDisbursed: netAmount } 
-        : l
-    ));
+      await fetchWalletBalance();
 
-    addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
+      addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
+      alert(`Loan disbursed successfully.`);
+      fetchApplications();
+    } catch (err) {
+      console.error("Failed to disburse money:", err);
+      alert(`Failed to disburse money: ${err.message}`);
+    }
   };
-
-  // 4. Approved/Sanctioned Loans Dataset
-  const [approvedLoans, setApprovedLoans] = useState([
-    { id: 'LN-99120', name: 'Rahul S.', type: 'Personal Loan', amount: 150000, rate: 14, date: '05/17/2026', status: 'Pre-Approved' },
-    { id: 'LN-84092', name: 'Aarav Mehta', type: 'Business Loan', amount: 500000, rate: 12, date: '05/10/2026', status: 'Pre-Approved' },
-    { id: 'LN-44219', name: 'Priya Kapoor', type: 'Auto Loan', amount: 350000, rate: 13, date: '04/28/2026', status: 'Disbursed' },
-    { id: 'LN-77401', name: 'Sneha Rao', type: 'Home Loan', amount: 1200000, rate: 11, date: '04/15/2026', status: 'Disbursed' }
-  ]);
 
   // 5. Careers & Recruiting Dataset
   const [careersOpenings, setCareersOpenings] = useState([
@@ -275,9 +461,69 @@ export const useAdminController = () => {
     addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
   };
 
-  const handleRechargeWallet = (amount) => {
-    setActiveBalance(prev => prev + amount);
-    addAuditLog(`Admin wallet recharged by ₹${amount.toLocaleString('en-IN')}`, 'success');
+  const handleRechargeWallet = async (amount) => {
+    try {
+      // 1. Create Razorpay Order on backend
+      const orderData = await apiClient('/admin/wallet/create-order', {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      });
+
+      if (!orderData || !orderData.order_id) {
+        throw new Error("Failed to create Razorpay order.");
+      }
+
+      // 2. Configure and Open Razorpay Checkout modal
+      const options = {
+        key: "rzp_test_SvWORMMdaUGuZO", // Public Key ID from backend
+        amount: orderData.amount, // Amount in Paise
+        currency: "INR",
+        name: "LendoGo Admin Capital",
+        description: `Wallet Recharge: ₹${amount.toLocaleString('en-IN')}`,
+        order_id: orderData.order_id,
+        handler: async function (response) {
+          try {
+            // 3. Verify Payment signature on backend
+            const verifyData = await apiClient('/admin/wallet/verify-payment', {
+              method: 'POST',
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: amount // Actual INR amount to credit
+              })
+            });
+
+            // 4. Update balance state and log audit
+            await fetchWalletBalance();
+            addAuditLog(`Admin wallet recharged by ₹${amount.toLocaleString('en-IN')} via Razorpay (Order ID: ${orderData.order_id})`, 'success');
+            alert(verifyData.message || "Admin Wallet recharged successfully!");
+          } catch (verifyErr) {
+            console.error("Razorpay verification error:", verifyErr);
+            alert(`Payment verification failed: ${verifyErr.message}`);
+          }
+        },
+        prefill: {
+          name: adminName,
+          email: adminEmail,
+        },
+        theme: {
+          color: "#0066ff"
+        },
+        modal: {
+          ondismiss: function () {
+            console.log("Razorpay Checkout dismissed.");
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.error("Razorpay recharge failed:", err);
+      alert(`Recharge failed: ${err.message}`);
+    }
   };
 
   const handleCreateJobOpening = (job) => {
@@ -300,16 +546,16 @@ export const useAdminController = () => {
     addAuditLog(`Job opening '${job.title}' (${newId}) created successfully`, 'success');
   };
 
-  // 6. Customer Care Consultation Logs State
-  const [consultations, setConsultations] = useState([
-    { id: 'TKT-1081', name: 'Amit Roy', email: 'amit.roy@gmail.com', phone: '+91 98765 43210', date: '2026-05-25', status: 'Pending', type: 'Personal Loan Advisor' },
-    { id: 'TKT-1044', name: 'Sonal Sen', email: 'sonal.sen@yahoo.com', phone: '+91 88472 90123', date: '2026-05-24', status: 'Contacted', type: 'Business Credit Builder' },
-    { id: 'TKT-0931', name: 'Vijay K.', email: 'vijay.k@outlook.com', phone: '+91 76543 21098', date: '2026-05-21', status: 'Contacted', type: 'Home Loan Refinancing' }
-  ]);
-
   const handleResolveTicket = (ticketId, customerName) => {
-    setConsultations(prev => prev.map(c => c.id === ticketId ? { ...c, status: 'Contacted' } : c));
-    addAuditLog(`Consultation ticket ${ticketId} for ${customerName} marked resolved.`, 'success');
+    const calledIds = JSON.parse(localStorage.getItem('lendogo_called_consultations') || '[]');
+    if (!calledIds.includes(ticketId)) {
+      calledIds.push(ticketId);
+      localStorage.setItem('lendogo_called_consultations', JSON.stringify(calledIds));
+    }
+    
+    setConsultations(prev => prev.map(c => c.id === ticketId ? { ...c, status: 'Called' } : c));
+    addAuditLog(`Consultation request for ${customerName} has been processed and marked as Called.`, 'success');
+    alert(`Consultation request for ${customerName} marked as Called successfully!`);
   };
 
   // 7. Staff Management State
@@ -476,6 +722,7 @@ export const useAdminController = () => {
     careersOpenings, setCareersOpenings,
     jobApplications, setJobApplications,
     consultations, setConsultations,
+    chats, setChats,
     staffMembers, setStaffMembers,
     newStaffName, setNewStaffName,
     newStaffEmail, setNewStaffEmail,

@@ -3,19 +3,19 @@ import { useAdminController } from './hooks/useAdminController';
 import './AdminPage.css';
 
 // Import Modular Components
-import AdminSidebar from './components/AdminSidebar';
-import AdminTopbar from './components/AdminTopbar';
-import DashboardTab from './components/DashboardTab';
-import UserManagementTab from './components/UserManagementTab';
-import LoanApplicationsTab from './components/LoanApplicationsTab';
-import KYCVerificationsTab from './components/KYCVerificationsTab';
-import RolePermissionsTab from './components/RolePermissionsTab';
-import AssignRolesTab from './components/AssignRolesTab';
-import CareersManagementTab from './components/CareersManagementTab';
-import CustomerCareTab from './components/CustomerCareTab';
-import WebConfigurationTab from './components/WebConfigurationTab';
-import AuditLogsTab from './components/AuditLogsTab';
-import AdminSettingsTab from './components/AdminSettingsTab';
+import AdminSidebar from './components/AdminSidebar/AdminSidebar';
+import AdminTopbar from './components/AdminTopbar/AdminTopbar';
+import DashboardTab from './components/DashboardTab/DashboardTab';
+import UserManagementTab from './components/UserManagementTab/UserManagementTab';
+import LoanApplicationsTab from './components/LoanApplicationsTab/LoanApplicationsTab';
+import KYCVerificationsTab from './components/KYCVerificationsTab/KYCVerificationsTab';
+import RolePermissionsTab from './components/RolePermissionsTab/RolePermissionsTab';
+import AssignRolesTab from './components/AssignRolesTab/AssignRolesTab';
+import CareersManagementTab from './components/CareersManagementTab/CareersManagementTab';
+import CustomerCareTab from './components/CustomerCareTab/CustomerCareTab';
+import WebConfigurationTab from './components/WebConfigurationTab/WebConfigurationTab';
+import AuditLogsTab from './components/AuditLogsTab/AuditLogsTab';
+import AdminSettingsTab from './components/AdminSettingsTab/AdminSettingsTab';
 
 const AdminPage = () => {
   const {
@@ -74,8 +74,76 @@ const AdminPage = () => {
     handleUpdateAdminEmail,
     handleUpdateAdminPassword,
     handleTransferOwnership,
-    handleAdminLogout
+    handleAdminLogout,
+    chats,
+    setChats
   } = useAdminController();
+
+  const pendingChatCount = chats ? chats.filter(c => c.status === 'Active').length : 0;
+
+  // Toast Notification System
+  const [toasts, setToasts] = React.useState([]);
+
+  const showToast = React.useCallback((message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type, isExiting: false }]);
+
+    // Slide out after 3.7 seconds (so it transitions nicely before removal)
+    setTimeout(() => {
+      setToasts((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, isExiting: true } : t))
+      );
+    }, 3700);
+
+    // Remove from DOM after 4 seconds
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  }, []);
+
+  // Intercept window.alert
+  React.useEffect(() => {
+    const originalAlert = window.alert;
+
+    window.alert = (message) => {
+      if (!message) return;
+      let type = 'info';
+      const msgLower = message.toLowerCase();
+      if (
+        msgLower.includes('success') ||
+        msgLower.includes('approve') ||
+        msgLower.includes('disburse') ||
+        msgLower.includes('recharge') ||
+        msgLower.includes('resolved') ||
+        msgLower.includes('settled') ||
+        msgLower.includes('updated') ||
+        msgLower.includes('set to')
+      ) {
+        type = 'success';
+      } else if (
+        msgLower.includes('fail') ||
+        msgLower.includes('error') ||
+        msgLower.includes('reject') ||
+        msgLower.includes('invalid') ||
+        msgLower.includes('not match') ||
+        msgLower.includes('must be')
+      ) {
+        type = 'error';
+      } else if (
+        msgLower.includes('warning') ||
+        msgLower.includes('clear') ||
+        msgLower.includes('privileges')
+      ) {
+        type = 'warning';
+      }
+
+      showToast(message, type);
+    };
+
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, [showToast]);
 
   const navItems = [
     { 
@@ -278,30 +346,7 @@ const AdminPage = () => {
   return (
     <div className={`admin-dashboard-wrapper ${darkMode ? 'dark-theme' : 'light-theme'}`}>
       
-      {/* ── TOP MARQUEE (LIVE APPROVAL TICKERS) ── */}
-      <div className="admin-marquee-bar">
-        <div className="marquee-label">
-          <span className="live-pulse" />
-          LIVE DISBURSEMENTS
-        </div>
-        <div className="marquee-content">
-          <div className="marquee-slider">
-            {liveMarquee.map((item, idx) => (
-              <span key={idx} className="marquee-item">
-                <span className="badge-bullet">{item.status}</span>
-                <strong>{item.name}</strong> approved for {item.type}: <span className="highlight-text">{item.amount}</span>
-              </span>
-            ))}
-            {/* Duplicate for infinite loop */}
-            {liveMarquee.map((item, idx) => (
-              <span key={`dup-${idx}`} className="marquee-item">
-                <span className="badge-bullet">{item.status}</span>
-                <strong>{item.name}</strong> approved for {item.type}: <span className="highlight-text">{item.amount}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+
 
       <div className={`admin-main-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         
@@ -314,6 +359,7 @@ const AdminPage = () => {
           setDarkMode={setDarkMode}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
+          pendingChatCount={pendingChatCount}
         />
 
         {/* ── MAIN DASHBOARD CONTENT AREA ── */}
@@ -400,6 +446,9 @@ const AdminPage = () => {
               <CustomerCareTab 
                 consultations={consultations}
                 handleResolveTicket={handleResolveTicket}
+                chats={chats}
+                setChats={setChats}
+                users={users}
                 showOnly={
                   activeTab === 'Free Consultation' ? 'consultation' :
                   activeTab === 'Chat Support' ? 'chat' :
@@ -477,6 +526,60 @@ const AdminPage = () => {
 
           </div>
         </main>
+      </div>
+
+      {/* ── TOAST NOTIFICATIONS CONTAINER ── */}
+      <div className="admin-toast-container">
+        {toasts.map((t) => (
+          <div 
+            key={t.id} 
+            className={`admin-toast-card ${t.type} ${t.isExiting ? 'exit' : ''}`}
+          >
+            <div className="toast-icon-wrap">
+              {t.type === 'success' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+              {t.type === 'error' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              )}
+              {t.type === 'warning' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              )}
+              {t.type === 'info' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              )}
+            </div>
+
+            <div className="toast-message-content">
+              {t.message}
+            </div>
+
+            <button 
+              className="toast-close-btn" 
+              onClick={() => setToasts((prev) => prev.filter((item) => item.id !== t.id))}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+
+            <div className="toast-progress-bar" />
+          </div>
+        ))}
       </div>
 
     </div>

@@ -9,7 +9,7 @@ import AboutPage       from '../../views/pages/UserUI/AboutPage/AboutPage';
 import BlogPage        from '../../views/pages/UserUI/BlogPage/BlogPage';
 import AdminPage       from '../../views/pages/AdminPage/AdminPage';
 import HomePage        from '../../views/pages/UserUI/HomePage/HomePage';
-import UserProfilePage from '../../views/pages/UserUI/UserProfilePage/UserProfilePage';
+import ProductPage     from '../../views/pages/UserUI/ProductPage/ProductPage';
 
 // Loan Apply Flow — context wraps all 5 steps
 import { LoanApplicationProvider } from '../../views/pages/UserUI/LoanApplyPage/LoanApplicationContext';
@@ -39,7 +39,8 @@ const AuthRoutes = (
     <Route path="/blogs"                element={<BlogPage />}        />
     <Route path="/admin"                element={<AdminPage />}       />
     <Route path="/home"                 element={<HomePage />}        />
-    <Route path="/profile"              element={<UserProfilePage />} />
+    <Route path="/profile"              element={<HomePage />}        />
+    <Route path="/products/:type"       element={<ProductPage />}     />
 
     {/* ── Loan Apply Multi-Step Flow ── */}
     <Route path="/loan/apply/details"     element={<LoanApplicationProvider><Step1Details /></LoanApplicationProvider>}  />
