@@ -37,21 +37,11 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     };
   }, [user]);
 
-  const wasOpenRef = useRef(false);
-  const prevInitialViewRef = useRef(initialView);
-
-  useEffect(() => {
-    if ((isOpen && !wasOpenRef.current) || (isOpen && initialView !== prevInitialViewRef.current)) {
-      setCurrentView(initialView);
-    }
-    wasOpenRef.current = isOpen;
-    prevInitialViewRef.current = initialView;
-  }, [isOpen, initialView]);
-
   // Load profile photo state
   const [profilePhoto, setProfilePhoto] = useState(
     localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
   );
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState(null);
 
   const getFallbackName = () => {
     if (user && user.name && user.name !== 'LendoGO User') {
@@ -74,6 +64,59 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const [dob, setDob] = useState(localStorage.getItem('user_dob') || '');
   const [pincode, setPincode] = useState(localStorage.getItem('user_pincode') || '');
   const [address, setAddress] = useState(localStorage.getItem('user_address') || '');
+
+  const fetchUserProfile = async () => {
+    if (!user || !user.isAuthenticated) return;
+    try {
+      const res = await apiClient('/user/profile');
+      if (res && res.success && res.data) {
+        const p = res.data;
+        const nameVal = p.full_name || getFallbackName();
+        const phoneVal = p.phone_number || '';
+        const dobVal = p.date_of_birth || '';
+        const pincodeVal = p.pincode || '';
+        const addressVal = p.address || '';
+        const profileImgUrl = p.profile_image ? `http://localhost:8080${p.profile_image}` : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+
+        setFullName(nameVal);
+        setPhone(phoneVal);
+        setDob(dobVal);
+        setPincode(pincodeVal);
+        setAddress(addressVal);
+        setProfilePhoto(profileImgUrl);
+
+        // Sync to localStorage
+        localStorage.setItem('user_full_name', nameVal);
+        localStorage.setItem('user_phone', phoneVal);
+        localStorage.setItem('user_dob', dobVal);
+        localStorage.setItem('user_pincode', pincodeVal);
+        localStorage.setItem('user_address', addressVal);
+        localStorage.setItem('user_dp', profileImgUrl);
+
+        window.dispatchEvent(new Event('user-dp-changed'));
+        window.dispatchEvent(new Event('user-details-changed'));
+      }
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && user && user.isAuthenticated) {
+      fetchUserProfile();
+    }
+  }, [isOpen, user]);
+
+  const wasOpenRef = useRef(false);
+  const prevInitialViewRef = useRef(initialView);
+
+  useEffect(() => {
+    if ((isOpen && !wasOpenRef.current) || (isOpen && initialView !== prevInitialViewRef.current)) {
+      setCurrentView(initialView);
+    }
+    wasOpenRef.current = isOpen;
+    prevInitialViewRef.current = initialView;
+  }, [isOpen, initialView]);
 
   const [panNumber, setPanNumber] = useState(localStorage.getItem('kyc_pan_number') || '');
   const [aadhaarNumber, setAadhaarNumber] = useState(localStorage.getItem('kyc_aadhaar_number') || '');
@@ -188,11 +231,10 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePhoto(reader.result);
-        localStorage.setItem('user_dp', reader.result);
-        window.dispatchEvent(new Event('user-dp-changed'));
       };
       reader.readAsDataURL(file);
     }
@@ -201,20 +243,51 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const handleRemovePhoto = () => {
     const defaultNoDp = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
     setProfilePhoto(defaultNoDp);
+    setSelectedPhotoFile(null);
     localStorage.removeItem('user_dp');
     window.dispatchEvent(new Event('user-dp-changed'));
   };
 
-  const handleSavePersonal = (e) => {
+  const handleSavePersonal = async (e) => {
     e.preventDefault();
-    localStorage.setItem('user_full_name', fullName);
-    localStorage.setItem('user_phone', phone);
-    localStorage.setItem('user_dob', dob);
-    localStorage.setItem('user_pincode', pincode);
-    localStorage.setItem('user_address', address);
-    window.dispatchEvent(new Event('user-details-changed'));
-    alert('Personal details saved successfully.');
-    setCurrentView('menu');
+    try {
+      const formData = new FormData();
+      formData.append('full_name', fullName);
+      formData.append('phone_number', phone);
+      formData.append('date_of_birth', dob);
+      formData.append('pincode', pincode);
+      formData.append('address', address);
+      if (selectedPhotoFile) {
+        formData.append('profile_image', selectedPhotoFile);
+      }
+
+      await apiClient('/user/profile', {
+        method: 'PUT',
+        body: formData,
+      });
+
+      localStorage.setItem('user_full_name', fullName);
+      localStorage.setItem('user_phone', phone);
+      localStorage.setItem('user_dob', dob);
+      localStorage.setItem('user_pincode', pincode);
+      localStorage.setItem('user_address', address);
+
+      const res = await apiClient('/user/profile');
+      if (res && res.success && res.data) {
+        const p = res.data;
+        const profileImgUrl = p.profile_image ? `http://localhost:8080${p.profile_image}` : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+        setProfilePhoto(profileImgUrl);
+        localStorage.setItem('user_dp', profileImgUrl);
+        window.dispatchEvent(new Event('user-dp-changed'));
+      }
+
+      window.dispatchEvent(new Event('user-details-changed'));
+      setSelectedPhotoFile(null);
+      setCurrentView('menu');
+    } catch (err) {
+      console.error("Failed to save personal details:", err);
+      alert("Failed to save personal details: " + err.message);
+    }
   };
 
   const handleSaveKyc = (e) => {
@@ -1100,6 +1173,36 @@ const Navbar = () => {
     };
     window.addEventListener('user-dp-changed', handleDpChange);
     window.addEventListener('user-details-changed', handleDetailsChange);
+
+    if (user && user.isAuthenticated) {
+      const fetchProfileInit = async () => {
+        try {
+          const res = await apiClient('/user/profile');
+          if (res && res.success && res.data) {
+            const p = res.data;
+            const nameVal = p.full_name || getFallbackName();
+            const profileImgUrl = p.profile_image ? `http://localhost:8080${p.profile_image}` : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+            
+            localStorage.setItem('user_full_name', nameVal);
+            localStorage.setItem('user_phone', p.phone_number || '');
+            localStorage.setItem('user_dob', p.date_of_birth || '');
+            localStorage.setItem('user_pincode', p.pincode || '');
+            localStorage.setItem('user_address', p.address || '');
+            localStorage.setItem('user_dp', profileImgUrl);
+
+            setProfileDp(profileImgUrl);
+            setFullName(nameVal);
+
+            window.dispatchEvent(new Event('user-dp-changed'));
+            window.dispatchEvent(new Event('user-details-changed'));
+          }
+        } catch (err) {
+          console.error("Failed to prefetch profile on login:", err);
+        }
+      };
+      fetchProfileInit();
+    }
+
     return () => {
       window.removeEventListener('user-dp-changed', handleDpChange);
       window.removeEventListener('user-details-changed', handleDetailsChange);
