@@ -4,11 +4,38 @@ import { createPortal } from 'react-dom';
 import './Navbar.css';
 import ConsultationModal from '../ConsultationModal/ConsultationModal';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
+import { apiClient } from '../../../utils/apiClient';
 
 // Global sliding profile sidebar React Portal component (Nested Sub-Views System)
 const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu' }) => {
   // Navigation stack state ('menu', 'profile', 'kyc', 'loan', 'repayment', 'feedback')
   const [currentView, setCurrentView] = useState(initialView);
+  const [walletBalance, setWalletBalance] = useState(0);
+
+  const fetchBalance = async () => {
+    if (!user || !user.isAuthenticated) return;
+    try {
+      const res = await apiClient('/user/wallet/balance');
+      if (res && res.success && res.data) {
+        setWalletBalance(res.data.balance || 0);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user wallet balance:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && user && user.isAuthenticated) {
+      fetchBalance();
+    }
+  }, [isOpen, user]);
+
+  useEffect(() => {
+    window.addEventListener('wallet-balance-changed', fetchBalance);
+    return () => {
+      window.removeEventListener('wallet-balance-changed', fetchBalance);
+    };
+  }, [user]);
 
   const wasOpenRef = useRef(false);
   const prevInitialViewRef = useRef(initialView);
@@ -310,7 +337,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
               <div className="wallet-card-overlay-glow" />
               <div className="wallet-card-left-section">
                 <span className="wallet-card-label">LendoGo Wallet Balance</span>
-                <span className="wallet-card-amount">₹12,450.00</span>
+                <span className="wallet-card-amount">₹{walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="wallet-card-right-section">
                 <span className="wallet-active-pulse-dot"></span>

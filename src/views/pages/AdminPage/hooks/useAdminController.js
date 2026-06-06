@@ -351,14 +351,20 @@ export const useAdminController = () => {
 
   const handleDisburseMoney = async (loanId, feeAmount) => {
     const loan = approvedLoans.find(l => l.id === loanId);
-    if (!loan) return;
+    if (!loan) return false;
 
     const netAmount = loan.amount - feeAmount;
 
     try {
-      await apiClient(`/admin/applications/${loanId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'DISBURSED' })
+      await apiClient('/admin/wallet/disburse', {
+        method: 'POST',
+        body: JSON.stringify({
+          loan_id: loanId,
+          user_id: loan.raw.user_id,
+          sanctioned_amount: Number(loan.amount),
+          processing_fee: Number(feeAmount),
+          net_payout: Number(netAmount)
+        })
       });
 
       await fetchWalletBalance();
@@ -366,9 +372,11 @@ export const useAdminController = () => {
       addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
       alert(`Loan disbursed successfully.`);
       fetchApplications();
+      return true;
     } catch (err) {
       console.error("Failed to disburse money:", err);
       alert(`Failed to disburse money: ${err.message}`);
+      return false;
     }
   };
 
