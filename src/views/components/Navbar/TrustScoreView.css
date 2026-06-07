@@ -1,0 +1,574 @@
+/* ─── TrustScoreView: Google Pay Credit Report & Carousel Gauge ──────── */
+
+.trust-score-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0.25rem 2rem 0.25rem;
+  color: #1f1f1f;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Credit Card Container - Breathing Glow Animation */
+@keyframes calm-glow {
+  0% { box-shadow: 0 4px 18px rgba(26, 115, 232, 0.02), 0 0 0 1px rgba(26, 115, 232, 0.01); }
+  50% { box-shadow: 0 6px 24px rgba(26, 115, 232, 0.05), 0 0 0 1px rgba(26, 115, 232, 0.03); }
+  100% { box-shadow: 0 4px 18px rgba(26, 115, 232, 0.02), 0 0 0 1px rgba(26, 115, 232, 0.01); }
+}
+
+.credit-report-card {
+  background: #f8fbff;
+  border: 1px solid #e0ebff;
+  border-radius: 24px;
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: calm-glow 6s infinite ease-in-out;
+}
+
+/* Carousel Navigation Buttons */
+.carousel-nav-btn {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+  color: #1a73e8;
+  outline: none;
+}
+
+.carousel-nav-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #1a73e8;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-nav-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.carousel-nav-btn.left {
+  left: -8px;
+}
+
+.carousel-nav-btn.right {
+  right: -8px;
+}
+
+.nav-arrow-svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Page content transitions - Smooth fade with slight lift and blur filter */
+.carousel-page-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.animate-fade {
+  animation: calm-fadeIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes calm-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.report-title-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #3c4043;
+  margin-bottom: 0.75rem;
+  align-self: flex-start;
+}
+
+/* Score Board Gauge View */
+.gauge-wrapper {
+  width: 100%;
+  max-width: 180px;
+  margin: 0.25rem auto;
+}
+
+.gauge-svg {
+  overflow: visible;
+}
+
+.gauge-label-text {
+  font-size: 0.65rem;
+  font-weight: 600;
+  fill: #80868b;
+}
+
+.gauge-score-value-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -8px;
+}
+
+.gauge-big-number {
+  font-size: 2.25rem;
+  font-weight: 850;
+  color: #1f1f1f;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.gauge-status-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background-color: #f1f3f4;
+  margin-top: 4px;
+}
+
+.gauge-status-badge.score-excellent {
+  color: #1e7e34;
+  background-color: #e6f4ea;
+}
+
+.gauge-status-badge.score-good {
+  color: #b06000;
+  background-color: #fef7e0;
+}
+
+.gauge-status-badge.score-fair {
+  color: #c5221f;
+  background-color: #fce8e6;
+}
+
+.gauge-banks-disclaimer {
+  font-size: 0.74rem;
+  color: #1a73e8;
+  text-align: center;
+  margin: 0.75rem 0 0 0;
+  font-weight: 600;
+  line-height: 1.35;
+  max-width: 220px;
+}
+
+/* Dashboard Grid (Page 1) */
+.report-dashboard-grid {
+  width: 100%;
+}
+
+.report-dashboard-col {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.col-chart-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #5f6368;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+/* SVG Line Graph Styling & Animation */
+.credit-chart-svg {
+  overflow: visible;
+  width: 100%;
+}
+
+.credit-chart-path {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: draw-line-path 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes draw-line-path {
+  to { stroke-dashoffset: 0; }
+}
+
+.dashed-indicator-line {
+  opacity: 0;
+  animation: fade-in-indicator 0.6s 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes fade-in-indicator {
+  to { opacity: 0.45; }
+}
+
+/* Sequenced Loading Dots */
+.chart-dot-group circle {
+  opacity: 0;
+  animation: pop-dot 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.chart-dot-group text {
+  opacity: 0;
+  animation: fade-dot-label 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.chart-dot-group:nth-child(1) circle { animation-delay: 0.1s; }
+.chart-dot-group:nth-child(1) text { animation-delay: 0.1s; }
+
+.chart-dot-group:nth-child(2) circle { animation-delay: 0.3s; }
+.chart-dot-group:nth-child(2) text { animation-delay: 0.3s; }
+
+.chart-dot-group:nth-child(3) circle { animation-delay: 0.5s; }
+.chart-dot-group:nth-child(3) text { animation-delay: 0.5s; }
+
+.chart-dot-group:nth-child(4) circle { animation-delay: 0.7s; }
+.chart-dot-group:nth-child(4) text { animation-delay: 0.7s; }
+
+.chart-dot-group:nth-child(5) circle { animation-delay: 0.9s; }
+.chart-dot-group:nth-child(5) text { animation-delay: 0.9s; }
+
+/* Active Glow Ring pulsing */
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0.3; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.active-glow-ring {
+  transform-origin: center;
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+@keyframes pop-dot {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-dot-label {
+  to { opacity: 0.7; }
+}
+
+/* Tooltip group slide up */
+.chart-tooltip-group {
+  opacity: 0;
+  transform: translateY(4px);
+  animation: slide-up-tooltip 0.5s 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-up-tooltip {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.y-axis-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  fill: #80868b;
+  opacity: 0;
+  animation: fade-dot-label 0.5s 0.2s forwards;
+}
+
+.x-axis-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  fill: #80868b;
+}
+
+.x-axis-label.active {
+  fill: #1a73e8;
+  font-weight: 700;
+}
+
+.tooltip-score-text {
+  font-size: 0.68rem;
+  font-weight: 700;
+  fill: #ffffff;
+}
+
+/* Carousel indicators */
+.report-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 0.75rem 0 0.25rem 0;
+}
+
+.carousel-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #dadce0;
+  transition: background-color 0.4s ease;
+}
+
+.carousel-dot.active {
+  background-color: #1a73e8;
+}
+
+.report-update-caption {
+  font-size: 0.74rem;
+  color: #5f6368;
+  text-align: center;
+  margin: 0.4rem 0 0 0;
+  font-weight: 500;
+}
+
+/* What's Impacting Your Score section */
+.impact-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.impact-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #202124;
+  margin: 0 0 0.15rem 0;
+  letter-spacing: -0.01em;
+}
+
+.factor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Google Pay Style Factor Row - Gentle Gliding Animation */
+.factor-item-row {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #f1f3f4;
+  border-radius: 16px;
+  padding: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.factor-item-row:hover {
+  background-color: #ffffff;
+  border-color: #c2dbff;
+  box-shadow: 0 4px 14px rgba(26, 115, 232, 0.04);
+  transform: translateY(-2px);
+}
+
+.factor-item-icon-wrapper {
+  width: 38px;
+  height: 38px;
+  background-color: #e8f0fe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.8rem;
+  flex-shrink: 0;
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.factor-item-row:hover .factor-item-icon-wrapper {
+  background-color: #d2e3fc;
+}
+
+.factor-svg-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.factor-item-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factor-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 0.4rem;
+}
+
+.factor-item-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #202124;
+}
+
+.factor-item-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #80868b;
+}
+
+.factor-item-badge.excellent {
+  color: #137333;
+}
+
+.factor-item-badge.good {
+  color: #b06000;
+}
+
+.factor-item-badge.fair {
+  color: #c5221f;
+}
+
+.factor-item-subtext {
+  font-size: 0.76rem;
+  color: #5f6368;
+  margin: 0;
+  font-weight: 400;
+}
+
+.chevron-right-svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 0.2rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chevron-right-svg.rotated {
+  transform: rotate(90deg);
+}
+
+/* Inline detail panel for active loans list */
+.inline-loans-details-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin: -0.25rem 0.25rem 0.5rem 0.25rem;
+  animation: slide-down-panel 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes slide-down-panel {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.details-panel-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #5f6368;
+  margin: 0 0 0.45rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.loans-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.loan-compact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #202124;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.loan-compact-item:last-child {
+  border-bottom: none;
+}
+
+.loan-compact-name {
+  font-weight: 600;
+}
+
+.loan-compact-val {
+  color: #1a73e8;
+  font-weight: 500;
+}
+
+/* Show Credit Cards and Loans action button */
+.show-cards-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 1px solid #dadce0;
+  border-radius: 9999px;
+  color: #1a73e8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.show-cards-btn:hover {
+  background-color: #f1f6fe;
+  border-color: #1a73e8;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.08);
+}
+
+/* Refresh score button GPay style */
+.score-refresh-btn-gpay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  color: #3c4043;
+  padding: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.score-refresh-btn-gpay:hover:not(:disabled) {
+  background-color: #f1f3f4;
+  color: #202124;
+  border-color: #bdc1c6;
+}
+
+.score-refresh-btn-gpay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-icon-gpay {
+  transition: transform 0.4s ease;
+}
+
+.score-refresh-btn-gpay.refreshing .refresh-icon-gpay {
+  animation: spin-clockwise 1s infinite linear;
+}
+
+@keyframes spin-clockwise {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

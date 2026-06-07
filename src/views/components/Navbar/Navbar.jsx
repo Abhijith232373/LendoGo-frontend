@@ -3,14 +3,29 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './Navbar.css';
 import ConsultationModal from '../ConsultationModal/ConsultationModal';
+import TrustScoreView from './TrustScoreView';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
 import { apiClient } from '../../../utils/apiClient';
 
 // Global sliding profile sidebar React Portal component (Nested Sub-Views System)
 const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu', showToast }) => {
-  // Navigation stack state ('menu', 'profile', 'kyc', 'loan', 'repayment', 'feedback')
+  // Navigation stack state ('menu', 'profile', 'trustScore', 'loan', 'repayment', 'feedback')
   const [currentView, setCurrentView] = useState(initialView);
   const [walletBalance, setWalletBalance] = useState(0);
+
+  const getStoredScore = () => {
+    if (!user || !user.email) return 736;
+    const cached = localStorage.getItem(`trust_score_${user.email}`);
+    if (cached) return parseInt(cached);
+    let hash = 0;
+    const email = user.email;
+    for (let i = 0; i < email.length; i++) {
+      hash = email.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const generated = 620 + Math.abs(hash % 240);
+    localStorage.setItem(`trust_score_${user.email}`, generated.toString());
+    return generated;
+  };
 
   const fetchBalance = async () => {
     if (!user || !user.isAuthenticated) return;
@@ -400,7 +415,9 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                 <div className="sidebar-meta-text">
                   <h4 className="sidebar-username">{fullName || getFallbackName()}</h4>
                   <span className="sidebar-useremail">{user.email}</span>
-                  <span className="sidebar-kyc-badge">KYC STATUS: VERIFIED</span>
+                  <span className="sidebar-kyc-badge" style={{ backgroundColor: '#eff6ff', color: '#0f66ff' }}>
+                    TRUST SCORE: {getStoredScore()}
+                  </span>
                 </div>
               </div>
               <button type="button" className="sidebar-close-btn" onClick={onClose} aria-label="Close Profile Portal">×</button>
@@ -430,10 +447,10 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
 
-                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('kyc')}>
+                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('trustScore')}>
                   <div className="sidebar-menu-left-details">
-                    <span className="sidebar-menu-title">KYC Verification</span>
-                    <span className="sidebar-menu-subtitle">Aadhaar, PAN & document validation</span>
+                    <span className="sidebar-menu-title">Internal Trust Score</span>
+                    <span className="sidebar-menu-subtitle">Real-time internal credit score assessment</span>
                   </div>
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
@@ -574,165 +591,17 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
           </>
         )}
 
-        {/* VIEW: KYC IDENTITY EDIT SUB-SCREEN */}
-        {currentView === 'kyc' && (
+        {/* VIEW: TRUST SCORE ASSESSMENT SUB-SCREEN */}
+        {currentView === 'trustScore' && (
           <>
             <div className="sidebar-header subview-header-row">
               <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Fintech KYC Verification</h4>
+              <h4 className="sidebar-subpage-title-text">Trust Score Assessment</h4>
               <div style={{ width: '40px' }} />
             </div>
 
             <div className="sidebar-scroll-content">
-              <form onSubmit={handleSaveKyc} className="sidebar-form">
-                <div className="sidebar-input-group">
-                  <label>PAN Card Number</label>
-                  <input 
-                    type="text" 
-                    value={panNumber}
-                    onChange={(e) => setPanNumber(e.target.value)}
-                    placeholder="Enter 10-digit PAN"
-                    className="sidebar-input-field"
-                    maxLength={10}
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Aadhaar Card Number</label>
-                  <input 
-                    type="text" 
-                    value={aadhaarNumber}
-                    onChange={(e) => setAadhaarNumber(e.target.value)}
-                    placeholder="Enter 12-digit Aadhaar"
-                    className="sidebar-input-field"
-                    maxLength={14}
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Father's Full Name</label>
-                  <input 
-                    type="text" 
-                    value={fatherName}
-                    onChange={(e) => setFatherName(e.target.value)}
-                    placeholder="Enter father's name"
-                    className="sidebar-input-field"
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Employment Status</label>
-                  <select 
-                    value={employmentType}
-                    onChange={(e) => setEmploymentType(e.target.value)}
-                    className="sidebar-input-field"
-                    required
-                  >
-                    <option value="Salaried">Salaried</option>
-                    <option value="Self-Employed">Self-Employed</option>
-                    <option value="Student">Student</option>
-                    <option value="Unemployed">Unemployed</option>
-                  </select>
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Monthly Income (INR)</label>
-                  <input 
-                    type="number" 
-                    value={monthlyIncome}
-                    onChange={(e) => setMonthlyIncome(e.target.value)}
-                    placeholder="Enter monthly income"
-                    className="sidebar-input-field"
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Permanent Address</label>
-                  <textarea 
-                    value={kycAddress}
-                    onChange={(e) => setKycAddress(e.target.value)}
-                    placeholder="Enter permanent address"
-                    className="sidebar-textarea-field"
-                    required
-                  />
-                </div>
-
-                {/* Document uploads inside KYC view */}
-                <div className="sidebar-upload-section">
-                  <h5 className="sidebar-subpage-sub-title">Document Scans Verification</h5>
-                  
-                  <div className="sidebar-upload-row">
-                    <label className="sidebar-upload-field-label">Aadhaar Card Front</label>
-                    <div className="sidebar-file-flex">
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => {
-                          const f = e.target.files[0];
-                          if (f) {
-                            setAadharFrontName(f.name);
-                            localStorage.setItem('kyc_aadhar_front', f.name);
-                            window.dispatchEvent(new Event('user-details-changed'));
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                        id="sidebar-sub-aadhar-front"
-                      />
-                      <label htmlFor="sidebar-sub-aadhar-front" className="sidebar-upload-label-btn">Choose Front</label>
-                      <span className="sidebar-upload-filename">{aadharFrontName}</span>
-                    </div>
-                  </div>
-
-                  <div className="sidebar-upload-row">
-                    <label className="sidebar-upload-field-label">Aadhaar Card Back</label>
-                    <div className="sidebar-file-flex">
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => {
-                          const f = e.target.files[0];
-                          if (f) {
-                            setAadharBackName(f.name);
-                            localStorage.setItem('kyc_aadhar_back', f.name);
-                            window.dispatchEvent(new Event('user-details-changed'));
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                        id="sidebar-sub-aadhar-back"
-                      />
-                      <label htmlFor="sidebar-sub-aadhar-back" className="sidebar-upload-label-btn">Choose Back</label>
-                      <span className="sidebar-upload-filename">{aadharBackName}</span>
-                    </div>
-                  </div>
-
-                  <div className="sidebar-upload-row">
-                    <label className="sidebar-upload-field-label">PAN Card Scan</label>
-                    <div className="sidebar-file-flex">
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => {
-                          const f = e.target.files[0];
-                          if (f) {
-                            setPanFileName(f.name);
-                            localStorage.setItem('kyc_pan_file', f.name);
-                            window.dispatchEvent(new Event('user-details-changed'));
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                        id="sidebar-sub-pan"
-                      />
-                      <label htmlFor="sidebar-sub-pan" className="sidebar-upload-label-btn">Choose PAN Scan</label>
-                      <span className="sidebar-upload-filename">{panFileName}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sidebar-security-disclaimer">
-                  Your data is secure and encrypted.
-                </div>
-
-                <button type="submit" className="sidebar-submit-btn-unified">Submit KYC Identity</button>
-              </form>
+              <TrustScoreView user={user} showToast={showToast} />
             </div>
           </>
         )}
@@ -1340,7 +1209,7 @@ const Navbar = () => {
                       <div 
                         className="notification-item unread" 
                         onClick={() => { 
-                          setSidebarInitialView('kyc'); 
+                          setSidebarInitialView('trustScore'); 
                           setProfileDropdownOpen(true); 
                           setNotificationsDropdownOpen(false); 
                         }}
@@ -1348,7 +1217,7 @@ const Navbar = () => {
                       >
                         <span className="notification-dot"></span>
                         <div className="notification-text-group">
-                          <p className="notification-msg">Your KYC has been successfully verified.</p>
+                          <p className="notification-msg">Your LendoGo Trust Score was updated.</p>
                           <span className="notification-time">10 mins ago</span>
                         </div>
                       </div>
