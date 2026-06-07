@@ -45,6 +45,9 @@ export const AuthProvider = ({ children }) => {
       });
       
       localStorage.setItem('lendogo_user', JSON.stringify(loggedInUser));
+      if (data.token) {
+        localStorage.setItem('lendogo_token', data.token);
+      }
       setUser(loggedInUser);
       
       // 👇 FIX: Return the user so SignInForm can use it for routing
@@ -81,6 +84,9 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated: true,
     });
     localStorage.setItem('lendogo_user', JSON.stringify(loggedInUser));
+    if (userData.token) {
+      localStorage.setItem('lendogo_token', userData.token);
+    }
     setUser(loggedInUser);
   };
 

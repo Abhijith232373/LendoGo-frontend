@@ -7,7 +7,7 @@ import { useAuthController } from '../../../controllers/auth/useAuthController';
 import { apiClient } from '../../../utils/apiClient';
 
 // Global sliding profile sidebar React Portal component (Nested Sub-Views System)
-const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu' }) => {
+const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu', showToast }) => {
   // Navigation stack state ('menu', 'profile', 'kyc', 'loan', 'repayment', 'feedback')
   const [currentView, setCurrentView] = useState(initialView);
   const [walletBalance, setWalletBalance] = useState(0);
@@ -161,7 +161,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const handleAddBankAccount = (e) => {
     e.preventDefault();
     if (!newBankName || !newAccNum || !newIfsc) {
-      alert('Please fill out all bank credentials.');
+      showToast('Please fill out all bank credentials.', 'error');
       return;
     }
     const maskedAcc = '•••• •••• ' + newAccNum.slice(-4);
@@ -177,7 +177,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     setNewAccNum('');
     setNewIfsc('');
     setShowAddBank(false);
-    alert('Bank account successfully verified and linked to LendoGo Wallet!');
+    showToast('Bank account successfully verified and linked to LendoGo Wallet!', 'success');
   };
 
   // Set Bank Account as primary
@@ -193,7 +193,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     if (confirm('Are you sure you want to unlink this bank account from LendoGo?')) {
       const bank = bankAccounts.find(b => b.id === id);
       if (bank && bank.isPrimary && bankAccounts.length > 1) {
-        alert('Please select another primary bank before unlinking this one.');
+        showToast('Please select another primary bank before unlinking this one.', 'error');
         return;
       }
       setBankAccounts(prev => prev.filter(b => b.id !== id));
@@ -284,16 +284,17 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
       window.dispatchEvent(new Event('user-details-changed'));
       setSelectedPhotoFile(null);
       setCurrentView('menu');
+      showToast('Profile details updated successfully.', 'success');
     } catch (err) {
       console.error("Failed to save personal details:", err);
-      alert("Failed to save personal details: " + err.message);
+      showToast("Failed to save personal details: " + err.message, "error");
     }
   };
 
   const handleSaveKyc = (e) => {
     e.preventDefault();
     if (panNumber.length < 10 || aadhaarNumber.replace(/\s/g, '').length < 12) {
-      alert('Invalid PAN or Aadhaar format.');
+      showToast('Invalid PAN or Aadhaar format.', 'error');
       return;
     }
     localStorage.setItem('kyc_status', 'VERIFIED');
@@ -304,13 +305,13 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     localStorage.setItem('kyc_income', monthlyIncome);
     localStorage.setItem('kyc_verified_address', kycAddress);
     window.dispatchEvent(new Event('user-details-changed'));
-    alert('KYC documents submitted and verified.');
+    showToast('KYC documents submitted and verified.', 'success');
     setCurrentView('menu');
   };
 
   const handleSubmitFeedback = (e) => {
     e.preventDefault();
-    alert(`Thank you for your feedback! Rating: ${feedbackRating}/5 stars. Comments submitted.`);
+    showToast(`Thank you for your feedback! Rating: ${feedbackRating}/5 stars. Comments submitted.`, 'success');
     setFeedbackComment('');
     setCurrentView('menu');
   };
@@ -772,7 +773,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                 <button 
                   type="button" 
                   className="card-repayment-action-btn"
-                  onClick={() => alert('Redirecting to secure repayment gateway...')}
+                  onClick={() => showToast('Redirecting to secure repayment gateway...', 'info')}
                 >
                   Make a Repayment
                 </button>
@@ -1035,7 +1036,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
               <button 
                 type="button" 
                 className="sidebar-make-repayment-unified-btn mt-3"
-                onClick={() => alert('Launching Secure Repayment Gateway...')}
+                onClick={() => showToast('Launching Secure Repayment Gateway...', 'info')}
               >
                 Make a Repayment
               </button>
@@ -1140,6 +1141,21 @@ const Navbar = () => {
   const [sidebarInitialView, setSidebarInitialView] = useState('menu');
   const [notificationsDropdownOpen, setNotificationsDropdownOpen] = useState(false);
   const navbarRef = useRef(null);
+
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const [profileDp, setProfileDp] = useState(
     localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
@@ -1318,7 +1334,7 @@ const Navbar = () => {
                   <div className="notifications-dropdown-menu">
                     <div className="notifications-header">
                       <h5>Notifications</h5>
-                      <button type="button" className="mark-all-read-btn" onClick={() => alert('All notifications marked as read!')}>Mark all read</button>
+                      <button type="button" className="mark-all-read-btn" onClick={() => showToast('All notifications marked as read!', 'success')}>Mark all read</button>
                     </div>
                     <div className="notifications-list">
                       <div 
@@ -1395,6 +1411,7 @@ const Navbar = () => {
                   signOut={signOut}
                   navigate={navigate}
                   initialView={sidebarInitialView}
+                  showToast={showToast}
                 />
               </div>
             </>
@@ -1511,6 +1528,21 @@ const Navbar = () => {
     </nav>
 
     <ConsultationModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+
+    {toast && (
+      <div className="lendogo-toast-container">
+        <div className={`lendogo-toast ${toast.type}`}>
+          <div className="lendogo-toast-content">{toast.message}</div>
+          <button 
+            type="button" 
+            className="lendogo-toast-close" 
+            onClick={() => setToast(null)}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 };

@@ -12,6 +12,11 @@ export const apiClient = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
+  const token = localStorage.getItem('lendogo_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   // ONLY set Content-Type to JSON if we are NOT sending files.
   // If it's FormData, the browser MUST set the header automatically to create the boundary!
   if (isFormData) {

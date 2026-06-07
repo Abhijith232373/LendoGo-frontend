@@ -95,10 +95,13 @@ const SetPasswordForm = () => {
 
       const data = await response.json();
       if (response.ok) {
+        const backendUser = data.data || {};
         loginUserLocally({
-          id: data.id || 'unknown',
-          email: email,
-          name: fullName || 'LendoGO User',
+          id: backendUser.id || 'unknown',
+          email: backendUser.email || email,
+          name: backendUser.fullName || fullName || 'LendoGO User',
+          role: backendUser.role || 'user',
+          token: data.token,
         });
         navigate('/home'); 
       } else {
