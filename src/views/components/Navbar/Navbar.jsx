@@ -7,6 +7,17 @@ import TrustScoreView from './TrustScoreView';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
 import { apiClient } from '../../../utils/apiClient';
 
+const getCleanDpUrl = (imgUrl) => {
+  if (!imgUrl) return 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+  if (imgUrl.startsWith('http://localhost:8080http')) {
+    return imgUrl.replace('http://localhost:8080', '');
+  }
+  if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) {
+    return imgUrl;
+  }
+  return `http://localhost:8080${imgUrl}`;
+};
+
 // Global sliding profile sidebar React Portal component (Nested Sub-Views System)
 const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu', showToast }) => {
   // Navigation stack state ('menu', 'profile', 'trustScore', 'loan', 'repayment', 'feedback')
@@ -53,9 +64,9 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   }, [user]);
 
   // Load profile photo state
-  const [profilePhoto, setProfilePhoto] = useState(
-    localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-  );
+  const [profilePhoto, setProfilePhoto] = useState(() => {
+    return getCleanDpUrl(localStorage.getItem('user_dp'));
+  });
   const [selectedPhotoFile, setSelectedPhotoFile] = useState(null);
 
   const getFallbackName = () => {
@@ -91,7 +102,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
         const dobVal = p.date_of_birth || '';
         const pincodeVal = p.pincode || '';
         const addressVal = p.address || '';
-        const profileImgUrl = p.profile_image ? `http://localhost:8080${p.profile_image}` : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+        const profileImgUrl = getCleanDpUrl(p.profile_image);
 
         setFullName(nameVal);
         setPhone(phoneVal);
@@ -290,7 +301,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
       const res = await apiClient('/user/profile');
       if (res && res.success && res.data) {
         const p = res.data;
-        const profileImgUrl = p.profile_image ? `http://localhost:8080${p.profile_image}` : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+        const profileImgUrl = getCleanDpUrl(p.profile_image);
         setProfilePhoto(profileImgUrl);
         localStorage.setItem('user_dp', profileImgUrl);
         window.dispatchEvent(new Event('user-dp-changed'));
@@ -407,17 +418,13 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
         {/* VIEW: MAIN NAVIGATION MENU */}
         {currentView === 'menu' && (
           <>
-            <div className="sidebar-header">
+            <div className="sidebar-header main-menu-header">
               <div className="sidebar-user-card-header">
                 <div className="sidebar-avatar-circle">
                   <img src={profilePhoto} alt="User Avatar" />
                 </div>
                 <div className="sidebar-meta-text">
                   <h4 className="sidebar-username">{fullName || getFallbackName()}</h4>
-                  <span className="sidebar-useremail">{user.email}</span>
-                  <span className="sidebar-kyc-badge" style={{ backgroundColor: '#eff6ff', color: '#0f66ff' }}>
-                    TRUST SCORE: {getStoredScore()}
-                  </span>
                 </div>
               </div>
               <button type="button" className="sidebar-close-btn" onClick={onClose} aria-label="Close Profile Portal">×</button>
@@ -455,18 +462,34 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
 
-                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('loan')}>
+                <div className="sidebar-menu-card-item" onClick={() => showToast('CIBIL Score Checker feature is coming soon!', 'info')}>
                   <div className="sidebar-menu-left-details">
-                    <span className="sidebar-menu-title">Financial Accounts</span>
-                    <span className="sidebar-menu-subtitle">Manage bank accounts and active loan metrics</span>
+                    <span className="sidebar-menu-title">Check CIBIL Score</span>
+                    <span className="sidebar-menu-subtitle">Verify external credit report score details</span>
+                  </div>
+                  <span className="sidebar-arrow-chevron">&gt;</span>
+                </div>
+
+                <div className="sidebar-menu-card-item" onClick={() => showToast('Auto Pay feature is coming soon!', 'info')}>
+                  <div className="sidebar-menu-left-details">
+                    <span className="sidebar-menu-title">Auto Pay</span>
+                    <span className="sidebar-menu-subtitle">Setup automatic monthly EMI deductions</span>
                   </div>
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
 
                 <div className="sidebar-menu-card-item" onClick={() => setCurrentView('repayment')}>
                   <div className="sidebar-menu-left-details">
-                    <span className="sidebar-menu-title">Transaction & Repayment History</span>
+                    <span className="sidebar-menu-title">Repay</span>
                     <span className="sidebar-menu-subtitle">View repayment schedules and EMI dates</span>
+                  </div>
+                  <span className="sidebar-arrow-chevron">&gt;</span>
+                </div>
+
+                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('loan')}>
+                  <div className="sidebar-menu-left-details">
+                    <span className="sidebar-menu-title">Loan History</span>
+                    <span className="sidebar-menu-subtitle">View active/applied loans</span>
                   </div>
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
@@ -606,125 +629,96 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
           </>
         )}
 
-        {/* VIEW: FINANCIAL ACCOUNTS & ACTIVE LOAN DETAILS */}
-        {currentView === 'loan' && (
+        {/* VIEW: REPAY */}
+        {currentView === 'repayment' && (
           <>
-            <div className="sidebar-header subview-header-row">
-              <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Loans & Portfolio</h4>
-              <div style={{ width: '40px' }} />
+            <div className="sidebar-header subview-header-row" style={{ justifyContent: 'space-between' }}>
+              <h4 className="sidebar-subpage-title-text">Repay</h4>
+              <button 
+                type="button" 
+                className="sidebar-close-btn" 
+                onClick={onClose} 
+                aria-label="Close Profile Portal"
+                style={{ fontSize: '1.5rem', padding: '0.1rem 0.4rem', border: 'none', background: 'none', cursor: 'pointer' }}
+              >
+                ×
+              </button>
             </div>
 
             <div className="sidebar-scroll-content">
-              {/* Premium Card matching fourth image */}
-              <div className="sidebar-amount-due-premium-card">
-                <div className="card-top-amounts">
-                  <div className="amount-group">
-                    <span className="card-amount-label">Amount Due</span>
-                    <h2 className="card-amount-value">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</h2>
-                  </div>
-                  <div className="amount-group text-right">
-                    <span className="card-amount-label">Due On</span>
-                    <span className="card-due-date-value">{activeLoan.nextEmiDueDate}</span>
-                  </div>
+              {/* Top next due card matching third image */}
+              <div className="sidebar-repayment-quick-summary-card">
+                <div className="summary-col">
+                  <span className="summary-lbl">Next EMI</span>
+                  <span className="summary-val">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</span>
                 </div>
-                
-                {/* Horizontal Progress Bar */}
-                <div className="card-progress-section">
-                  <div className="card-progress-bar-track">
-                    <div className="card-progress-bar-fill" style={{ width: '100%' }}></div>
-                  </div>
-                  <div className="card-progress-labels">
-                    <span>Paid ₹1,532</span>
-                  </div>
-                </div>
-
-                <button 
-                  type="button" 
-                  className="card-repayment-action-btn"
-                  onClick={() => showToast('Redirecting to secure repayment gateway...', 'info')}
-                >
-                  Make a Repayment
-                </button>
-              </div>
-
-              {/* Parameter List */}
-              <div className="sidebar-loan-parameters-vertical-list">
-                <h5 className="sidebar-subpage-sub-title">Active Loan Specifications</h5>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Loan Account ID</span>
-                  <span className="param-value-tag">{activeLoan.id}</span>
-                </div>
-                
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Amount Applied</span>
-                  <span className="param-value-tag">₹{activeLoan.amountApplied.toLocaleString('en-IN')}</span>
-                </div>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Date Applied</span>
-                  <span className="param-value-tag">{activeLoan.dateApplied}</span>
-                </div>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Amount Distributed</span>
-                  <span className="param-value-tag">₹{activeLoan.amountDistributed.toLocaleString('en-IN')}</span>
-                </div>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Date Distributed</span>
-                  <span className="param-value-tag">{activeLoan.dateDistributed}</span>
-                </div>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Daily Interest Rate</span>
-                  <span className="param-value-tag highlight-green">{activeLoan.dailyInterestRate}</span>
-                </div>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Number of EMIs</span>
-                  <span className="param-value-tag">{activeLoan.numberOfEmis} Months</span>
-                </div>
-
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">EMI Frequency</span>
-                  <span className="param-value-tag">{activeLoan.emiFrequency}</span>
+                <div className="summary-col">
+                  <span className="summary-lbl">Due On</span>
+                  <span className="summary-val">{activeLoan.nextEmiDueDate}</span>
                 </div>
               </div>
 
-              {/* Card 2: Applied Loan History */}
-              <div style={{ marginTop: '2rem' }}>
-                <h5 className="sidebar-subpage-sub-title">Applied Loan History</h5>
-                <div className="loan-history-list">
-                  {loanHistory.length === 0 ? (
-                    <p className="no-loans-text">No active or applied loans found.</p>
-                  ) : (
-                    loanHistory.map((loan) => (
-                      <div key={loan.id} className="loan-history-item">
-                        <div className="loan-item-details">
-                          <div className="loan-type-row">
-                            <span className="loan-icon-bullet">📄</span>
-                            <div className="loan-meta-info">
-                              <h4>{loan.type}</h4>
-                              <span className="loan-id-sub">{loan.id} • {loan.date}</span>
-                            </div>
-                          </div>
+              <h5 className="sidebar-subpage-sub-title">Upcoming & Past Installments</h5>
+
+              {/* Installment dates cards list matching third image exactly */}
+              <div className="sidebar-repayment-list-stack">
+                {repaymentSchedule.map((emi) => {
+                  const isExpanded = expandedRepaymentInstallment === emi.installment;
+                  return (
+                    <div key={emi.installment} className="sidebar-repayment-card-row">
+                      <div 
+                        className="repayment-card-row-header"
+                        onClick={() => setExpandedRepaymentInstallment(isExpanded ? null : emi.installment)}
+                      >
+                        <div className="repayment-row-left-group">
+                          <span className="repayment-emi-date-lbl">{emi.date}</span>
+                          {emi.status === 'Paid' && (
+                            <span className="repayment-status-paid-icon">✓</span>
+                          )}
+                          {emi.status === 'Next Due' && (
+                            <span className="repayment-status-badge next-due">Next Due</span>
+                          )}
                         </div>
-                        <div className="loan-status-wrap">
-                          <span className={`loan-status-tag ${loan.status.toLowerCase()}`}>
-                            {loan.status}
+                        <div className="repayment-row-right-group">
+                          <span className="repayment-amount-val">
+                            {emi.status === 'Paid' ? 'Paid' : `₹${emi.amount.toLocaleString('en-IN')}`}
                           </span>
-                          <h4 className="loan-amount-val">₹{loan.amount.toLocaleString('en-IN')}</h4>
+                          <span className="repayment-arrow-toggle-indicator">
+                            {isExpanded ? '▲' : '▼'}
+                          </span>
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
+                      
+                      {isExpanded && (
+                        <div className="repayment-card-row-body-details">
+                          <div className="repayment-breakdown-row">
+                            <span className="breakdown-lbl">Principal</span>
+                            <span className="breakdown-val">₹{emi.principal.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="repayment-breakdown-row">
+                            <span className="breakdown-lbl">Interest + Fees</span>
+                            <span className="breakdown-val">₹{emi.interest.toLocaleString('en-IN')}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Card 3: Linked Bank Accounts Coordinates */}
-              <div style={{ marginTop: '1.5rem', paddingBottom: '2rem' }}>
+              {/* Grand Repayment Button matching third image */}
+              <button 
+                type="button" 
+                className="sidebar-make-repayment-unified-btn mt-3"
+                onClick={() => showToast('Launching Secure Repayment Gateway...', 'info')}
+              >
+                Make a Repayment
+              </button>
+
+              <hr style={{ border: '0', borderTop: '1px solid #e2e8f0', margin: '2rem 0' }} />
+
+              {/* Card 3: Linked Bank Accounts Coordinates (Payment Settings under Repay) */}
+              <div style={{ paddingBottom: '1rem' }}>
                 <h5 className="sidebar-subpage-sub-title">Bank Accounts Coordinates</h5>
 
                 {!showAddBank ? (
@@ -831,84 +825,90 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
           </>
         )}
 
-        {/* VIEW: REPAYMENT SCHEDULE */}
-        {currentView === 'repayment' && (
+        {/* VIEW: LOAN HISTORY */}
+        {currentView === 'loan' && (
           <>
             <div className="sidebar-header subview-header-row">
               <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Repayment Schedule</h4>
+              <h4 className="sidebar-subpage-title-text">Loan History</h4>
               <div style={{ width: '40px' }} />
             </div>
 
             <div className="sidebar-scroll-content">
-              {/* Top next due card matching third image */}
-              <div className="sidebar-repayment-quick-summary-card">
-                <div className="summary-col">
-                  <span className="summary-lbl">Next EMI</span>
-                  <span className="summary-val">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</span>
+              {/* Parameter List */}
+              <div className="sidebar-loan-parameters-vertical-list">
+                <h5 className="sidebar-subpage-sub-title">Active Loan Specifications</h5>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Loan Account ID</span>
+                  <span className="param-value-tag">{activeLoan.id}</span>
                 </div>
-                <div className="summary-col">
-                  <span className="summary-lbl">Due On</span>
-                  <span className="summary-val">{activeLoan.nextEmiDueDate}</span>
+                
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Amount Applied</span>
+                  <span className="param-value-tag">₹{activeLoan.amountApplied.toLocaleString('en-IN')}</span>
+                </div>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Date Applied</span>
+                  <span className="param-value-tag">{activeLoan.dateApplied}</span>
+                </div>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Amount Distributed</span>
+                  <span className="param-value-tag">₹{activeLoan.amountDistributed.toLocaleString('en-IN')}</span>
+                </div>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Date Distributed</span>
+                  <span className="param-value-tag">{activeLoan.dateDistributed}</span>
+                </div>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Daily Interest Rate</span>
+                  <span className="param-value-tag highlight-green">{activeLoan.dailyInterestRate}</span>
+                </div>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">Number of EMIs</span>
+                  <span className="param-value-tag">{activeLoan.numberOfEmis} Months</span>
+                </div>
+
+                <div className="sidebar-param-row-detail">
+                  <span className="param-label-tag">EMI Frequency</span>
+                  <span className="param-value-tag">{activeLoan.emiFrequency}</span>
                 </div>
               </div>
 
-              <h5 className="sidebar-subpage-sub-title">Upcoming & Past Installments</h5>
-
-              {/* Installment dates cards list matching third image exactly */}
-              <div className="sidebar-repayment-list-stack">
-                {repaymentSchedule.map((emi) => {
-                  const isExpanded = expandedRepaymentInstallment === emi.installment;
-                  return (
-                    <div key={emi.installment} className="sidebar-repayment-card-row">
-                      <div 
-                        className="repayment-card-row-header"
-                        onClick={() => setExpandedRepaymentInstallment(isExpanded ? null : emi.installment)}
-                      >
-                        <div className="repayment-row-left-group">
-                          <span className="repayment-emi-date-lbl">{emi.date}</span>
-                          {emi.status === 'Paid' && (
-                            <span className="repayment-status-paid-icon">✓</span>
-                          )}
-                          {emi.status === 'Next Due' && (
-                            <span className="repayment-status-badge next-due">Next Due</span>
-                          )}
+              {/* Card 2: Applied Loan History */}
+              <div style={{ marginTop: '2.5rem' }}>
+                <h5 className="sidebar-subpage-sub-title">Applied Loan History</h5>
+                <div className="loan-history-list">
+                  {loanHistory.length === 0 ? (
+                    <p className="no-loans-text">No active or applied loans found.</p>
+                  ) : (
+                    loanHistory.map((loan) => (
+                      <div key={loan.id} className="loan-history-item">
+                        <div className="loan-item-details">
+                          <div className="loan-type-row">
+                            <span className="loan-icon-bullet">📄</span>
+                            <div className="loan-meta-info">
+                              <h4>{loan.type}</h4>
+                              <span className="loan-id-sub">{loan.id} • {loan.date}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="repayment-row-right-group">
-                          <span className="repayment-amount-val">
-                            {emi.status === 'Paid' ? 'Paid' : `₹${emi.amount.toLocaleString('en-IN')}`}
+                        <div className="loan-status-wrap">
+                          <span className={`loan-status-tag ${loan.status.toLowerCase()}`}>
+                            {loan.status}
                           </span>
-                          <span className="repayment-arrow-toggle-indicator">
-                            {isExpanded ? '▲' : '▼'}
-                          </span>
+                          <h4 className="loan-amount-val">₹{loan.amount.toLocaleString('en-IN')}</h4>
                         </div>
                       </div>
-                      
-                      {isExpanded && (
-                        <div className="repayment-card-row-body-details">
-                          <div className="repayment-breakdown-row">
-                            <span className="breakdown-lbl">Principal</span>
-                            <span className="breakdown-val">₹{emi.principal.toLocaleString('en-IN')}</span>
-                          </div>
-                          <div className="repayment-breakdown-row">
-                            <span className="breakdown-lbl">Interest + Fees</span>
-                            <span className="breakdown-val">₹{emi.interest.toLocaleString('en-IN')}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    ))
+                  )}
+                </div>
               </div>
-
-              {/* Grand Repayment Button matching third image */}
-              <button 
-                type="button" 
-                className="sidebar-make-repayment-unified-btn mt-3"
-                onClick={() => showToast('Launching Secure Repayment Gateway...', 'info')}
-              >
-                Make a Repayment
-              </button>
             </div>
           </>
         )}
@@ -1013,6 +1013,27 @@ const Navbar = () => {
 
   const [toast, setToast] = useState(null);
 
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (menuOpen || modalOpen || profileDropdownOpen || notificationsDropdownOpen) {
+        setShowNavbar(true);
+        return;
+      }
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowNavbar(false);
+      } else {
+        setShowNavbar(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, menuOpen, modalOpen, profileDropdownOpen, notificationsDropdownOpen]);
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
   };
@@ -1021,14 +1042,14 @@ const Navbar = () => {
     if (toast) {
       const timer = setTimeout(() => {
         setToast(null);
-      }, 4000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [toast]);
 
-  const [profileDp, setProfileDp] = useState(
-    localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-  );
+  const [profileDp, setProfileDp] = useState(() => {
+    return getCleanDpUrl(localStorage.getItem('user_dp'));
+  });
 
   const getFallbackName = () => {
     if (user && user.name && user.name !== 'LendoGO User') {
@@ -1050,7 +1071,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleDpChange = () => {
       setProfileDp(
-        localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+        getCleanDpUrl(localStorage.getItem('user_dp'))
       );
     };
     const handleDetailsChange = () => {
@@ -1066,7 +1087,7 @@ const Navbar = () => {
           if (res && res.success && res.data) {
             const p = res.data;
             const nameVal = p.full_name || getFallbackName();
-            const profileImgUrl = p.profile_image ? `http://localhost:8080${p.profile_image}` : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+            const profileImgUrl = getCleanDpUrl(p.profile_image);
             
             localStorage.setItem('user_full_name', nameVal);
             localStorage.setItem('user_phone', p.phone_number || '');
@@ -1125,7 +1146,7 @@ const Navbar = () => {
 
   return (
     <>
-    <nav className="navbar" ref={navbarRef}>
+    <nav className={`navbar ${showNavbar ? '' : 'navbar--hidden'}`} ref={navbarRef}>
       <div className="navbar-container">
         <div className="navbar-logo" onClick={() => navigate(user.isAuthenticated ? '/home' : '/')} style={{ cursor: 'pointer' }}>
           <div className="logo-icon"></div>

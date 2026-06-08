@@ -88,7 +88,7 @@ const BlogPage = () => {
           <div className="blog-hero-container">
             {/* <span className="blog-page-badge">LENDOGO PUBLICATIONS 📚</span> */}
             <h1 className="blog-hero-title">
-              Blogs & <span className="text-gradient">Financial Guides</span>
+              Blogs & Financial Guides
             </h1>
             <p className="blog-hero-desc">
               Search expert borrower guides, interest calculators, and CIBIL optimization tools built by industry professionals.

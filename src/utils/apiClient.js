@@ -44,8 +44,7 @@ export const apiClient = async (endpoint, options = {}) => {
       try {
         data = JSON.parse(rawText);
       } catch (e) {
-        console.error("Non-JSON response:", rawText);
-        throw new Error(`Server returned unexpected format (${response.status})`);
+        data = { message: rawText };
       }
     }
 

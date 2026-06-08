@@ -328,9 +328,11 @@ export const useAdminController = () => {
 
       fetchApplications();
       await fetchWalletBalance();
+      return true;
     } catch (err) {
       console.error("Failed to approve loan:", err);
       alert(`Failed to approve loan: ${err.message}`);
+      return false;
     }
   };
 
@@ -343,9 +345,11 @@ export const useAdminController = () => {
       addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
       alert(`Application ${reqId} rejected.`);
       fetchApplications();
+      return true;
     } catch (err) {
       console.error("Failed to reject loan application:", err);
       alert(`Failed to reject application: ${err.message}`);
+      return false;
     }
   };
 

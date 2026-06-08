@@ -22,9 +22,10 @@ import creditBuilderSecondary from '../../../../assets/credit_builder_secondary.
 const PRODUCT_DATA_MAP = {
   personal: {
     title: "Elite Personal Funding",
-    badge: "FAST & UNSECURED ⚡",
+    badge: "FAST & UNSECURED",
     headline: "Simple, Unsecured Financing Mapped to Your Life Goals",
     intro: "Whether it is handling unforeseen medical needs, consolidating existing high-interest bills, planning a grand marriage, or taking that dream trip, our elite personal funding gives you rapid capital without the drag of traditional banking red tape.",
+    thought: "A personal loan is not just a debt—it is a strategic bridge that empowers you to capture life's opportunities and handle its surprises with dignity, clarity, and control.",
     features: [
       "Interest starting at 8.99% annually",
       "Unsecured credit - No collateral or guarantor required",
@@ -37,9 +38,10 @@ const PRODUCT_DATA_MAP = {
   },
   business: {
     title: "Strategic Business Capital",
-    badge: "ENTERPRISE SCALING 💼",
+    badge: "ENTERPRISE SCALING",
     headline: "Fuelling Scalable Growth, Equipment, and Working Capital",
     intro: "Propel your corporate ambitions, stock up seasonal inventory, acquire state-of-the-art machinery, or expand physical coordinates with high-fidelity, customized commercial credit plans mapped directly to your revenue streams.",
+    thought: "Business capital is the fuel of innovation. It transforms ambitious concepts into market-leading enterprises, enabling scale at the precise moment opportunity knocks.",
     features: [
       "High credit tickets ranging up to ₹50 Lakhs",
       "Customized monthly or seasonal EMI payment models",
@@ -52,9 +54,10 @@ const PRODUCT_DATA_MAP = {
   },
   home: {
     title: "Premium Home Mortgages",
-    badge: "GENERATIONAL EQUITY 🏠",
+    badge: "GENERATIONAL EQUITY",
     headline: "Own the Spaces You Deserve with Transparent Long-Term Mortgages",
     intro: "Stop paying rent and build long-term generational equity. Our tailored housing credit products offer transparent interest terms to help you acquire, build, or remodel your residential coordinates with total peace of mind.",
+    thought: "A home loan is an investment in stability and belonging. It is the foundation upon which families build memories and write their future stories.",
     features: [
       "Extended repayment periods stretching up to 30 years",
       "Highly competitive interest schemes synced with RBI repo rates",
@@ -67,9 +70,10 @@ const PRODUCT_DATA_MAP = {
   },
   property: {
     title: "Sovereign Asset Liquidity",
-    badge: "ASSET LEVERAGE 💎",
+    badge: "ASSET LEVERAGE",
     headline: "Unlock the Latent Financial Potential of Your Real Estate",
     intro: "Transform static real estate wealth into liquid working capital. Retain complete ownership and usage coordinates of your property while securing large-ticket funding to scale operations or consolidate leverage.",
+    thought: "Real estate is a powerful tool for wealth generation. Leveraging property equity is a sophisticated way to unlock liquidity without sacrificing ownership.",
     features: [
       "High LTV financing options covering up to 75% of market value",
       "Extremely low interest rate metrics compared to personal loans",
@@ -82,9 +86,10 @@ const PRODUCT_DATA_MAP = {
   },
   instant: {
     title: "Nano Instant Credit",
-    badge: "MICRO-LIQUIDITY ⚡",
+    badge: "MICRO-LIQUIDITY",
     headline: "Lightning-Fast Cash Drops Mapped Directly to Your Mobile Wallet",
     intro: "Need urgent liquidity to cover a flash expense, buy a premium gadget, or plug a cash gap? LendoGo’s state-of-the-art e-KYC risk scanner matches details in seconds, pushing money directly to your account in under 10 minutes.",
+    thought: "Instant liquidity is financial agility. It provides peace of mind, knowing that a minor cash crunch will not interrupt your lifestyle or life's momentum.",
     features: [
       "Guaranteed disbursal to bank account in under 10 minutes",
       "100% digital e-KYC flow requiring just Aadhaar and PAN",
@@ -97,9 +102,10 @@ const PRODUCT_DATA_MAP = {
   },
   'credit-builder': {
     title: "Credit Catalyst Builder",
-    badge: "FINANCIAL ELEVATION 📈",
+    badge: "FINANCIAL ELEVATION",
     headline: "Engineer Your Premium Credit History with Automated Reporting",
     intro: "Struggling with a low credit score or completely new to borrowing coordinates? Our credit catalyst builder is engineered to build your rating. Make prompt micropayments and watch your financial trust score rise in real-time.",
+    thought: "A strong credit score is the key to financial freedom. Building credit is a step-by-step commitment that opens doors to premium financial products.",
     features: [
       "Zero minimum credit score coordinates needed to qualify",
       "Active automated reporting to CIBIL, Equifax, and Experian",
@@ -183,12 +189,21 @@ const ProductPage = () => {
               {data.intro}
             </p>
             <button className="product-apply-cta-btn" onClick={handleApplyClick}>
-              Apply Now ⚡
+              Apply Now
             </button>
             <div className="product-hero-trust-badges">
-              <span className="hero-trust-badge">🛡️ Bank-grade Security</span>
-              <span className="hero-trust-badge">📜 RBI Regulated NBFCs</span>
-              <span className="hero-trust-badge">⚡ 24h Approval Deciders</span>
+              <span className="hero-trust-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', color: '#0f66ff' }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Bank-grade Security
+              </span>
+              <span className="hero-trust-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', color: '#0f66ff' }}><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="16"/><line x1="15" y1="22" x2="15" y2="16"/><line x1="9" y1="16" x2="15" y2="16"/><path d="M9 6h6"/><path d="M9 10h6"/></svg>
+                RBI Regulated NBFCs
+              </span>
+              <span className="hero-trust-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', color: '#0f66ff' }}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                24h Approval Deciders
+              </span>
             </div>
           </div>
           <div className="product-hero-visual landing-animate-right">
@@ -197,6 +212,20 @@ const ProductPage = () => {
           </div>
         </div>
       </section>
+
+      {/* THOUGHT / PERSPECTIVE CARD CALLOUT */}
+      {data.thought && (
+        <section className="product-thought-section reveal-on-scroll fade-in-up">
+          <div className="thought-container">
+            <span className="thought-quote-icon">“</span>
+            <p className="thought-text">{data.thought}</p>
+            <div className="thought-author-line">
+              <span className="thought-dash"></span>
+              <span className="thought-attribution">LendoGo Smart Borrowing Philosophy</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* DETAILS SECTION (ALTERNATING ROWS: LEFT & RIGHT ALIGNED) */}
       <section className="product-alternating-details-section">
@@ -270,25 +299,33 @@ const ProductPage = () => {
 
           <div className="pillars-grid">
             <div className="pillar-card reveal-on-scroll fade-in-up">
-              <span className="pillar-icon">🔒</span>
+              <div className="pillar-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pillar-svg-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
               <h3 className="pillar-card-title">256-Bit Data Encryption</h3>
               <p className="pillar-card-desc">Your personal coordinates and KYC scans are guarded by state-of-the-art secure layers.</p>
             </div>
             
             <div className="pillar-card reveal-on-scroll fade-in-up" style={{ '--delay': '0.15s' }}>
-              <span className="pillar-icon">🏛️</span>
+              <div className="pillar-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pillar-svg-icon"><path d="M3 22h18"/><path d="M6 18V9"/><path d="M10 18V9"/><path d="M14 18V9"/><path d="M18 18V9"/><path d="M4 6h16l-8-4-8 4z"/></svg>
+              </div>
               <h3 className="pillar-card-title">RBI-Regulated NBFCs</h3>
               <p className="pillar-card-desc">LendoGo operates in total compliance with central mandates to secure your borrower rights.</p>
             </div>
 
             <div className="pillar-card reveal-on-scroll fade-in-up" style={{ '--delay': '0.3s' }}>
-              <span className="pillar-icon">💸</span>
+              <div className="pillar-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pillar-svg-icon"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
               <h3 className="pillar-card-title">Zero Hidden Surcharges</h3>
               <p className="pillar-card-desc">What you see on the dashboard is what you pay. Zero broker fees, zero hidden fines.</p>
             </div>
 
             <div className="pillar-card reveal-on-scroll fade-in-up" style={{ '--delay': '0.45s' }}>
-              <span className="pillar-icon">⚡</span>
+              <div className="pillar-icon-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pillar-svg-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
               <h3 className="pillar-card-title">Flexible Prepayments</h3>
               <p className="pillar-card-desc">Repay early or modify monthly EMI tenures at zero penalty surcharges after 3 terms.</p>
             </div>
@@ -307,25 +344,6 @@ const ProductPage = () => {
           <div className="testimonial-author">
             <span className="author-name">Siddharth Sharma</span>
             <span className="author-role">Verified Borrower (Elite Personal Funding)</span>
-          </div>
-        </div>
-      </section>
-
-      {/* FINAL CALL TO ACTION */}
-      <section className="product-final-cta-section">
-        <div className="product-cta-container reveal-on-scroll scale-in">
-          <div className="cta-overlay-glow" />
-          <h2 className="product-cta-title">Ready to take control of your financial goals?</h2>
-          <p className="product-cta-subtitle">
-            Apply now to secure competitive rates, 24-48 hours approval decisions, and 100% transparent terms with absolutely zero fine-print surprises.
-          </p>
-          <div className="product-cta-btn-wrapper">
-            <button className="cta-action-btn-primary" onClick={handleApplyClick}>
-              Apply for {data.title} ⚡
-            </button>
-            <button className="cta-action-btn-secondary" onClick={() => navigate('/home')}>
-              Go to Dashboard
-            </button>
           </div>
         </div>
       </section>
