@@ -165,6 +165,24 @@ const ProductPage = () => {
   }, [type]);
 
   const handleApplyClick = () => {
+    // Check if there is an active loan that is not closed
+    const activeLoanStr = localStorage.getItem('lendogo_active_loan');
+    if (activeLoanStr) {
+      try {
+        const activeLoan = JSON.parse(activeLoanStr);
+        if (activeLoan && activeLoan.status === 'ACTIVE') {
+          window.dispatchEvent(new CustomEvent('lendogo-toast', {
+            detail: {
+              message: `You already have an active loan (${activeLoan.id}). Please pay it off entirely to unlock the ability to apply for a new loan!`,
+              type: 'error'
+            }
+          }));
+          return;
+        }
+      } catch (err) {
+        console.error("Error reading active loan state:", err);
+      }
+    }
     // Navigates directly to our core 5-step wizard with the corresponding product query param
     navigate(`/loan/apply/details?type=${productKey}`);
   };

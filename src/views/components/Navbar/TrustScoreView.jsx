@@ -19,7 +19,20 @@ const TrustScoreView = ({ user, showToast }) => {
     return generated;
   };
 
-  const targetScore = getStoredScore();
+  const [targetScore, setTargetScore] = useState(() => getStoredScore());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setTargetScore(getStoredScore());
+    };
+    window.addEventListener('user-details-changed', handleUpdate);
+    window.addEventListener('loan-state-changed', handleUpdate);
+    return () => {
+      window.removeEventListener('user-details-changed', handleUpdate);
+      window.removeEventListener('loan-state-changed', handleUpdate);
+    };
+  }, [user]);
+
   const [score, setScore] = useState(600); // Start animation from 600
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showLoanDetails, setShowLoanDetails] = useState(false);

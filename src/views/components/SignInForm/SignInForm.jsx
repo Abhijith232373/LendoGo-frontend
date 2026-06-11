@@ -54,7 +54,7 @@ const SignInForm = ({ onSignIn, loading, error }) => {
     try {
       const user = await onSignIn(email, password);
       
-      if (user && user.role === 'admin') {
+      if (user && user.role !== 'user') {
         navigate('/admin');
       } else {
         navigate('/home');

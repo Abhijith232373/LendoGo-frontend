@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LoanApplyLayout from '../LoanApplyLayout';
 import { useLoanApplication } from '../LoanApplicationContext';
 import { apiClient } from '../../../../../utils/apiClient';
+import { useAuthController } from '../../../../../controllers/auth/useAuthController';
 
 const TERMS_TEXT = `
 LENDOGO FINANCIAL SERVICES & DIGITAL LOAN AGREEMENT
@@ -39,6 +40,7 @@ By confirming this agreement, you authorize LendoGo and its lending partners to 
 
 const Step4Terms = () => {
   const navigate = useNavigate();
+  const { user } = useAuthController();
   const {
     completedSteps,
     termsAccepted, setTermsAccepted,
@@ -71,6 +73,46 @@ const Step4Terms = () => {
     setError(null);
     try {
       const formData = new FormData();
+
+      // Retrieve and append user_id dynamically from context, localStorage, or JWT payload
+      let userId = user?.id;
+
+      if (!userId || userId === 'unknown') {
+        const savedUser = localStorage.getItem('lendogo_user');
+        if (savedUser) {
+          try {
+            const parsed = JSON.parse(savedUser);
+            if (parsed && parsed.id) {
+              userId = parsed.id;
+            }
+          } catch (e) {
+            console.error("Error parsing user from localStorage:", e);
+          }
+        }
+      }
+
+      if (!userId || userId === 'unknown') {
+        const token = localStorage.getItem('lendogo_token');
+        if (token) {
+          try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const payload = JSON.parse(jsonPayload);
+            userId = payload.user_id || payload.userId;
+          } catch (e) {
+            console.error('Error decoding JWT token:', e);
+          }
+        }
+      }
+
+      if (!userId || userId === 'unknown') {
+        throw new Error('User authentication state is invalid or missing. Please sign in again.');
+      }
+
+      formData.append('user_id', userId);
 
       // Append text parameters
       formData.append('principal_amount', String(loanAmount));
@@ -139,7 +181,10 @@ const Step4Terms = () => {
       if (response && response.reference_number) {
         markStepComplete('step4');
         navigate('/loan/apply/disbursal', {
-          state: { reference_number: response.reference_number }
+          state: { 
+            reference_number: response.reference_number,
+            loan_id: response.id
+          }
         });
       } else {
         throw new Error('Server response did not include reference number.');
