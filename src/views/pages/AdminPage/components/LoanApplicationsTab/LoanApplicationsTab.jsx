@@ -126,29 +126,40 @@ const LoanApplicationsTab = ({
   };
 
   // Confirm rejection & save log
-  const handleConfirmRejection = () => {
+  const handleConfirmRejection = async () => {
     if (!selectedRequest) return;
 
-    // Create entry in rejected logs
-    const newRejectedLog = {
-      id: selectedRequest.id.replace('REQ-', 'REJ-'),
-      name: selectedRequest.name,
-      email: `${selectedRequest.name.toLowerCase().replace(' ', '.')}@gmail.com`,
-      type: selectedRequest.type,
-      amount: selectedRequest.amount,
-      reason: rejectionReason,
-      date: new Date().toISOString().split('T')[0]
-    };
+    const success = await handleRejectLoan(selectedRequest.id, selectedRequest.name);
+    if (success) {
+      // Create entry in rejected logs
+      const newRejectedLog = {
+        id: selectedRequest.id.replace('REQ-', 'REJ-'),
+        name: selectedRequest.name,
+        email: `${selectedRequest.name.toLowerCase().replace(' ', '.')}@gmail.com`,
+        type: selectedRequest.type,
+        amount: selectedRequest.amount,
+        reason: rejectionReason,
+        date: new Date().toISOString().split('T')[0]
+      };
 
-    setRejectedLoans(prev => [newRejectedLog, ...prev]);
-    
-    // Call main reject handler
-    handleRejectLoan(selectedRequest.id, selectedRequest.name);
+      setRejectedLoans(prev => [newRejectedLog, ...prev]);
 
-    // Reset modals
-    setShowRejectMailModal(false);
-    setShowInspectModal(false);
-    setSelectedRequest(null);
+      // Reset modals
+      setShowRejectMailModal(false);
+      setShowInspectModal(false);
+      setSelectedRequest(null);
+
+      // Redirect to rejected tab
+      setActiveSubTab('rejected');
+    }
+  };
+
+  const onApprove = async (req) => {
+    const success = await handleApproveLoan(req);
+    if (success) {
+      setShowInspectModal(false);
+      setActiveSubTab('ledger');
+    }
   };
 
   // Delete a rejected log
@@ -382,10 +393,7 @@ const LoanApplicationsTab = ({
           <LoanRequestsTab 
             loanRequests={loanRequests}
             handleRunRiskAudit={handleRunRiskAudit}
-            handleApproveLoan={(req) => {
-              handleApproveLoan(req);
-              setShowInspectModal(false);
-            }}
+            handleApproveLoan={onApprove}
             handleRejectLoan={(reqId, name) => {
               // Open rejection modal instead of direct reject
               const req = loanRequests.find(r => r.id === reqId);
@@ -658,7 +666,7 @@ const LoanApplicationsTab = ({
                 {selectedRequest.auditState === 'completed' && (
                   <button 
                     className="btn-decision approve"
-                    onClick={() => handleApproveLoan(selectedRequest)}
+                    onClick={() => onApprove(selectedRequest)}
                     style={{ padding: '8px 24px', fontSize: '0.85rem' }}
                   >
                     Approve & Disburse

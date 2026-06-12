@@ -19,7 +19,7 @@ const SignInPage = () => {
 
   useEffect(() => {
     if (user.isAuthenticated) {
-      if (user.role === 'admin') {
+      if (user.role !== 'user') {
         navigate('/admin');
       } else {
         navigate('/home');
@@ -31,7 +31,7 @@ const SignInPage = () => {
     try {
       const loggedInUser = await signIn(email, password);
       console.log('Signed in successfully');
-      if (loggedInUser && loggedInUser.role === 'admin') {
+      if (loggedInUser && loggedInUser.role !== 'user') {
         navigate('/admin');
       } else {
         navigate('/home');

@@ -1,13 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../../../utils/apiClient';
+import { useAuthController } from '../../../../controllers/auth/useAuthController';
 
 export const useAdminController = () => {
   const navigate = useNavigate();
+  const { user } = useAuthController();
 
   // Theme & Navigation States
   const [darkMode, setDarkMode] = useState(true);
-  const [activeTab, setActiveTab] = useState('Dashboard');
+  
+  // Initialize activeTab based on permissions
+  const [activeTab, setActiveTab] = useState(() => {
+    const p = user?.permissions || {};
+    const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+    if (isAdmin || p['Dashboard']) return 'Dashboard';
+    if (p['User Management']) return 'User Management';
+    if (p['Loan Applications']) return 'Loan Applications';
+    if (p['KYC Verifications']) return 'KYC Verifications';
+    if (p['Customer Care']) return 'Customer Care';
+    if (p['Careers']) return 'Careers Management';
+    if (p['Blog Management']) return 'Blog Management';
+    if (p['Due Date']) return 'Due Date Reminders';
+    return 'Dashboard'; // Fallback
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -22,9 +39,9 @@ export const useAdminController = () => {
   const [disbursedCapital, setDisbursedCapital] = useState(0);
 
   // Admin Personal Detail States
-  const [adminAvatar, setAdminAvatar] = useState('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
-  const [adminName, setAdminName] = useState('Admin Flow');
-  const [adminEmail, setAdminEmail] = useState('admin.flow@lendogo.com');
+  const [adminAvatar, setAdminAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
+  const [adminName, setAdminName] = useState(user?.name || 'Admin Flow');
+  const [adminEmail, setAdminEmail] = useState(user?.email || 'admin.flow@lendogo.com');
 
   // Input States for Settings Forms
   const [emailInput, setEmailInput] = useState('admin.flow@lendogo.com');
@@ -249,12 +266,17 @@ export const useAdminController = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-    fetchApplications();
-    fetchWalletBalance();
-    fetchConsultations();
-    fetchChatSessions();
-  }, [auditedScores]);
+    const p = user?.permissions || {};
+    const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+    
+    if (isAdmin || p['User Management']) fetchUsers();
+    if (isAdmin || p['Loan Applications']) fetchApplications();
+    if (isAdmin || p['Dashboard']) fetchWalletBalance();
+    if (isAdmin || p['Customer Care']) fetchConsultations();
+    
+    // Chats can be fetched by anyone who can see Customer Care or Dashboard
+    if (isAdmin || p['Customer Care'] || p['Dashboard']) fetchChatSessions();
+  }, [auditedScores, user]);
 
   // No more local storage sync for live chats; it's handled by WS and REST API
 
@@ -328,9 +350,11 @@ export const useAdminController = () => {
 
       fetchApplications();
       await fetchWalletBalance();
+      return true;
     } catch (err) {
       console.error("Failed to approve loan:", err);
       alert(`Failed to approve loan: ${err.message}`);
+      return false;
     }
   };
 
@@ -343,22 +367,30 @@ export const useAdminController = () => {
       addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
       alert(`Application ${reqId} rejected.`);
       fetchApplications();
+      return true;
     } catch (err) {
       console.error("Failed to reject loan application:", err);
       alert(`Failed to reject application: ${err.message}`);
+      return false;
     }
   };
 
   const handleDisburseMoney = async (loanId, feeAmount) => {
     const loan = approvedLoans.find(l => l.id === loanId);
-    if (!loan) return;
+    if (!loan) return false;
 
     const netAmount = loan.amount - feeAmount;
 
     try {
-      await apiClient(`/admin/applications/${loanId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'DISBURSED' })
+      await apiClient('/admin/wallet/disburse', {
+        method: 'POST',
+        body: JSON.stringify({
+          loan_id: loanId,
+          user_id: loan.raw.user_id,
+          sanctioned_amount: Number(loan.amount),
+          processing_fee: Number(feeAmount),
+          net_payout: Number(netAmount)
+        })
       });
 
       await fetchWalletBalance();
@@ -366,9 +398,11 @@ export const useAdminController = () => {
       addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
       alert(`Loan disbursed successfully.`);
       fetchApplications();
+      return true;
     } catch (err) {
       console.error("Failed to disburse money:", err);
       alert(`Failed to disburse money: ${err.message}`);
+      return false;
     }
   };
 

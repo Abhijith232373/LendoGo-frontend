@@ -7,15 +7,30 @@ const UserManagementTab = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+
   // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Confirmation Modal state
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    onConfirm: null,
+    isDestructive: false,
+    isInfoOnly: false
+  });
+
   // Edit Form states
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
-  const [editRole, setEditRole] = useState('Borrower');
+  const [editRole, setEditRole] = useState('User');
   const [editPan, setEditPan] = useState('');
   const [editRating, setEditRating] = useState('Low Risk');
   const [editCreditScore, setEditCreditScore] = useState(750);
@@ -30,7 +45,7 @@ const UserManagementTab = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addName, setAddName] = useState('');
   const [addEmail, setAddEmail] = useState('');
-  const [addRole, setAddRole] = useState('Borrower');
+  const [addRole, setAddRole] = useState('User');
   const [addPan, setAddPan] = useState('');
   const [addRating, setAddRating] = useState('Low Risk');
   const [addCreditScore, setAddCreditScore] = useState(750);
@@ -53,17 +68,17 @@ const UserManagementTab = () => {
         id: String(u.id || u.ID || u.Id || ''),
         fullName: u.full_name || u.FullName || u.fullName || 'Unknown',
         email: u.email || '',
-        role: u.role || 'Borrower',
-        PAN: u.PAN || u.pan || 'Attached',
-        rating: u.rating || 'Low Risk',
+        role: u.role ? (u.role.charAt(0).toUpperCase() + u.role.slice(1)) : 'User',
+        PAN: u.profile?.pan_card_number || u.PAN || u.pan || 'Attached',
+        rating: u.profile?.credit_rating || u.rating || 'Low Risk',
         status: u.status || 'Active',
-        creditScore: u.creditScore || u.credit_score || 750,
-        dob: u.dob || '',
-        mobileNumber: u.mobile_number || u.mobileNumber || '',
-        address: u.address || '',
-        city: u.city || '',
-        state: u.state || '',
-        pincode: u.pincode || '',
+        creditScore: u.profile?.trust_score || u.creditScore || u.credit_score || 750,
+        dob: u.profile?.date_of_birth || u.dob || '',
+        mobileNumber: u.profile?.phone_number || u.mobile_number || u.mobileNumber || '',
+        address: u.profile?.address || u.address || '',
+        city: u.profile?.city || u.city || '',
+        state: u.profile?.state || u.state || '',
+        pincode: u.profile?.pincode || u.pincode || '',
         createdAt: u.created_at || u.createdAt
       }));
       
@@ -80,47 +95,60 @@ const UserManagementTab = () => {
   }, []);
 
   // API Actions
-  const handleToggleUserStatus = async (userId, currentStatus) => {
+  const requestToggleUserStatus = (userId, currentStatus, userName) => {
     const newStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';
-    try {
-      await apiClient(`/admin/users/${userId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: newStatus })
-      });
-      setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
-    } catch (err) {
-      alert("Failed to update status. Check backend logs.");
-    }
+    const isBlocking = newStatus === 'Blocked';
+    setConfirmConfig({
+      isOpen: true,
+      title: isBlocking ? 'Block User Account' : 'Activate User Account',
+      message: isBlocking 
+        ? `Are you sure you want to block ${userName}? They will immediately lose access to the system.` 
+        : `Are you sure you want to activate ${userName}? They will regain full access to the system.`,
+      confirmText: isBlocking ? 'Block User' : 'Activate User',
+      isDestructive: isBlocking,
+      onConfirm: async () => {
+        try {
+          await apiClient(`/admin/users/${userId}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: newStatus })
+          });
+          setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+        } catch (err) {
+          alert("Failed to update status. Check backend logs.");
+        }
+      }
+    });
   };
 
-  const handleDeleteUser = async (userId, userName) => {
-    if (window.confirm(`Are you absolutely sure you want to permanently delete user ${userName}?`)) {
-      try {
-        await apiClient(`/admin/users/${userId}`, {
-          method: 'DELETE'
-        });
-        setUsers(users.filter(u => u.id !== userId));
-      } catch (err) {
-        alert("Failed to delete user.");
+  const requestDeleteUser = (userId, userName) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Confirm Deletion',
+      message: `Are you sure you want to permanently delete user ${userName}? This action cannot be undone.`,
+      confirmText: 'Delete Permanently',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await apiClient(`/admin/users/${userId}`, { method: 'DELETE' });
+          setUsers(prev => prev.filter(u => u.id !== userId));
+        } catch (err) {
+          alert("Failed to delete user.");
+        }
       }
-    }
+    });
   };
 
   const onSubmitEdit = async (e) => {
     e.preventDefault();
     const updatedFields = {
-      fullName: editName,
       full_name: editName,
       email: editEmail,
       role: editRole,
-      pan: editPan,
-      PAN: editPan,
-      rating: editRating,
-      creditScore: Number(editCreditScore),
+      pan_card_number: editPan,
+      credit_rating: editRating,
       credit_score: Number(editCreditScore),
-      dob: editDob,
-      mobileNumber: editMobileNumber,
-      mobile_number: editMobileNumber,
+      date_of_birth: editDob,
+      phone_number: editMobileNumber,
       address: editAddress,
       city: editCity,
       state: editState,
@@ -150,7 +178,6 @@ const UserManagementTab = () => {
       } : u));
       
       setShowEditModal(false);
-      alert("User details successfully updated!");
     } catch (err) {
       console.warn("Backend PUT failed, falling back to local simulation:", err);
       setUsers(users.map(u => u.id === selectedUser.id ? { 
@@ -169,7 +196,6 @@ const UserManagementTab = () => {
         pincode: editPincode
       } : u));
       setShowEditModal(false);
-      alert("User details updated in session!");
     }
   };
 
@@ -180,13 +206,10 @@ const UserManagementTab = () => {
       full_name: addName,
       email: addEmail,
       role: addRole,
-      pan: addPan,
-      PAN: addPan,
-      rating: addRating,
-      creditScore: Number(addCreditScore),
+      pan_card_number: addPan,
+      credit_rating: addRating,
       credit_score: Number(addCreditScore),
       dob: addDob,
-      mobileNumber: addMobileNumber,
       mobile_number: addMobileNumber,
       address: addAddress,
       city: addCity,
@@ -201,7 +224,7 @@ const UserManagementTab = () => {
         method: 'POST',
         body: JSON.stringify(newUserObj)
       });
-      const created = res?.data || res || newUserObj;
+      const created = res?.data || newUserObj;
       setUsers([
         {
           ...created,
@@ -209,12 +232,33 @@ const UserManagementTab = () => {
           fullName: created.full_name || created.fullName || addName,
           email: created.email || addEmail,
           status: created.status || 'Active',
+          role: created.role || addRole,
+          PAN: created.profile?.pan_card_number || addPan,
+          rating: created.profile?.credit_rating || addRating,
+          creditScore: created.profile?.trust_score || Number(addCreditScore),
+          dob: created.profile?.date_of_birth || addDob,
+          mobileNumber: created.profile?.phone_number || addMobileNumber,
+          address: created.profile?.address || addAddress,
+          city: created.profile?.city || addCity,
+          state: created.profile?.state || addState,
+          pincode: created.profile?.pincode || addPincode,
           createdAt: created.created_at || created.createdAt || new Date().toISOString()
         },
         ...users
       ]);
       setShowAddModal(false);
-      alert("User successfully created!");
+
+      if (res?.default_password) {
+        setConfirmConfig({
+          isOpen: true,
+          title: 'Account Created Successfully',
+          message: `The user account was created successfully.\n\nPlease copy this auto-generated temporary password and securely share it with the user so they can log in:\n\nPassword: ${res.default_password}`,
+          confirmText: 'Acknowledge',
+          isDestructive: false,
+          isInfoOnly: true,
+          onConfirm: async () => {}
+        });
+      }
     } catch (err) {
       console.warn("Backend creation failed, falling back to local simulation:", err);
       const mockCreated = {
@@ -223,7 +267,6 @@ const UserManagementTab = () => {
       };
       setUsers([mockCreated, ...users]);
       setShowAddModal(false);
-      alert("User successfully added to system!");
     }
   };
 
@@ -232,7 +275,7 @@ const UserManagementTab = () => {
     setSelectedUser(user);
     setEditName(user.fullName || user.full_name || '');
     setEditEmail(user.email || '');
-    setEditRole(user.role || 'Borrower');
+    setEditRole(user.role || 'User');
     setEditPan(user.PAN || user.pan || '');
     setEditRating(user.rating || 'Low Risk');
     setEditCreditScore(user.creditScore || user.credit_score || 750);
@@ -248,7 +291,7 @@ const UserManagementTab = () => {
   const openAddModal = () => {
     setAddName('');
     setAddEmail('');
-    setAddRole('Borrower');
+    setAddRole('User');
     setAddPan('');
     setAddRating('Low Risk');
     setAddCreditScore(750);
@@ -268,12 +311,55 @@ const UserManagementTab = () => {
 
   if (loading) return <div className="text-white p-8">Loading real database users...</div>;
 
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = 
+      (u.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.id || '').toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'All' || (u.status && u.status.toLowerCase() === statusFilter.toLowerCase());
+    
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="tab-pane-container animate-fade-in">
+      {/* ── CONFIRMATION MODAL ── */}
+      {confirmConfig.isOpen && createPortal(
+        <div className="admin-dashboard-wrapper dark-theme" style={{ display: 'contents' }}>
+          <div className="admin-modal-overlay" onClick={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}>
+            <div className="admin-modal-container" style={{ width: '450px', maxWidth: '90vw', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>{confirmConfig.title}</h3>
+                <button className="close-btn" onClick={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}>✕</button>
+              </div>
+              <div className="modal-body" style={{ minHeight: '80px', color: 'var(--admin-text)', fontSize: '0.95rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                {confirmConfig.message}
+              </div>
+              <div className="modal-footer">
+                {!confirmConfig.isInfoOnly && (
+                  <button className="btn-secondary-admin" onClick={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}>Cancel</button>
+                )}
+                <button 
+                  className="btn-primary-admin" 
+                  style={{ backgroundColor: confirmConfig.isDestructive ? '#ef4444' : 'var(--primary)', color: '#ffffff' }}
+                  onClick={async () => {
+                    if (confirmConfig.onConfirm) await confirmConfig.onConfirm();
+                    setConfirmConfig({ ...confirmConfig, isOpen: false });
+                  }}
+                >
+                  {confirmConfig.confirmText}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       <div className="section-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h2>Borrower Directory</h2>
-          <p>Create, inspect, update clearances, or block user accounts in real-time.</p>
+          <h2>User Management</h2>
         </div>
         <button 
           className="btn-action-primary" 
@@ -286,6 +372,23 @@ const UserManagementTab = () => {
           </svg>
           Add New User
         </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <input 
+          type="text" 
+          placeholder="Search by name, email, or ID..." 
+          className="form-input-admin" 
+          style={{ flex: 1, minWidth: '200px' }}
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+
+        <select className="form-input-admin" style={{ width: 'auto' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <option value="All">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Blocked">Blocked</option>
+        </select>
       </div>
 
       <div className="table-responsive-admin">
@@ -302,17 +405,17 @@ const UserManagementTab = () => {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0 ? (
-              users.map((user) => (
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b border-gray-800 hover:bg-gray-800/50">
                   <td className="p-4 text-gray-300"><strong>USR-{(user.id || '').substring(0, 4).toUpperCase()}</strong></td>
                   <td className="p-4">
                     <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${
                       user.role === 'Admin' ? 'bg-purple-900/50 text-purple-400' :
-                      user.role === 'Staff' ? 'bg-blue-900/50 text-blue-400' :
-                      'bg-teal-900/50 text-teal-400'
+                      user.role === 'User' ? 'bg-teal-900/50 text-teal-400' :
+                      'bg-blue-900/50 text-blue-400'
                     }`}>
-                      {user.role || 'Borrower'}
+                      {user.role || 'User'}
                     </span>
                   </td>
                   <td className="p-4 text-white">{user.fullName}</td>
@@ -336,13 +439,13 @@ const UserManagementTab = () => {
                       <button className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600" onClick={() => openEditModal(user)}>Edit</button>
                       <button 
                         className={`px-3 py-1 rounded ${user.status === 'Active' || !user.status ? 'bg-orange-600/20 text-orange-500 hover:bg-orange-600/30' : 'bg-green-600/20 text-green-500 hover:bg-green-600/30'}`}
-                        onClick={() => handleToggleUserStatus(user.id, user.status || 'Active')}
+                        onClick={() => requestToggleUserStatus(user.id, user.status || 'Active', user.fullName)}
                       >
                         {user.status === 'Active' || !user.status ? 'Block' : 'Activate'}
                       </button>
                       <button 
                         className="bg-red-900/40 text-red-500 px-3 py-1 rounded border border-red-500/20 hover:bg-red-900/60"
-                        onClick={() => handleDeleteUser(user.id, user.fullName)}
+                        onClick={() => requestDeleteUser(user.id, user.fullName)}
                       >
                         Delete
                       </button>
@@ -383,8 +486,7 @@ const UserManagementTab = () => {
                     <div className="form-group-admin">
                       <label>Role Clearance</label>
                       <select className="form-input-admin" value={addRole} onChange={(e) => setAddRole(e.target.value)}>
-                        <option value="Borrower">Borrower</option>
-                        <option value="Staff">Staff</option>
+                        <option value="User">User</option>
                         <option value="Admin">Admin</option>
                       </select>
                     </div>
@@ -479,8 +581,7 @@ const UserManagementTab = () => {
                     <div className="form-group-admin">
                       <label>Role Clearance</label>
                       <select className="form-input-admin" value={editRole} onChange={(e) => setEditRole(e.target.value)}>
-                        <option value="Borrower">Borrower</option>
-                        <option value="Staff">Staff</option>
+                        <option value="User">User</option>
                         <option value="Admin">Admin</option>
                       </select>
                     </div>
@@ -573,9 +674,9 @@ const UserManagementTab = () => {
                     <span className="text-gray-400 text-xs block" style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Role Clearance</span>
                     <span className={`px-2.5 py-0.5 rounded text-xs font-bold inline-block ${
                       selectedUser.role === 'Admin' ? 'bg-purple-900/50 text-purple-400' :
-                      selectedUser.role === 'Staff' ? 'bg-blue-900/50 text-blue-400' :
-                      'bg-teal-900/50 text-teal-400'
-                    }`}>{selectedUser.role || 'Borrower'}</span>
+                      selectedUser.role === 'User' ? 'bg-teal-900/50 text-teal-400' :
+                      'bg-blue-900/50 text-blue-400'
+                    }`}>{selectedUser.role || 'User'}</span>
                   </div>
                   
                   <div>

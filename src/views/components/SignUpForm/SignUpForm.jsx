@@ -310,7 +310,7 @@ const SignUpForm = () => {
                   maxLength={8}
                 />
               </div>
-              <div className="su-captcha-img-wrap">
+              <div className="su-captcha-img-wrap" data-captcha={captchaText}>
                 <CaptchaCanvas text={captchaText} />
                 <button
                   type="button"

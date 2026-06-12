@@ -1,123 +1,79 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import featuredImg from '../../../../assets/blog_featured.png';
 import './BlogPage.css';
 
 const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [blogs, setBlogs] = useState([]);
 
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (newsletterEmail.trim()) {
-      setSubscribed(true);
-      setNewsletterEmail('');
-      setTimeout(() => setSubscribed(false), 5000);
-    }
-  };
+  const categories = [
+    'All',
+    'Loan Basics',
+    'Interest & EMI Guides',
+    'Eligibility & CIBIL Help',
+    'Our Process & Security',
+    'Smart Borrowing & Wellness'
+  ];
 
-  const categories = ['All', 'Personal Loans', 'Business Growth', 'Home & Auto', 'Credit Score', 'Financial Literacy'];
-
-  const blogPosts = [
+  // Default seed posts
+  const defaultBlogs = [
     {
       id: 1,
-      title: 'How to Boost Your Credit Score in 5 Easy Steps',
-      excerpt: 'Stuck with a low credit score? Discover actionable strategies to fix your credit profile, correct errors, and unlock lower interest rates on your next loan.',
-      category: 'Credit Score',
-      date: 'May 20, 2026',
-      readTime: '4 min read',
-      author: 'Aarav Mehta',
-      badgeColor: '#a855f7',
-      isFeatured: false,
+      title: 'How Lenders Verify Your Income Without Salary Slips',
+      category: 'Loan Basics',
+      image: '/src/assets/personal_loan_visual.png',
+      summary: 'Modern lenders use automated bank statement analysis, GST/Tax filings, and AI-driven data verification tools to verify income streams, allowing self-employed individuals to qualify for credit without traditional salary slips. This guide covers how these digital validations work.',
+      description: 'Securing credit without salary slips was once impossible. Today, digital verification technology allows lenders to assess creditworthiness using bank statement analyzers, business turnover audits, tax returns, and digital transaction history. By analyzing your cash flow directly, automated scoring engines can approve personal or business capital in real time. Self-employed borrowers can optimize their chances by maintaining clean transaction records and avoiding excessive bounce penalties.',
+      date: '02 Jun 2026',
+      author: 'LendoGo Finance Desk'
     },
     {
       id: 2,
-      title: 'Understanding Business Loans: A Guide for Young Startups',
-      excerpt: 'Securing capital is the lifeblood of business. Learn how LendoGo helps you bypass standard banking delays with minimal docs and tailored business interest plans.',
-      category: 'Business Growth',
-      date: 'May 18, 2026',
-      readTime: '5 min read',
-      author: 'Sneha Rao',
-      badgeColor: '#eab308',
-      isFeatured: false,
+      title: 'Why We Panic During Financial Emergencies — Smarter Ways to Handle Them',
+      category: 'Smart Borrowing & Wellness',
+      image: '/src/assets/blog_featured.png',
+      summary: 'Financial panic leads to rash decisions like borrowing from unregulated loan sharks. Learn how structured planning, emergency reserves, and low-interest line of credit options keep you secure and calm during cash crunches.',
+      description: 'Emergency expenses arise without warning, triggering immediate stress. When panic sets in, consumers often turn to predatory lenders offering instant payouts with hidden interest traps. The smart approach involves establishing a personal line of credit, automating a small emergency savings reserve, and comparing flexible loans before signing. LendoGo provides pre-approved limits that act as a safety net, protecting your credit score from last-minute desperation.',
+      date: '04 Jun 2026',
+      author: 'LendoGo Wellness Board'
     },
     {
       id: 3,
-      title: 'Personal Loans vs. Credit Cards: Which is Right for You?',
-      excerpt: 'Compare flexible installment terms vs. credit line debts. Discover why personal loans provide structured repayments, protecting you from compound interest traps.',
-      category: 'Personal Loans',
-      date: 'May 14, 2026',
-      readTime: '3 min read',
-      author: 'Kabir Dev',
-      badgeColor: '#0066ff',
-      isFeatured: false,
-    },
-    {
-      id: 4,
-      title: '5 Signs It’s Time to Refinance Your Home Loan',
-      excerpt: 'Interest rates fluctuate frequently. We outline major indicators showing that replacing your existing mortgage can save you lakhs in future EMI payouts.',
-      category: 'Home & Auto',
-      date: 'May 10, 2026',
-      readTime: '5 min read',
-      author: 'Vikram Aditya',
-      badgeColor: '#10b981',
-      isFeatured: false,
-    },
-    {
-      id: 5,
-      title: 'Navigating Student Loans: Invest in Your Future Smarter',
-      excerpt: 'Fund your dream degree without stressing your family budget. Tips on grace periods, digital collateral verification, and selecting appropriate repayment timelines.',
-      category: 'Financial Literacy',
-      date: 'May 05, 2026',
-      readTime: '4 min read',
-      author: 'Neha Roy',
-      badgeColor: '#f43f5e',
-      isFeatured: false,
-    },
-    {
-      id: 6,
-      title: 'Everything You Need to Know About Auto Loan Approvals',
-      excerpt: 'Ready to drive home your dream car? A complete breakdown of documentation requirements, instant down-payment options, and choosing appropriate loan terms.',
-      category: 'Home & Auto',
-      date: 'May 02, 2026',
-      readTime: '4 min read',
-      author: 'Rohan Sen',
-      badgeColor: '#06b6d4',
-      isFeatured: false,
-    },
+      title: 'Understanding Flat Rate vs. Reducing Rate of Interest on Loans',
+      category: 'Interest & EMI Guides',
+      image: '/src/assets/loan_illustration.png',
+      summary: 'Choosing between flat rate and reducing balance interest can drastically affect your overall payout. We explain the core mathematical differences to prevent you from overpaying on credit cards and personal contracts.',
+      description: 'Understanding interest calculation metrics is crucial to smart borrowing. A flat rate applies interest to the full principal throughout the loan term, meaning you pay interest on money you have already paid back. A reducing balance rate calculates interest only on the remaining outstanding principal. Always check the Effective Annualized Rate (APR) before signing, as flat rates are often deceptively marketed as lower than reducing rates.',
+      date: '06 Jun 2026',
+      author: 'LendoGo Analytics'
+    }
   ];
 
-  const featuredPost = {
-    title: 'The Smart Borrowing Guide: How to Secure the Best Rates',
-    excerpt: 'Navigating interest plans doesn’t have to be daunting. Discover our proven checklist to secure premium interest rates, optimize your credit file, and borrow with absolute transparency.',
-    category: 'Financial Literacy',
-    date: 'May 25, 2026',
-    readTime: '6 min read',
-    author: 'Priya Sharma, Chief Finance Editor',
-    badgeColor: '#f43f5e',
-    image: featuredImg,
-  };
+  // Sync with localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('lendogo_blog_posts');
+    if (stored) {
+      setBlogs(JSON.parse(stored));
+    } else {
+      localStorage.setItem('lendogo_blog_posts', JSON.stringify(defaultBlogs));
+      setBlogs(defaultBlogs);
+    }
+  }, []);
 
   // Filter posts based on Category and Search Query
-  const filteredPosts = blogPosts.filter((post) => {
+  const filteredPosts = blogs.filter((post) => {
     const matchesCategory = activeCategory === 'All' || post.category === activeCategory;
     const matchesSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const isFeaturedVisible =
-    (activeCategory === 'All' || activeCategory === featuredPost.category) &&
-    (featuredPost.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      featuredPost.excerpt.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="blog-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -126,17 +82,16 @@ const BlogPage = () => {
       {/* Dynamic ambient moving shapes background */}
       <ParallaxShapes preset="side-decor" />
 
-      {/* ── HERO HEADER ── */}
+      {/* HERO HEADER */}
       <section className="blog-hero" style={{ position: 'relative', zIndex: 2 }}>
         <ScrollReveal variant="fade-up">
           <div className="blog-hero-container">
-            <span className="blog-page-badge">LENDOGO INSIGHTS 📚</span>
+            {/* <span className="blog-page-badge">LENDOGO PUBLICATIONS 📚</span> */}
             <h1 className="blog-hero-title">
-              Your Center for <br />
-              <span className="text-gradient">Financial Wisdom.</span>
+              Blogs & Financial Guides
             </h1>
             <p className="blog-hero-desc">
-              Expert guides, credit building tips, and finance strategies designed to help you unlock the power of accessible borrowing.
+              Search expert borrower guides, interest calculators, and CIBIL optimization tools built by industry professionals.
             </p>
 
             {/* Search Controls */}
@@ -144,7 +99,7 @@ const BlogPage = () => {
               <span className="search-icon">🔍</span>
               <input
                 type="text"
-                placeholder="Search guides, categories, keywords..."
+                placeholder="Search finance guides, terms, categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="blog-search-input"
@@ -159,7 +114,7 @@ const BlogPage = () => {
         </ScrollReveal>
       </section>
 
-      {/* ── CATEGORY BAR ── */}
+      {/* CATEGORY BAR */}
       <section className="blog-categories" style={{ position: 'relative', zIndex: 2 }}>
         <ScrollReveal variant="fade-up" delay={0.05}>
           <div className="categories-container">
@@ -168,7 +123,10 @@ const BlogPage = () => {
                 <button
                   key={cat}
                   className={`category-pill ${activeCategory === cat ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    setSelectedPost(null); // Clear selected article on category change
+                  }}
                 >
                   {cat}
                 </button>
@@ -178,141 +136,137 @@ const BlogPage = () => {
         </ScrollReveal>
       </section>
 
-      {/* ── BLOG CONTENT GRID ── */}
+      {/* DUAL WORKSPACE LAYOUT (Cards Grid + Sticky Reading Drawer) */}
       <section className="blog-content" style={{ position: 'relative', zIndex: 2 }}>
         <div className="blog-container">
-          {/* Spotlight Featured Post */}
-          {isFeaturedVisible && !searchQuery && (
-            <ScrollReveal variant="zoom-in" delay={0.1}>
-              <div className="featured-post-card">
-                <div className="featured-img-wrap">
-                  <img src={featuredPost.image} alt="Featured Post" className="featured-img" />
-                  <span className="post-category-badge" style={{ backgroundColor: featuredPost.badgeColor }}>
-                    {featuredPost.category}
-                  </span>
+          <div className={`blog-workspace-layout ${selectedPost ? 'has-selected-post' : ''}`}>
+            
+            {/* Left Column: Listings Side */}
+            <div className="blog-listings-side">
+              {filteredPosts.length > 0 ? (
+                <div className="articles-grid">
+                  {filteredPosts.map((post, index) => (
+                    <ScrollReveal 
+                      key={post.id} 
+                      variant="fade-up" 
+                      delay={(index % 3) * 0.06}
+                    >
+                      <article 
+                        className={`post-card ${selectedPost && selectedPost.id === post.id ? 'active' : ''}`}
+                        onClick={() => setSelectedPost(post)}
+                      >
+                        <div className="post-card-thumb-wrap">
+                          <img 
+                            src={post.image} 
+                            alt="" 
+                            className="post-card-thumb" 
+                            onError={(e) => { e.target.src = '/src/assets/blog_featured.png'; }}
+                          />
+                          <span className="post-category-tag">{post.category}</span>
+                        </div>
+                        <div className="post-card-body">
+                          <div className="post-meta">
+                            <span>{post.date}</span>
+                          </div>
+                          <h3 className="post-card-title">{post.title}</h3>
+                          <p className="post-card-summary">{post.summary}</p>
+                          <div className="post-card-footer">
+                            <span className="author-name">By {post.author}</span>
+                            <button 
+                              className="read-now-btn" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPost(post);
+                              }}
+                            >
+                              <span>Read Now</span>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    </ScrollReveal>
+                  ))}
                 </div>
-                <div className="featured-post-info">
-                  <div className="post-meta">
-                    <span>{featuredPost.date}</span>
-                    <span className="meta-divider">•</span>
-                    <span>{featuredPost.readTime}</span>
-                  </div>
-                  <h2 className="featured-post-title">{featuredPost.title}</h2>
-                  <p className="featured-post-excerpt">{featuredPost.excerpt}</p>
-                  <div className="post-footer">
-                    <div className="post-author-wrap">
-                      <span className="author-avatar">✍️</span>
-                      <span className="author-name">{featuredPost.author}</span>
-                    </div>
-                    <button className="read-more-btn" onClick={() => alert('Article reading view coming soon!')}>
-                      <span>Read Article</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
+              ) : (
+                <ScrollReveal variant="fade-up">
+                  <div className="no-results">
+                    <span className="no-results-icon">🔎</span>
+                    <h3>No articles found</h3>
+                    <p>We couldn't find any guides matching "{searchQuery}". Try another category filter or keyword.</p>
+                    <button
+                      className="reset-btn"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setActiveCategory('All');
+                        setSelectedPost(null);
+                      }}
+                    >
+                      Clear Filters
                     </button>
                   </div>
+                </ScrollReveal>
+              )}
+            </div>
+
+            {/* Right Column: Sticky Article Reading Drawer */}
+            {selectedPost && (
+              <div className="blog-reading-drawer animate-slide-in-right">
+                <div className="drawer-header">
+                  <span className="drawer-category-badge">{selectedPost.category}</span>
+                  <button className="btn-close-drawer" onClick={() => setSelectedPost(null)} aria-label="Close article">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="drawer-body">
+                  <img 
+                    src={selectedPost.image} 
+                    alt="" 
+                    className="drawer-article-img" 
+                    onError={(e) => { e.target.src = '/src/assets/blog_featured.png'; }}
+                  />
+                  <div className="drawer-article-meta">
+                    <span>{selectedPost.date}</span>
+                    <span className="meta-divider">•</span>
+                    <span className="drawer-author-text">By {selectedPost.author}</span>
+                  </div>
+                  
+                  <h2 className="drawer-article-title">{selectedPost.title}</h2>
+                  
+                  <blockquote className="drawer-article-summary-block">
+                    {selectedPost.summary}
+                  </blockquote>
+                  
+                  <div className="drawer-article-content">
+                    {selectedPost.description.split('\n\n').map((para, idx) => (
+                      <p key={idx}>{para}</p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="drawer-footer">
+                  <button className="btn-back-to-grid" onClick={() => setSelectedPost(null)}>
+                    Back to Articles
+                  </button>
                 </div>
               </div>
-            </ScrollReveal>
-          )}
+            )}
 
-          {/* Articles list */}
-          {filteredPosts.length > 0 ? (
-            <div className="articles-grid">
-              {filteredPosts.map((post, index) => (
-                <ScrollReveal 
-                  key={post.id} 
-                  variant="fade-up" 
-                  delay={(index % 3) * 0.08}
-                >
-                  <article className="post-card">
-                    <div className="post-card-header">
-                      <span className="post-category-badge" style={{ backgroundColor: post.badgeColor }}>
-                        {post.category}
-                      </span>
-                      <div className="post-meta">
-                        <span>{post.date}</span>
-                        <span className="meta-divider">•</span>
-                        <span>{post.readTime}</span>
-                      </div>
-                    </div>
-                    <h3 className="post-card-title">{post.title}</h3>
-                    <p className="post-card-excerpt">{post.excerpt}</p>
-                    <div className="post-footer">
-                      <span className="author-name">By {post.author}</span>
-                      <button className="read-more-icon-btn" onClick={() => alert('Article reading view coming soon!')} aria-label="Read Article">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </article>
-                </ScrollReveal>
-              ))}
-            </div>
-          ) : (
-            <ScrollReveal variant="fade-up">
-              <div className="no-results">
-                <span className="no-results-icon">🔎</span>
-                <h3>No articles found</h3>
-                <p>We couldn't find any guides matching "{searchQuery}". Try searching for standard finance keywords like "EMIs", "Credit Score", or "Business".</p>
-                <button
-                  className="reset-btn"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setActiveCategory('All');
-                  }}
-                >
-                  Clear Filters
-                </button>
-              </div>
-            </ScrollReveal>
-          )}
+          </div>
         </div>
       </section>
 
-      {/* ── NEWSLETTER SUBSCRIPTION SECTION ── */}
-      <section className="blog-newsletter" style={{ position: 'relative', zIndex: 2 }}>
-        <ScrollReveal variant="fade-up">
-          <div className="newsletter-container">
-            <div className="newsletter-glow" />
-            <div className="newsletter-content">
-              <span className="newsletter-badge">STAY UPDATED ✉️</span>
-              <h2 className="newsletter-title">Subscribe to LendoGo Weekly</h2>
-              <p className="newsletter-subtitle">
-                Get the latest credit score hacks, debt refinancing checklists, and instant lending guides delivered directly to your inbox.
-              </p>
 
-              {subscribed ? (
-                <div className="subscription-success">
-                  <span className="success-icon">🎉</span>
-                  <h4>You're on the list!</h4>
-                  <p>Welcome! We will send you our curated financial newsletters starting next Tuesday.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubscribe} className="newsletter-form">
-                  <input
-                    type="email"
-                    placeholder="Enter your professional email address..."
-                    value={newsletterEmail}
-                    onChange={(e) => setSearchQuery(e.target.value)} // Wait, using newsletterEmail state
-                    required
-                    className="newsletter-email-input"
-                  />
-                  <button type="submit" className="newsletter-submit-btn">
-                    <span>Subscribe Now</span>
-                  </button>
-                </form>
-              )}
-              <span className="spam-protection-pill">🔒 Zero spam. Unsubscribe with one-click.</span>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
 
       <Footer />
     </div>
   );
- };
- 
- export default BlogPage;
+};
+
+export default BlogPage;

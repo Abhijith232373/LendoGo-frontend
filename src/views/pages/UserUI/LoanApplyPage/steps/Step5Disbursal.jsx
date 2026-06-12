@@ -14,11 +14,13 @@ const Step5Disbursal = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const referenceNumberFromState = location.state?.reference_number;
+  const loanIdFromState = location.state?.loan_id;
 
   const {
     completedSteps,
     loanAmount, tenure, interestRate, emi,
     loanTypeLabel,
+    email,
   } = useLoanApplication();
 
   useEffect(() => {
@@ -46,6 +48,80 @@ const Step5Disbursal = () => {
 
   const handleTrackApplication = () => {
     alert(`Application Status Update:\nReference: ${refNumber}\n\nYour application is in "Credit Underwriting". A status tracking link has been sent to your registered mobile number and email address.`);
+  };
+
+  const handleGoToDashboard = () => {
+    // Generate new active loan
+    const activeLoanId = loanIdFromState || '1092a1a1-1234-4321-abcd-1234567890ab';
+    const newActiveLoan = {
+      id: activeLoanId,
+      referenceNumber: refNumber,
+      amountApplied: loanAmount,
+      dateApplied: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      amountDistributed: loanAmount,
+      dateDistributed: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      dailyInterestRate: (interestRate / 365).toFixed(3) + '%',
+      numberOfEmis: tenure,
+      emiFrequency: 'Monthly',
+      nextEmiAmount: emi,
+      nextEmiDueDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      remainingBalance: emi * tenure,
+      status: 'ACTIVE'
+    };
+    localStorage.setItem('lendogo_active_loan', JSON.stringify(newActiveLoan));
+
+    // Generate new repayment schedule
+    const newSchedule = [];
+    const limit = Math.min(6, tenure);
+    for (let i = 1; i <= limit; i++) {
+      const dueDate = new Date();
+      dueDate.setMonth(dueDate.getMonth() + i);
+      const dateStr = dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      newSchedule.push({
+        installment: i,
+        date: dateStr,
+        amount: emi,
+        status: i === 1 ? 'Next Due' : 'Upcoming',
+        principal: Math.round(emi * 0.88 * 100) / 100,
+        interest: Math.round(emi * 0.12 * 100) / 100
+      });
+    }
+    localStorage.setItem('lendogo_repayment_schedule', JSON.stringify(newSchedule));
+
+    // Add to loan history
+    const savedHistoryStr = localStorage.getItem('lendogo_loan_history');
+    let history = savedHistoryStr ? JSON.parse(savedHistoryStr) : [
+      { id: 'LGO-1092', type: 'Personal Loan', amount: 50000, status: 'DISBURSED', date: 'May 12, 2026' },
+      { id: 'LGO-0871', type: 'Instant Mobile Loan', amount: 15000, status: 'APPROVED', date: 'May 24, 2026' },
+      { id: 'LGO-0654', type: 'Credit Builder Loan', amount: 10000, status: 'PENDING', date: 'May 25, 2026' }
+    ];
+    // Remove or mark old active loan as CLOSED in history
+    history = history.map(item => {
+      if (item.id === 'LGO-1092' && item.status === 'DISBURSED') {
+        return { ...item, status: 'CLOSED' };
+      }
+      return item;
+    });
+    // Add new loan to history
+    history.unshift({
+      id: refNumber,
+      type: loanTypeLabel,
+      amount: loanAmount,
+      status: 'DISBURSED',
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    });
+    localStorage.setItem('lendogo_loan_history', JSON.stringify(history));
+
+    // Dip trust score slightly on application (-15 points)
+    const emailKey = email || 'user';
+    const currentScore = parseInt(localStorage.getItem(`trust_score_${emailKey}`)) || 736;
+    localStorage.setItem(`trust_score_${emailKey}`, Math.max(300, currentScore - 15).toString());
+
+    // Trigger update events
+    window.dispatchEvent(new Event('loan-state-changed'));
+    window.dispatchEvent(new Event('user-details-changed'));
+
+    navigate('/home');
   };
 
   const StatusOutlineIcon = () => (
@@ -157,7 +233,7 @@ const Step5Disbursal = () => {
               <button
                 type="button"
                 className="btn-step-next"
-                onClick={() => navigate('/home')}
+                onClick={handleGoToDashboard}
                 style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#059669', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '0.82rem', fontWeight: 700, color: '#ffffff', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5,150,105,0.15)', transition: 'all 0.2s' }}
               >
                 GO TO DASHBOARD &gt;

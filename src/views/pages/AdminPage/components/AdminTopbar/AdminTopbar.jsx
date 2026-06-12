@@ -9,7 +9,8 @@ const AdminTopbar = ({
   adminAvatar, 
   adminName, 
   adminEmail,
-  handleRechargeWallet
+  handleRechargeWallet,
+  hasPermission = () => true
 }) => {
   const [isRechargeOpen, setIsRechargeOpen] = useState(false);
   const [rechargeAmount, setRechargeAmount] = useState('');
@@ -84,31 +85,33 @@ const AdminTopbar = ({
             <span className="wallet-amount-text">₹{activeBalance.toLocaleString('en-IN')}</span>
             
             {/* Recharge Icon/Button */}
-            <button 
-              onClick={handleRechargeClick}
-              title="Recharge Admin Wallet"
-              style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                border: 'none',
-                borderRadius: '4px',
-                width: '20px',
-                height: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: '8px',
-                cursor: 'pointer',
-                transition: 'background 0.2s ease',
-                padding: 0
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-            </button>
+            {hasPermission('Web Configuration') && (
+              <button 
+                onClick={handleRechargeClick}
+                title="Recharge Admin Wallet"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginLeft: '8px',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
+                  padding: 0
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Notification Bell Toggle (Clean SVG) */}

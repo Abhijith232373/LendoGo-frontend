@@ -3,28 +3,71 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './Navbar.css';
 import ConsultationModal from '../ConsultationModal/ConsultationModal';
+import TrustScoreView from './TrustScoreView';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
+import { apiClient } from '../../../utils/apiClient';
+
+const getCleanDpUrl = (imgUrl) => {
+  if (!imgUrl) return 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+  if (imgUrl.startsWith('http://localhost:8080http')) {
+    return imgUrl.replace('http://localhost:8080', '');
+  }
+  if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) {
+    return imgUrl;
+  }
+  return `http://localhost:8080${imgUrl}`;
+};
 
 // Global sliding profile sidebar React Portal component (Nested Sub-Views System)
-const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu' }) => {
-  // Navigation stack state ('menu', 'profile', 'kyc', 'loan', 'repayment', 'feedback')
+const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = 'menu', showToast }) => {
+  // Navigation stack state ('menu', 'profile', 'trustScore', 'loan', 'repayment', 'feedback')
   const [currentView, setCurrentView] = useState(initialView);
+  const [walletBalance, setWalletBalance] = useState(0);
 
-  const wasOpenRef = useRef(false);
-  const prevInitialViewRef = useRef(initialView);
+  const getStoredScore = () => {
+    if (!user || !user.email) return 736;
+    const cached = localStorage.getItem(`trust_score_${user.email}`);
+    if (cached) return parseInt(cached);
+    let hash = 0;
+    const email = user.email;
+    for (let i = 0; i < email.length; i++) {
+      hash = email.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const generated = 620 + Math.abs(hash % 240);
+    localStorage.setItem(`trust_score_${user.email}`, generated.toString());
+    return generated;
+  };
+
+  const fetchBalance = async () => {
+    if (!user || !user.isAuthenticated) return;
+    try {
+      const res = await apiClient('/user/wallet/balance');
+      if (res && res.success && res.data) {
+        setWalletBalance(res.data.balance || 0);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user wallet balance:", err);
+    }
+  };
 
   useEffect(() => {
-    if ((isOpen && !wasOpenRef.current) || (isOpen && initialView !== prevInitialViewRef.current)) {
-      setCurrentView(initialView);
+    if (isOpen && user && user.isAuthenticated) {
+      fetchBalance();
     }
-    wasOpenRef.current = isOpen;
-    prevInitialViewRef.current = initialView;
-  }, [isOpen, initialView]);
+  }, [isOpen, user]);
+
+  useEffect(() => {
+    window.addEventListener('wallet-balance-changed', fetchBalance);
+    return () => {
+      window.removeEventListener('wallet-balance-changed', fetchBalance);
+    };
+  }, [user]);
 
   // Load profile photo state
-  const [profilePhoto, setProfilePhoto] = useState(
-    localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-  );
+  const [profilePhoto, setProfilePhoto] = useState(() => {
+    return getCleanDpUrl(localStorage.getItem('user_dp'));
+  });
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState(null);
 
   const getFallbackName = () => {
     if (user && user.name && user.name !== 'LendoGO User') {
@@ -48,6 +91,59 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const [pincode, setPincode] = useState(localStorage.getItem('user_pincode') || '');
   const [address, setAddress] = useState(localStorage.getItem('user_address') || '');
 
+  const fetchUserProfile = async () => {
+    if (!user || !user.isAuthenticated) return;
+    try {
+      const res = await apiClient('/user/profile');
+      if (res && res.success && res.data) {
+        const p = res.data;
+        const nameVal = p.full_name || getFallbackName();
+        const phoneVal = p.phone_number || '';
+        const dobVal = p.date_of_birth || '';
+        const pincodeVal = p.pincode || '';
+        const addressVal = p.address || '';
+        const profileImgUrl = getCleanDpUrl(p.profile_image);
+
+        setFullName(nameVal);
+        setPhone(phoneVal);
+        setDob(dobVal);
+        setPincode(pincodeVal);
+        setAddress(addressVal);
+        setProfilePhoto(profileImgUrl);
+
+        // Sync to localStorage
+        localStorage.setItem('user_full_name', nameVal);
+        localStorage.setItem('user_phone', phoneVal);
+        localStorage.setItem('user_dob', dobVal);
+        localStorage.setItem('user_pincode', pincodeVal);
+        localStorage.setItem('user_address', addressVal);
+        localStorage.setItem('user_dp', profileImgUrl);
+
+        window.dispatchEvent(new Event('user-dp-changed'));
+        window.dispatchEvent(new Event('user-details-changed'));
+      }
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && user && user.isAuthenticated) {
+      fetchUserProfile();
+    }
+  }, [isOpen, user]);
+
+  const wasOpenRef = useRef(false);
+  const prevInitialViewRef = useRef(initialView);
+
+  useEffect(() => {
+    if ((isOpen && !wasOpenRef.current) || (isOpen && initialView !== prevInitialViewRef.current)) {
+      setCurrentView(initialView);
+    }
+    wasOpenRef.current = isOpen;
+    prevInitialViewRef.current = initialView;
+  }, [isOpen, initialView]);
+
   const [panNumber, setPanNumber] = useState(localStorage.getItem('kyc_pan_number') || '');
   const [aadhaarNumber, setAadhaarNumber] = useState(localStorage.getItem('kyc_aadhaar_number') || '');
   const [fatherName, setFatherName] = useState(localStorage.getItem('kyc_father_name') || '');
@@ -69,11 +165,15 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const [expandedRepaymentInstallment, setExpandedRepaymentInstallment] = useState(1);
 
   // Applied Loan History State
-  const [loanHistory, setLoanHistory] = useState([
-    { id: 'LGO-1092', type: 'Personal Loan', amount: 50000, status: 'DISBURSED', date: 'May 12, 2026' },
-    { id: 'LGO-0871', type: 'Instant Mobile Loan', amount: 15000, status: 'APPROVED', date: 'May 24, 2026' },
-    { id: 'LGO-0654', type: 'Credit Builder Loan', amount: 10000, status: 'PENDING', date: 'May 25, 2026' }
-  ]);
+  const [loanHistory, setLoanHistory] = useState(() => {
+    const saved = localStorage.getItem('lendogo_loan_history');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 'LGO-1092', type: 'Personal Loan', amount: 50000, status: 'DISBURSED', date: 'May 12, 2026' },
+      { id: 'LGO-0871', type: 'Instant Mobile Loan', amount: 15000, status: 'APPROVED', date: 'May 24, 2026' },
+      { id: 'LGO-0654', type: 'Credit Builder Loan', amount: 10000, status: 'PENDING', date: 'May 25, 2026' }
+    ];
+  });
 
   // Bank Accounts Coordinates State
   const [bankAccounts, setBankAccounts] = useState([
@@ -91,7 +191,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const handleAddBankAccount = (e) => {
     e.preventDefault();
     if (!newBankName || !newAccNum || !newIfsc) {
-      alert('Please fill out all bank credentials.');
+      showToast('Please fill out all bank credentials.', 'error');
       return;
     }
     const maskedAcc = '•••• •••• ' + newAccNum.slice(-4);
@@ -107,7 +207,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     setNewAccNum('');
     setNewIfsc('');
     setShowAddBank(false);
-    alert('Bank account successfully verified and linked to LendoGo Wallet!');
+    showToast('Bank account successfully verified and linked to LendoGo Wallet!', 'success');
   };
 
   // Set Bank Account as primary
@@ -123,7 +223,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     if (confirm('Are you sure you want to unlink this bank account from LendoGo?')) {
       const bank = bankAccounts.find(b => b.id === id);
       if (bank && bank.isPrimary && bankAccounts.length > 1) {
-        alert('Please select another primary bank before unlinking this one.');
+        showToast('Please select another primary bank before unlinking this one.', 'error');
         return;
       }
       setBankAccounts(prev => prev.filter(b => b.id !== id));
@@ -161,11 +261,10 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePhoto(reader.result);
-        localStorage.setItem('user_dp', reader.result);
-        window.dispatchEvent(new Event('user-dp-changed'));
       };
       reader.readAsDataURL(file);
     }
@@ -174,26 +273,58 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const handleRemovePhoto = () => {
     const defaultNoDp = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
     setProfilePhoto(defaultNoDp);
+    setSelectedPhotoFile(null);
     localStorage.removeItem('user_dp');
     window.dispatchEvent(new Event('user-dp-changed'));
   };
 
-  const handleSavePersonal = (e) => {
+  const handleSavePersonal = async (e) => {
     e.preventDefault();
-    localStorage.setItem('user_full_name', fullName);
-    localStorage.setItem('user_phone', phone);
-    localStorage.setItem('user_dob', dob);
-    localStorage.setItem('user_pincode', pincode);
-    localStorage.setItem('user_address', address);
-    window.dispatchEvent(new Event('user-details-changed'));
-    alert('Personal details saved successfully.');
-    setCurrentView('menu');
+    try {
+      const formData = new FormData();
+      formData.append('full_name', fullName);
+      formData.append('phone_number', phone);
+      formData.append('date_of_birth', dob);
+      formData.append('pincode', pincode);
+      formData.append('address', address);
+      if (selectedPhotoFile) {
+        formData.append('profile_image', selectedPhotoFile);
+      }
+
+      await apiClient('/user/profile', {
+        method: 'PUT',
+        body: formData,
+      });
+
+      localStorage.setItem('user_full_name', fullName);
+      localStorage.setItem('user_phone', phone);
+      localStorage.setItem('user_dob', dob);
+      localStorage.setItem('user_pincode', pincode);
+      localStorage.setItem('user_address', address);
+
+      const res = await apiClient('/user/profile');
+      if (res && res.success && res.data) {
+        const p = res.data;
+        const profileImgUrl = getCleanDpUrl(p.profile_image);
+        setProfilePhoto(profileImgUrl);
+        localStorage.setItem('user_dp', profileImgUrl);
+        window.dispatchEvent(new Event('user-dp-changed'));
+      }
+
+      window.dispatchEvent(new Event('user-details-changed'));
+      setSelectedPhotoFile(null);
+      setCurrentView('menu');
+      showToast('Profile details updated successfully.', 'success');
+    } catch (err) {
+      console.error("Failed to save personal details:", err);
+      showToast("Failed to save personal details: " + err.message, "error");
+    }
   };
 
   const handleSaveKyc = (e) => {
     e.preventDefault();
     if (panNumber.length < 10 || aadhaarNumber.replace(/\s/g, '').length < 12) {
-      alert('Invalid PAN or Aadhaar format.');
+      showToast('Invalid PAN or Aadhaar format.', 'error');
       return;
     }
     localStorage.setItem('kyc_status', 'VERIFIED');
@@ -204,82 +335,333 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     localStorage.setItem('kyc_income', monthlyIncome);
     localStorage.setItem('kyc_verified_address', kycAddress);
     window.dispatchEvent(new Event('user-details-changed'));
-    alert('KYC documents submitted and verified.');
+    showToast('KYC documents submitted and verified.', 'success');
     setCurrentView('menu');
   };
 
   const handleSubmitFeedback = (e) => {
     e.preventDefault();
-    alert(`Thank you for your feedback! Rating: ${feedbackRating}/5 stars. Comments submitted.`);
+    showToast(`Thank you for your feedback! Rating: ${feedbackRating}/5 stars. Comments submitted.`, 'success');
     setFeedbackComment('');
     setCurrentView('menu');
   };
 
-  // Active Loan parameters
-  const activeLoan = {
-    id: 'LGO-1092',
-    amountApplied: 100000,
-    dateApplied: 'May 10, 2026',
-    amountDistributed: 100000,
-    dateDistributed: 'May 12, 2026',
-    dailyInterestRate: '0.05%',
-    numberOfEmis: 24,
-    emiFrequency: 'Monthly',
-    nextEmiAmount: 1532,
-    nextEmiDueDate: '1 Jul 2026'
-  };
+  // Active Loan parameters state
+  const [activeLoan, setActiveLoan] = useState(() => {
+    const saved = localStorage.getItem('lendogo_active_loan');
+    if (saved) return JSON.parse(saved);
+    return {
+      id: '1092a1a1-1234-4321-abcd-1234567890ab',
+      referenceNumber: 'LGO-1092',
+      amountApplied: 100000,
+      dateApplied: 'May 10, 2026',
+      amountDistributed: 100000,
+      dateDistributed: 'May 12, 2026',
+      dailyInterestRate: '0.05%',
+      numberOfEmis: 24,
+      emiFrequency: 'Monthly',
+      nextEmiAmount: 1532,
+      nextEmiDueDate: '1 Jul 2026',
+      remainingBalance: 7660,
+      status: 'ACTIVE'
+    };
+  });
 
-  // Repayments schedule with Principal / Interest breakdowns
-  const repaymentSchedule = [
-    { 
-      installment: 1, 
-      date: '1 Jun 2026', 
-      amount: 1532, 
-      status: 'Paid',
-      principal: 1370.17,
-      interest: 161.83
-    },
-    { 
-      installment: 2, 
-      date: '1 Jul 2026', 
-      amount: 1532, 
-      status: 'Next Due',
-      principal: 1370.17,
-      interest: 161.83
-    },
-    { 
-      installment: 3, 
-      date: '31 Jul 2026', 
-      amount: 1532, 
-      status: 'Upcoming',
-      principal: 1370.17,
-      interest: 161.83
-    },
-    { 
-      installment: 4, 
-      date: '30 Aug 2026', 
-      amount: 1532, 
-      status: 'Upcoming',
-      principal: 1370.17,
-      interest: 161.83
-    },
-    { 
-      installment: 5, 
-      date: '29 Sep 2026', 
-      amount: 1532, 
-      status: 'Upcoming',
-      principal: 1370.17,
-      interest: 161.83
-    },
-    { 
-      installment: 6, 
-      date: '29 Oct 2026', 
-      amount: 1532, 
-      status: 'Upcoming',
-      principal: 1370.17,
-      interest: 161.83
+  // Repayments schedule with Principal / Interest breakdowns state
+  const [repaymentSchedule, setRepaymentSchedule] = useState(() => {
+    const saved = localStorage.getItem('lendogo_repayment_schedule');
+    if (saved) return JSON.parse(saved);
+    return [
+      { 
+        installment: 1, 
+        date: '1 Jun 2026', 
+        amount: 1532, 
+        status: 'Paid',
+        principal: 1370.17,
+        interest: 161.83
+      },
+      { 
+        installment: 2, 
+        date: '1 Jul 2026', 
+        amount: 1532, 
+        status: 'Next Due',
+        principal: 1370.17,
+        interest: 161.83
+      },
+      { 
+        installment: 3, 
+        date: '31 Jul 2026', 
+        amount: 1532, 
+        status: 'Upcoming',
+        principal: 1370.17,
+        interest: 161.83
+      },
+      { 
+        installment: 4, 
+        date: '30 Aug 2026', 
+        amount: 1532, 
+        status: 'Upcoming',
+        principal: 1370.17,
+        interest: 161.83
+      },
+      { 
+        installment: 5, 
+        date: '29 Sep 2026', 
+        amount: 1532, 
+        status: 'Upcoming',
+        principal: 1370.17,
+        interest: 161.83
+      },
+      { 
+        installment: 6, 
+        date: '29 Oct 2026', 
+        amount: 1532, 
+        status: 'Upcoming',
+        principal: 1370.17,
+        interest: 161.83
+      }
+    ];
+  });
+
+  // Payment Selection Form states
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [paymentType, setPaymentType] = useState('due'); // 'due', 'entire', 'custom'
+  const [customAmountText, setCustomAmountText] = useState('');
+  const [paymentError, setPaymentError] = useState('');
+
+  // Synchronize state dynamically when localStorage changes elsewhere
+  useEffect(() => {
+    const handleSync = () => {
+      const savedLoan = localStorage.getItem('lendogo_active_loan');
+      if (savedLoan) {
+        setActiveLoan(JSON.parse(savedLoan));
+      } else {
+        // If cleared from localStorage, reset activeLoan to original default
+        setActiveLoan({
+          id: '1092a1a1-1234-4321-abcd-1234567890ab',
+          referenceNumber: 'LGO-1092',
+          amountApplied: 100000,
+          dateApplied: 'May 10, 2026',
+          amountDistributed: 100000,
+          dateDistributed: 'May 12, 2026',
+          dailyInterestRate: '0.05%',
+          numberOfEmis: 24,
+          emiFrequency: 'Monthly',
+          nextEmiAmount: 1532,
+          nextEmiDueDate: '1 Jul 2026',
+          remainingBalance: 7660,
+          status: 'ACTIVE'
+        });
+      }
+      
+      const savedSchedule = localStorage.getItem('lendogo_repayment_schedule');
+      if (savedSchedule) {
+        setRepaymentSchedule(JSON.parse(savedSchedule));
+      } else {
+        setRepaymentSchedule([
+          { installment: 1, date: '1 Jun 2026', amount: 1532, status: 'Paid', principal: 1370.17, interest: 161.83 },
+          { installment: 2, date: '1 Jul 2026', amount: 1532, status: 'Next Due', principal: 1370.17, interest: 161.83 },
+          { installment: 3, date: '31 Jul 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 },
+          { installment: 4, date: '30 Aug 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 },
+          { installment: 5, date: '29 Sep 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 },
+          { installment: 6, date: '29 Oct 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 }
+        ]);
+      }
+      
+      const savedHistory = localStorage.getItem('lendogo_loan_history');
+      if (savedHistory) setLoanHistory(JSON.parse(savedHistory));
+    };
+    window.addEventListener('loan-state-changed', handleSync);
+    return () => window.removeEventListener('loan-state-changed', handleSync);
+  }, []);
+
+  const handleRepaySubmit = async () => {
+    let amountPaid = 0;
+    const remainingToPay = repaymentSchedule.reduce((acc, emi) => emi.status !== 'Paid' ? acc + (emi.amount - (emi.paidAmount || 0)) : acc, 0);
+
+    if (paymentType === 'due') {
+      amountPaid = activeLoan.nextEmiAmount;
+    } else if (paymentType === 'entire') {
+      amountPaid = remainingToPay;
+    } else if (paymentType === 'custom') {
+      const parsed = parseFloat(customAmountText);
+      if (isNaN(parsed) || parsed < 100) {
+        setPaymentError('Please enter a valid amount of at least ₹100.');
+        return;
+      }
+      if (parsed > remainingToPay) {
+        setPaymentError(`Amount cannot exceed the remaining loan balance of ₹${remainingToPay.toLocaleString('en-IN')}.`);
+        return;
+      }
+      amountPaid = parsed;
     }
-  ];
+
+    setPaymentError('');
+    try {
+      // 1. Create Razorpay order on Go backend
+      const orderData = await apiClient('/payments/order', {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: amountPaid,
+          loan_id: activeLoan.id
+        })
+      });
+
+      if (!orderData || !orderData.order_id) {
+        throw new Error("Failed to create Razorpay repayment order.");
+      }
+
+      // 2. Open Razorpay Checkout modal
+      const options = {
+        key: "rzp_test_SvWORMMdaUGuZO", // Public Key ID from backend/admin config
+        amount: Math.round(orderData.amount * 100), // Amount in Paise
+        currency: orderData.currency || "INR",
+        name: "LendoGo Loan Repayment",
+        description: `Repayment for Loan: ${activeLoan.referenceNumber || activeLoan.id}`,
+        order_id: orderData.order_id,
+        prefill: {
+          name: fullName || user?.name || "",
+          email: user?.email || "",
+          contact: phone || ""
+        },
+        theme: {
+          color: "#0f172a"
+        },
+        handler: async function (response) {
+          try {
+            // 3. Verify Payment Signature with backend
+            const verifyRes = await apiClient('/payments/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                loan_id: activeLoan.id,
+                amount_paid: amountPaid
+              })
+            });
+
+            if (verifyRes && verifyRes.status === "success") {
+              // 4. Update frontend state post-verification
+              let newSchedule = [...repaymentSchedule];
+              let newActiveLoan = { ...activeLoan };
+
+              if (paymentType === 'entire' || amountPaid >= remainingToPay) {
+                newSchedule = newSchedule.map(emi => ({
+                  ...emi,
+                  status: 'Paid',
+                  paidAmount: emi.amount
+                }));
+                newActiveLoan.remainingBalance = 0;
+                newActiveLoan.nextEmiAmount = 0;
+                newActiveLoan.status = 'CLOSED';
+              } else {
+                let remainingPayment = amountPaid;
+                
+                for (let i = 0; i < newSchedule.length; i++) {
+                  const emi = newSchedule[i];
+                  if (emi.status === 'Paid') continue;
+                  
+                  const emiAmount = emi.amount;
+                  const currentPaid = emi.paidAmount || 0;
+                  const leftForThisEmi = emiAmount - currentPaid;
+                  
+                  if (remainingPayment >= leftForThisEmi) {
+                    remainingPayment -= leftForThisEmi;
+                    newSchedule[i] = {
+                      ...emi,
+                      status: 'Paid',
+                      paidAmount: emiAmount
+                    };
+                  } else {
+                    newSchedule[i] = {
+                      ...emi,
+                      paidAmount: currentPaid + remainingPayment,
+                      status: 'Next Due'
+                    };
+                    remainingPayment = 0;
+                    break;
+                  }
+                }
+
+                const allPaid = newSchedule.every(emi => emi.status === 'Paid');
+                if (allPaid) {
+                  newActiveLoan.remainingBalance = 0;
+                  newActiveLoan.nextEmiAmount = 0;
+                  newActiveLoan.status = 'CLOSED';
+                } else {
+                  const nextUnpaidIdx = newSchedule.findIndex(emi => emi.status !== 'Paid');
+                  if (nextUnpaidIdx !== -1) {
+                    newSchedule[nextUnpaidIdx].status = 'Next Due';
+                    for (let j = nextUnpaidIdx + 1; j < newSchedule.length; j++) {
+                      newSchedule[j].status = 'Upcoming';
+                    }
+                    
+                    const nextUnpaid = newSchedule[nextUnpaidIdx];
+                    newActiveLoan.nextEmiAmount = nextUnpaid.amount - (nextUnpaid.paidAmount || 0);
+                    newActiveLoan.nextEmiDueDate = nextUnpaid.date;
+                  }
+                  
+                  newActiveLoan.remainingBalance = Math.max(0, newActiveLoan.remainingBalance - amountPaid);
+                }
+              }
+
+              setActiveLoan(newActiveLoan);
+              setRepaymentSchedule(newSchedule);
+              localStorage.setItem('lendogo_active_loan', JSON.stringify(newActiveLoan));
+              localStorage.setItem('lendogo_repayment_schedule', JSON.stringify(newSchedule));
+
+              let newHistory = [...loanHistory];
+              const targetIdx = newHistory.findIndex(h => h.id === newActiveLoan.id);
+              if (targetIdx !== -1) {
+                if (newActiveLoan.status === 'CLOSED') {
+                  newHistory[targetIdx].status = 'CLOSED';
+                }
+                setLoanHistory(newHistory);
+                localStorage.setItem('lendogo_loan_history', JSON.stringify(newHistory));
+              }
+
+              if (newActiveLoan.status === 'CLOSED') {
+                const emailKey = user?.email || 'user';
+                const currentScore = parseInt(localStorage.getItem(`trust_score_${emailKey}`)) || 736;
+                const newScore = Math.min(850, currentScore + 85);
+                localStorage.setItem(`trust_score_${emailKey}`, newScore.toString());
+                
+                showToast(`Congratulations! Loan fully paid. Trust score updated to ${newScore}!`, 'success');
+              } else {
+                showToast(`Repayment of ₹${amountPaid.toLocaleString('en-IN')} successful!`, 'success');
+              }
+
+              window.dispatchEvent(new Event('loan-state-changed'));
+              window.dispatchEvent(new Event('user-details-changed'));
+
+              setShowPaymentOptions(false);
+              setPaymentType('due');
+              setCustomAmountText('');
+              setPaymentError('');
+            } else {
+              throw new Error("Verification failed on the server.");
+            }
+          } catch (verifyErr) {
+            console.error("Verification error:", verifyErr);
+            showToast("Payment verification failed! " + verifyErr.message, "error");
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            showToast("Payment cancelled by user.", "info");
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.error("Razorpay initiation error:", err);
+      setPaymentError(err.message || "Something went wrong. Please try again.");
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -291,15 +673,13 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
         {/* VIEW: MAIN NAVIGATION MENU */}
         {currentView === 'menu' && (
           <>
-            <div className="sidebar-header">
+            <div className="sidebar-header main-menu-header">
               <div className="sidebar-user-card-header">
                 <div className="sidebar-avatar-circle">
                   <img src={profilePhoto} alt="User Avatar" />
                 </div>
                 <div className="sidebar-meta-text">
                   <h4 className="sidebar-username">{fullName || getFallbackName()}</h4>
-                  <span className="sidebar-useremail">{user.email}</span>
-                  <span className="sidebar-kyc-badge">KYC STATUS: VERIFIED</span>
                 </div>
               </div>
               <button type="button" className="sidebar-close-btn" onClick={onClose} aria-label="Close Profile Portal">×</button>
@@ -310,7 +690,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
               <div className="wallet-card-overlay-glow" />
               <div className="wallet-card-left-section">
                 <span className="wallet-card-label">LendoGo Wallet Balance</span>
-                <span className="wallet-card-amount">₹12,450.00</span>
+                <span className="wallet-card-amount">₹{walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="wallet-card-right-section">
                 <span className="wallet-active-pulse-dot"></span>
@@ -329,26 +709,42 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
 
-                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('kyc')}>
+                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('trustScore')}>
                   <div className="sidebar-menu-left-details">
-                    <span className="sidebar-menu-title">KYC Verification</span>
-                    <span className="sidebar-menu-subtitle">Aadhaar, PAN & document validation</span>
+                    <span className="sidebar-menu-title">Internal Trust Score</span>
+                    <span className="sidebar-menu-subtitle">Real-time internal credit score assessment</span>
                   </div>
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
 
-                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('loan')}>
+                <div className="sidebar-menu-card-item" onClick={() => showToast('CIBIL Score Checker feature is coming soon!', 'info')}>
                   <div className="sidebar-menu-left-details">
-                    <span className="sidebar-menu-title">Financial Accounts</span>
-                    <span className="sidebar-menu-subtitle">Manage bank accounts and active loan metrics</span>
+                    <span className="sidebar-menu-title">Check CIBIL Score</span>
+                    <span className="sidebar-menu-subtitle">Verify external credit report score details</span>
+                  </div>
+                  <span className="sidebar-arrow-chevron">&gt;</span>
+                </div>
+
+                <div className="sidebar-menu-card-item" onClick={() => showToast('Auto Pay feature is coming soon!', 'info')}>
+                  <div className="sidebar-menu-left-details">
+                    <span className="sidebar-menu-title">Auto Pay</span>
+                    <span className="sidebar-menu-subtitle">Setup automatic monthly EMI deductions</span>
                   </div>
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
 
                 <div className="sidebar-menu-card-item" onClick={() => setCurrentView('repayment')}>
                   <div className="sidebar-menu-left-details">
-                    <span className="sidebar-menu-title">Transaction & Repayment History</span>
+                    <span className="sidebar-menu-title">Repay</span>
                     <span className="sidebar-menu-subtitle">View repayment schedules and EMI dates</span>
+                  </div>
+                  <span className="sidebar-arrow-chevron">&gt;</span>
+                </div>
+
+                <div className="sidebar-menu-card-item" onClick={() => setCurrentView('loan')}>
+                  <div className="sidebar-menu-left-details">
+                    <span className="sidebar-menu-title">Loan History</span>
+                    <span className="sidebar-menu-subtitle">View active/applied loans</span>
                   </div>
                   <span className="sidebar-arrow-chevron">&gt;</span>
                 </div>
@@ -473,258 +869,316 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
           </>
         )}
 
-        {/* VIEW: KYC IDENTITY EDIT SUB-SCREEN */}
-        {currentView === 'kyc' && (
+        {/* VIEW: TRUST SCORE ASSESSMENT SUB-SCREEN */}
+        {currentView === 'trustScore' && (
           <>
             <div className="sidebar-header subview-header-row">
               <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Fintech KYC Verification</h4>
+              <h4 className="sidebar-subpage-title-text">Trust Score Assessment</h4>
               <div style={{ width: '40px' }} />
             </div>
 
             <div className="sidebar-scroll-content">
-              <form onSubmit={handleSaveKyc} className="sidebar-form">
-                <div className="sidebar-input-group">
-                  <label>PAN Card Number</label>
-                  <input 
-                    type="text" 
-                    value={panNumber}
-                    onChange={(e) => setPanNumber(e.target.value)}
-                    placeholder="Enter 10-digit PAN"
-                    className="sidebar-input-field"
-                    maxLength={10}
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Aadhaar Card Number</label>
-                  <input 
-                    type="text" 
-                    value={aadhaarNumber}
-                    onChange={(e) => setAadhaarNumber(e.target.value)}
-                    placeholder="Enter 12-digit Aadhaar"
-                    className="sidebar-input-field"
-                    maxLength={14}
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Father's Full Name</label>
-                  <input 
-                    type="text" 
-                    value={fatherName}
-                    onChange={(e) => setFatherName(e.target.value)}
-                    placeholder="Enter father's name"
-                    className="sidebar-input-field"
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Employment Status</label>
-                  <select 
-                    value={employmentType}
-                    onChange={(e) => setEmploymentType(e.target.value)}
-                    className="sidebar-input-field"
-                    required
-                  >
-                    <option value="Salaried">Salaried</option>
-                    <option value="Self-Employed">Self-Employed</option>
-                    <option value="Student">Student</option>
-                    <option value="Unemployed">Unemployed</option>
-                  </select>
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Monthly Income (INR)</label>
-                  <input 
-                    type="number" 
-                    value={monthlyIncome}
-                    onChange={(e) => setMonthlyIncome(e.target.value)}
-                    placeholder="Enter monthly income"
-                    className="sidebar-input-field"
-                    required
-                  />
-                </div>
-                <div className="sidebar-input-group">
-                  <label>Permanent Address</label>
-                  <textarea 
-                    value={kycAddress}
-                    onChange={(e) => setKycAddress(e.target.value)}
-                    placeholder="Enter permanent address"
-                    className="sidebar-textarea-field"
-                    required
-                  />
-                </div>
-
-                {/* Document uploads inside KYC view */}
-                <div className="sidebar-upload-section">
-                  <h5 className="sidebar-subpage-sub-title">Document Scans Verification</h5>
-                  
-                  <div className="sidebar-upload-row">
-                    <label className="sidebar-upload-field-label">Aadhaar Card Front</label>
-                    <div className="sidebar-file-flex">
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => {
-                          const f = e.target.files[0];
-                          if (f) {
-                            setAadharFrontName(f.name);
-                            localStorage.setItem('kyc_aadhar_front', f.name);
-                            window.dispatchEvent(new Event('user-details-changed'));
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                        id="sidebar-sub-aadhar-front"
-                      />
-                      <label htmlFor="sidebar-sub-aadhar-front" className="sidebar-upload-label-btn">Choose Front</label>
-                      <span className="sidebar-upload-filename">{aadharFrontName}</span>
-                    </div>
-                  </div>
-
-                  <div className="sidebar-upload-row">
-                    <label className="sidebar-upload-field-label">Aadhaar Card Back</label>
-                    <div className="sidebar-file-flex">
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => {
-                          const f = e.target.files[0];
-                          if (f) {
-                            setAadharBackName(f.name);
-                            localStorage.setItem('kyc_aadhar_back', f.name);
-                            window.dispatchEvent(new Event('user-details-changed'));
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                        id="sidebar-sub-aadhar-back"
-                      />
-                      <label htmlFor="sidebar-sub-aadhar-back" className="sidebar-upload-label-btn">Choose Back</label>
-                      <span className="sidebar-upload-filename">{aadharBackName}</span>
-                    </div>
-                  </div>
-
-                  <div className="sidebar-upload-row">
-                    <label className="sidebar-upload-field-label">PAN Card Scan</label>
-                    <div className="sidebar-file-flex">
-                      <input 
-                        type="file" 
-                        accept="image/*,application/pdf"
-                        onChange={(e) => {
-                          const f = e.target.files[0];
-                          if (f) {
-                            setPanFileName(f.name);
-                            localStorage.setItem('kyc_pan_file', f.name);
-                            window.dispatchEvent(new Event('user-details-changed'));
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                        id="sidebar-sub-pan"
-                      />
-                      <label htmlFor="sidebar-sub-pan" className="sidebar-upload-label-btn">Choose PAN Scan</label>
-                      <span className="sidebar-upload-filename">{panFileName}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sidebar-security-disclaimer">
-                  Your data is secure and encrypted.
-                </div>
-
-                <button type="submit" className="sidebar-submit-btn-unified">Submit KYC Identity</button>
-              </form>
+              <TrustScoreView user={user} showToast={showToast} />
             </div>
           </>
         )}
 
-        {/* VIEW: FINANCIAL ACCOUNTS & ACTIVE LOAN DETAILS */}
-        {currentView === 'loan' && (
+        {/* VIEW: REPAY */}
+        {currentView === 'repayment' && (
           <>
             <div className="sidebar-header subview-header-row">
               <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Loans & Portfolio</h4>
+              <h4 className="sidebar-subpage-title-text">Repay</h4>
               <div style={{ width: '40px' }} />
             </div>
 
             <div className="sidebar-scroll-content">
-              {/* Premium Card matching fourth image */}
-              <div className="sidebar-amount-due-premium-card">
-                <div className="card-top-amounts">
-                  <div className="amount-group">
-                    <span className="card-amount-label">Amount Due</span>
-                    <h2 className="card-amount-value">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</h2>
+              {activeLoan && activeLoan.status === 'ACTIVE' ? (
+                <>
+                  {/* Top next due card matching third image */}
+                  <div className="sidebar-repayment-quick-summary-card">
+                    <div className="summary-col">
+                      <span className="summary-lbl">Next EMI</span>
+                      <span className="summary-val">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="summary-col">
+                      <span className="summary-lbl">Due On</span>
+                      <span className="summary-val">{activeLoan.nextEmiDueDate}</span>
+                    </div>
                   </div>
-                  <div className="amount-group text-right">
-                    <span className="card-amount-label">Due On</span>
-                    <span className="card-due-date-value">{activeLoan.nextEmiDueDate}</span>
-                  </div>
-                </div>
-                
-                {/* Horizontal Progress Bar */}
-                <div className="card-progress-section">
-                  <div className="card-progress-bar-track">
-                    <div className="card-progress-bar-fill" style={{ width: '100%' }}></div>
-                  </div>
-                  <div className="card-progress-labels">
-                    <span>Paid ₹1,532</span>
-                  </div>
-                </div>
 
-                <button 
-                  type="button" 
-                  className="card-repayment-action-btn"
-                  onClick={() => alert('Redirecting to secure repayment gateway...')}
-                >
-                  Make a Repayment
-                </button>
-              </div>
+                  <h5 className="sidebar-subpage-sub-title">Upcoming & Past Installments</h5>
 
+                  {/* Installment dates cards list matching third image exactly */}
+                  <div className="sidebar-repayment-list-stack">
+                    {repaymentSchedule.map((emi) => {
+                      const isExpanded = expandedRepaymentInstallment === emi.installment;
+                      const hasPaidPart = emi.paidAmount && emi.paidAmount > 0 && emi.paidAmount < emi.amount;
+                      return (
+                        <div key={emi.installment} className="sidebar-repayment-card-row">
+                          <div 
+                            className="repayment-card-row-header"
+                            onClick={() => setExpandedRepaymentInstallment(isExpanded ? null : emi.installment)}
+                          >
+                            <div className="repayment-row-left-group">
+                              <span className="repayment-emi-date-lbl">{emi.date}</span>
+                              {emi.status === 'Paid' && (
+                                <span className="repayment-status-paid-icon">✓</span>
+                              )}
+                              {emi.status === 'Next Due' && !hasPaidPart && (
+                                <span className="repayment-status-badge next-due">Next Due</span>
+                              )}
+                              {emi.status === 'Next Due' && hasPaidPart && (
+                                <span className="repayment-status-badge next-due partial">Partially Paid</span>
+                              )}
+                            </div>
+                            <div className="repayment-row-right-group">
+                              <span className="repayment-amount-val">
+                                {emi.status === 'Paid' 
+                                  ? 'Paid' 
+                                  : hasPaidPart 
+                                    ? `₹${(emi.amount - emi.paidAmount).toLocaleString('en-IN')} left` 
+                                    : `₹${emi.amount.toLocaleString('en-IN')}`}
+                              </span>
+                              <span className="repayment-arrow-toggle-indicator">
+                                {isExpanded ? '▲' : '▼'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {isExpanded && (
+                            <div className="repayment-card-row-body-details">
+                              <div className="repayment-breakdown-row">
+                                <span className="breakdown-lbl">Principal</span>
+                                <span className="breakdown-val">₹{emi.principal.toLocaleString('en-IN')}</span>
+                              </div>
+                              <div className="repayment-breakdown-row">
+                                <span className="breakdown-lbl">Interest + Fees</span>
+                                <span className="breakdown-val">₹{emi.interest.toLocaleString('en-IN')}</span>
+                              </div>
+                              {emi.paidAmount > 0 && (
+                                <div className="repayment-breakdown-row partial-payment-breakdown">
+                                  <span className="breakdown-lbl">Paid Portion</span>
+                                  <span className="breakdown-val highlight-green">₹{emi.paidAmount.toLocaleString('en-IN')}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Make a Repayment button or options selection panel */}
+                  <div className="repayment-action-section mt-3">
+                    {!showPaymentOptions ? (
+                      <button 
+                        type="button" 
+                        className="sidebar-make-repayment-unified-btn"
+                        onClick={() => {
+                          setShowPaymentOptions(true);
+                          setPaymentError('');
+                        }}
+                      >
+                        Make a Repayment
+                      </button>
+                    ) : (
+                      <div className="repayment-options-panel animate-slide-in">
+                        <h5 className="repayment-panel-title">Select Repayment Amount</h5>
+                        
+                        <div className="repayment-option-cards">
+                          {/* Card 1: Next Due */}
+                          <div 
+                            className={`repayment-option-card ${paymentType === 'due' ? 'selected' : ''}`}
+                            onClick={() => { setPaymentType('due'); setPaymentError(''); }}
+                          >
+                            <div className="option-card-radio">
+                              <span className="radio-dot"></span>
+                            </div>
+                            <div className="option-card-content">
+                              <span className="option-card-label">Next EMI Due</span>
+                              <span className="option-card-amount">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</span>
+                              <span className="option-card-sub">Due on {activeLoan.nextEmiDueDate}</span>
+                            </div>
+                          </div>
+
+                          {/* Card 2: Entire Loan Balance */}
+                          <div 
+                            className={`repayment-option-card ${paymentType === 'entire' ? 'selected' : ''}`}
+                            onClick={() => { setPaymentType('entire'); setPaymentError(''); }}
+                          >
+                            <div className="option-card-radio">
+                              <span className="radio-dot"></span>
+                            </div>
+                            <div className="option-card-content">
+                              <span className="option-card-label">Pay Entire Loan</span>
+                              <span className="option-card-amount">
+                                ₹{(repaymentSchedule.reduce((acc, emi) => emi.status !== 'Paid' ? acc + (emi.amount - (emi.paidAmount || 0)) : acc, 0)).toLocaleString('en-IN')}
+                              </span>
+                              <span className="option-card-sub">Close loan entirely & boost Trust Score</span>
+                            </div>
+                          </div>
+
+                          {/* Card 3: Custom Amount */}
+                          <div 
+                            className={`repayment-option-card ${paymentType === 'custom' ? 'selected' : ''}`}
+                            onClick={() => { setPaymentType('custom'); setPaymentError(''); }}
+                          >
+                            <div className="option-card-radio">
+                              <span className="radio-dot"></span>
+                            </div>
+                            <div className="option-card-content">
+                              <span className="option-card-label">Custom Amount</span>
+                              <span className="option-card-sub">Pay any partial or principal amount</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {paymentType === 'custom' && (
+                          <div className="custom-amount-input-wrapper mt-2">
+                            <label className="custom-amount-label">ENTER AMOUNT (MIN ₹100)</label>
+                            <div className="custom-amount-input-box">
+                              <span className="currency-symbol">₹</span>
+                              <input 
+                                type="number" 
+                                value={customAmountText}
+                                onChange={(e) => {
+                                  setCustomAmountText(e.target.value);
+                                  setPaymentError('');
+                                }}
+                                placeholder="0.00"
+                                min="100"
+                                className="custom-amount-input"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {paymentError && (
+                          <div className="repayment-error-msg mt-2">
+                            ⚠️ {paymentError}
+                          </div>
+                        )}
+
+                        <div className="repayment-panel-actions mt-3">
+                          <button 
+                            type="button" 
+                            className="repayment-cancel-btn"
+                            onClick={() => {
+                              setShowPaymentOptions(false);
+                              setPaymentType('due');
+                              setCustomAmountText('');
+                              setPaymentError('');
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          
+                          <button 
+                            type="button" 
+                            className="repayment-confirm-btn"
+                            onClick={handleRepaySubmit}
+                          >
+                            Confirm & Pay
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="loan-closed-celebration-card mt-3">
+                  <div className="celebration-glow" />
+                  <span className="celebration-trophy">🏆</span>
+                  <h4 className="celebration-title">Loan Fully Closed!</h4>
+                  <p className="celebration-desc">
+                    Congratulations! Your loan accounts are fully closed. 
+                    Your Trust Score has been updated, and you are eligible to apply for another loan.
+                  </p>
+                  <button
+                    type="button"
+                    className="sidebar-apply-new-loan-btn"
+                    onClick={() => {
+                      onClose();
+                      navigate('/products/personal');
+                    }}
+                  >
+                    Apply for Another Loan
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* VIEW: LOAN HISTORY */}
+        {currentView === 'loan' && (
+          <>
+            <div className="sidebar-header subview-header-row">
+              <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
+              <h4 className="sidebar-subpage-title-text">Loan History</h4>
+              <div style={{ width: '40px' }} />
+            </div>
+
+            <div className="sidebar-scroll-content">
               {/* Parameter List */}
-              <div className="sidebar-loan-parameters-vertical-list">
-                <h5 className="sidebar-subpage-sub-title">Active Loan Specifications</h5>
+              {activeLoan && activeLoan.status === 'ACTIVE' ? (
+                <div className="sidebar-loan-parameters-vertical-list">
+                  <h5 className="sidebar-subpage-sub-title">Active Loan Specifications</h5>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Loan Account ID</span>
-                  <span className="param-value-tag">{activeLoan.id}</span>
-                </div>
-                
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Amount Applied</span>
-                  <span className="param-value-tag">₹{activeLoan.amountApplied.toLocaleString('en-IN')}</span>
-                </div>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Loan Account ID</span>
+                    <span className="param-value-tag">{activeLoan.referenceNumber || activeLoan.id}</span>
+                  </div>
+                  
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Amount Applied</span>
+                    <span className="param-value-tag">₹{activeLoan.amountApplied.toLocaleString('en-IN')}</span>
+                  </div>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Date Applied</span>
-                  <span className="param-value-tag">{activeLoan.dateApplied}</span>
-                </div>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Date Applied</span>
+                    <span className="param-value-tag">{activeLoan.dateApplied}</span>
+                  </div>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Amount Distributed</span>
-                  <span className="param-value-tag">₹{activeLoan.amountDistributed.toLocaleString('en-IN')}</span>
-                </div>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Amount Distributed</span>
+                    <span className="param-value-tag">₹{activeLoan.amountDistributed.toLocaleString('en-IN')}</span>
+                  </div>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Date Distributed</span>
-                  <span className="param-value-tag">{activeLoan.dateDistributed}</span>
-                </div>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Date Distributed</span>
+                    <span className="param-value-tag">{activeLoan.dateDistributed}</span>
+                  </div>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Daily Interest Rate</span>
-                  <span className="param-value-tag highlight-green">{activeLoan.dailyInterestRate}</span>
-                </div>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Daily Interest Rate</span>
+                    <span className="param-value-tag highlight-green">{activeLoan.dailyInterestRate}</span>
+                  </div>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">Number of EMIs</span>
-                  <span className="param-value-tag">{activeLoan.numberOfEmis} Months</span>
-                </div>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">Number of EMIs</span>
+                    <span className="param-value-tag">{activeLoan.numberOfEmis} Months</span>
+                  </div>
 
-                <div className="sidebar-param-row-detail">
-                  <span className="param-label-tag">EMI Frequency</span>
-                  <span className="param-value-tag">{activeLoan.emiFrequency}</span>
+                  <div className="sidebar-param-row-detail">
+                    <span className="param-label-tag">EMI Frequency</span>
+                    <span className="param-value-tag">{activeLoan.emiFrequency}</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="loan-closed-celebration-card" style={{ padding: '1.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>🎉</span>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>No Active Loans</h4>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                    You currently have no active credit liabilities on LendoGo. Make an application to explore capital options!
+                  </p>
+                </div>
+              )}
 
               {/* Card 2: Applied Loan History */}
-              <div style={{ marginTop: '2rem' }}>
+              <div style={{ marginTop: '2.5rem' }}>
                 <h5 className="sidebar-subpage-sub-title">Applied Loan History</h5>
                 <div className="loan-history-list">
                   {loanHistory.length === 0 ? (
@@ -752,193 +1206,6 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                   )}
                 </div>
               </div>
-
-              {/* Card 3: Linked Bank Accounts Coordinates */}
-              <div style={{ marginTop: '1.5rem', paddingBottom: '2rem' }}>
-                <h5 className="sidebar-subpage-sub-title">Bank Accounts Coordinates</h5>
-
-                {!showAddBank ? (
-                  <button 
-                    type="button" 
-                    className="add-bank-trigger-btn"
-                    onClick={() => setShowAddBank(true)}
-                  >
-                    + Link New Bank Account
-                  </button>
-                ) : (
-                  <form onSubmit={handleAddBankAccount} className="add-bank-form-card">
-                    <div className="sidebar-form-grid">
-                      <div className="sidebar-input-group" style={{ marginBottom: '0.5rem' }}>
-                        <label style={{ fontSize: '0.72rem', color: '#64748b' }}>Bank Name</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. HDFC Bank, SBI, ICICI" 
-                          value={newBankName} 
-                          onChange={(e) => setNewBankName(e.target.value)} 
-                          className="sidebar-input-field"
-                          required
-                        />
-                      </div>
-                      <div className="sidebar-form-grid-row">
-                        <div className="sidebar-input-group" style={{ marginBottom: '0.5rem' }}>
-                          <label style={{ fontSize: '0.72rem', color: '#64748b' }}>Account Number</label>
-                          <input 
-                            type="password" 
-                            placeholder="12-16 digit Account Number" 
-                            value={newAccNum} 
-                            onChange={(e) => setNewAccNum(e.target.value)} 
-                            className="sidebar-input-field"
-                            required
-                          />
-                        </div>
-                        <div className="sidebar-input-group" style={{ marginBottom: '0.5rem' }}>
-                          <label style={{ fontSize: '0.72rem', color: '#64748b' }}>IFSC Code</label>
-                          <input 
-                            type="text" 
-                            placeholder="e.g. ICIC0000124" 
-                            value={newIfsc} 
-                            onChange={(e) => setNewIfsc(e.target.value)} 
-                            className="sidebar-input-field"
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button type="submit" className="sidebar-submit-btn-unified" style={{ padding: '0.4rem 0.8rem', fontSize: '0.72rem', marginTop: 0 }}>
-                        Verify & Link Bank
-                      </button>
-                      <button 
-                        type="button" 
-                        className="sidebar-back-nav-btn" 
-                        onClick={() => setShowAddBank(false)}
-                        style={{ fontSize: '0.72rem', padding: '0.4rem 0.8rem', background: '#f1f5f9', color: '#64748b', border: '1px solid #cbd5e1' }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                <div className="linked-banks-list">
-                  {bankAccounts.map((bank) => (
-                    <div key={bank.id} className={`bank-account-item ${bank.isPrimary ? 'primary-highlight' : ''}`}>
-                      <div className="bank-item-left">
-                        <div className="bank-avatar-badge">🏦</div>
-                        <div className="bank-item-details">
-                          <div className="bank-item-name-row">
-                            <h4>{bank.bankName}</h4>
-                            {bank.isPrimary && <span className="primary-pill">Primary</span>}
-                          </div>
-                          <p>{bank.accNum} • IFSC: {bank.ifsc}</p>
-                        </div>
-                      </div>
-                      <div className="bank-item-actions">
-                        {!bank.isPrimary && (
-                          <button 
-                            type="button" 
-                            className="bank-action-btn primary-trigger"
-                            onClick={() => handleSetPrimaryBank(bank.id)}
-                            title="Set as primary payout bank"
-                          >
-                            Set Primary
-                          </button>
-                        )}
-                        <button 
-                          type="button" 
-                          className="bank-action-btn unlink-trigger"
-                          onClick={() => handleRemoveBank(bank.id)}
-                          title="Unlink account"
-                        >
-                          Unlink
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* VIEW: REPAYMENT SCHEDULE */}
-        {currentView === 'repayment' && (
-          <>
-            <div className="sidebar-header subview-header-row">
-              <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Repayment Schedule</h4>
-              <div style={{ width: '40px' }} />
-            </div>
-
-            <div className="sidebar-scroll-content">
-              {/* Top next due card matching third image */}
-              <div className="sidebar-repayment-quick-summary-card">
-                <div className="summary-col">
-                  <span className="summary-lbl">Next EMI</span>
-                  <span className="summary-val">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="summary-col">
-                  <span className="summary-lbl">Due On</span>
-                  <span className="summary-val">{activeLoan.nextEmiDueDate}</span>
-                </div>
-              </div>
-
-              <h5 className="sidebar-subpage-sub-title">Upcoming & Past Installments</h5>
-
-              {/* Installment dates cards list matching third image exactly */}
-              <div className="sidebar-repayment-list-stack">
-                {repaymentSchedule.map((emi) => {
-                  const isExpanded = expandedRepaymentInstallment === emi.installment;
-                  return (
-                    <div key={emi.installment} className="sidebar-repayment-card-row">
-                      <div 
-                        className="repayment-card-row-header"
-                        onClick={() => setExpandedRepaymentInstallment(isExpanded ? null : emi.installment)}
-                      >
-                        <div className="repayment-row-left-group">
-                          <span className="repayment-emi-date-lbl">{emi.date}</span>
-                          {emi.status === 'Paid' && (
-                            <span className="repayment-status-paid-icon">✓</span>
-                          )}
-                          {emi.status === 'Next Due' && (
-                            <span className="repayment-status-badge next-due">Next Due</span>
-                          )}
-                        </div>
-                        <div className="repayment-row-right-group">
-                          <span className="repayment-amount-val">
-                            {emi.status === 'Paid' ? 'Paid' : `₹${emi.amount.toLocaleString('en-IN')}`}
-                          </span>
-                          <span className="repayment-arrow-toggle-indicator">
-                            {isExpanded ? '▲' : '▼'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {isExpanded && (
-                        <div className="repayment-card-row-body-details">
-                          <div className="repayment-breakdown-row">
-                            <span className="breakdown-lbl">Principal</span>
-                            <span className="breakdown-val">₹{emi.principal.toLocaleString('en-IN')}</span>
-                          </div>
-                          <div className="repayment-breakdown-row">
-                            <span className="breakdown-lbl">Interest + Fees</span>
-                            <span className="breakdown-val">₹{emi.interest.toLocaleString('en-IN')}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Grand Repayment Button matching third image */}
-              <button 
-                type="button" 
-                className="sidebar-make-repayment-unified-btn mt-3"
-                onClick={() => alert('Launching Secure Repayment Gateway...')}
-              >
-                Make a Repayment
-              </button>
             </div>
           </>
         )}
@@ -1041,9 +1308,55 @@ const Navbar = () => {
   const [notificationsDropdownOpen, setNotificationsDropdownOpen] = useState(false);
   const navbarRef = useRef(null);
 
-  const [profileDp, setProfileDp] = useState(
-    localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-  );
+  const [toast, setToast] = useState(null);
+
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (menuOpen || modalOpen || profileDropdownOpen || notificationsDropdownOpen) {
+        setShowNavbar(true);
+        return;
+      }
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowNavbar(false);
+      } else {
+        setShowNavbar(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, menuOpen, modalOpen, profileDropdownOpen, notificationsDropdownOpen]);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    const handleToastEvent = (e) => {
+      if (e.detail && e.detail.message) {
+        showToast(e.detail.message, e.detail.type || 'success');
+      }
+    };
+    window.addEventListener('lendogo-toast', handleToastEvent);
+    return () => window.removeEventListener('lendogo-toast', handleToastEvent);
+  }, []);
+
+  const [profileDp, setProfileDp] = useState(() => {
+    return getCleanDpUrl(localStorage.getItem('user_dp'));
+  });
 
   const getFallbackName = () => {
     if (user && user.name && user.name !== 'LendoGO User') {
@@ -1065,7 +1378,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleDpChange = () => {
       setProfileDp(
-        localStorage.getItem('user_dp') || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+        getCleanDpUrl(localStorage.getItem('user_dp'))
       );
     };
     const handleDetailsChange = () => {
@@ -1073,6 +1386,36 @@ const Navbar = () => {
     };
     window.addEventListener('user-dp-changed', handleDpChange);
     window.addEventListener('user-details-changed', handleDetailsChange);
+
+    if (user && user.isAuthenticated) {
+      const fetchProfileInit = async () => {
+        try {
+          const res = await apiClient('/user/profile');
+          if (res && res.success && res.data) {
+            const p = res.data;
+            const nameVal = p.full_name || getFallbackName();
+            const profileImgUrl = getCleanDpUrl(p.profile_image);
+            
+            localStorage.setItem('user_full_name', nameVal);
+            localStorage.setItem('user_phone', p.phone_number || '');
+            localStorage.setItem('user_dob', p.date_of_birth || '');
+            localStorage.setItem('user_pincode', p.pincode || '');
+            localStorage.setItem('user_address', p.address || '');
+            localStorage.setItem('user_dp', profileImgUrl);
+
+            setProfileDp(profileImgUrl);
+            setFullName(nameVal);
+
+            window.dispatchEvent(new Event('user-dp-changed'));
+            window.dispatchEvent(new Event('user-details-changed'));
+          }
+        } catch (err) {
+          console.error("Failed to prefetch profile on login:", err);
+        }
+      };
+      fetchProfileInit();
+    }
+
     return () => {
       window.removeEventListener('user-dp-changed', handleDpChange);
       window.removeEventListener('user-details-changed', handleDetailsChange);
@@ -1110,7 +1453,7 @@ const Navbar = () => {
 
   return (
     <>
-    <nav className="navbar" ref={navbarRef}>
+    <nav className={`navbar ${showNavbar ? '' : 'navbar--hidden'}`} ref={navbarRef}>
       <div className="navbar-container">
         <div className="navbar-logo" onClick={() => navigate(user.isAuthenticated ? '/home' : '/')} style={{ cursor: 'pointer' }}>
           <div className="logo-icon"></div>
@@ -1188,13 +1531,13 @@ const Navbar = () => {
                   <div className="notifications-dropdown-menu">
                     <div className="notifications-header">
                       <h5>Notifications</h5>
-                      <button type="button" className="mark-all-read-btn" onClick={() => alert('All notifications marked as read!')}>Mark all read</button>
+                      <button type="button" className="mark-all-read-btn" onClick={() => showToast('All notifications marked as read!', 'success')}>Mark all read</button>
                     </div>
                     <div className="notifications-list">
                       <div 
                         className="notification-item unread" 
                         onClick={() => { 
-                          setSidebarInitialView('kyc'); 
+                          setSidebarInitialView('trustScore'); 
                           setProfileDropdownOpen(true); 
                           setNotificationsDropdownOpen(false); 
                         }}
@@ -1202,7 +1545,7 @@ const Navbar = () => {
                       >
                         <span className="notification-dot"></span>
                         <div className="notification-text-group">
-                          <p className="notification-msg">Your KYC has been successfully verified.</p>
+                          <p className="notification-msg">Your LendoGo Trust Score was updated.</p>
                           <span className="notification-time">10 mins ago</span>
                         </div>
                       </div>
@@ -1265,6 +1608,7 @@ const Navbar = () => {
                   signOut={signOut}
                   navigate={navigate}
                   initialView={sidebarInitialView}
+                  showToast={showToast}
                 />
               </div>
             </>
@@ -1381,6 +1725,21 @@ const Navbar = () => {
     </nav>
 
     <ConsultationModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+
+    {toast && (
+      <div className="lendogo-toast-container">
+        <div className={`lendogo-toast ${toast.type}`}>
+          <div className="lendogo-toast-content">{toast.message}</div>
+          <button 
+            type="button" 
+            className="lendogo-toast-close" 
+            onClick={() => setToast(null)}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 };

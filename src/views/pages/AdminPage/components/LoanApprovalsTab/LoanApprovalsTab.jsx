@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const LoanApprovalsTab = ({ approvedLoans, handleDisburseMoney }) => {
   // Filter, Search, and Export states
@@ -201,31 +202,33 @@ const LoanApprovalsTab = ({ approvedLoans, handleDisburseMoney }) => {
   };
 
   // Payout confirmation handler
-  const handleConfirmDisbursal = () => {
+  const handleConfirmDisbursal = async () => {
     if (!selectedLoan || !authorizedChecked) return;
     setIsDisbursing(true);
 
     const feeVal = getFeeAmount();
     const netPayout = selectedLoan.amount - feeVal;
 
-    setTimeout(() => {
-      // Execute state changes in controller hook
-      handleDisburseMoney(selectedLoan.id, feeVal);
-
-      // Store local receipt data to render successful transfer screen
-      setDisbursalReceipt({
-        id: selectedLoan.id,
-        name: selectedLoan.name,
-        amount: selectedLoan.amount,
-        fee: feeVal,
-        net: netPayout,
-        date: new Date().toLocaleDateString(),
-        ref: `TXN-${Math.floor(10000000 + Math.random() * 90000000)}`
-      });
-
+    try {
+      const ok = await handleDisburseMoney(selectedLoan.id, feeVal);
+      if (ok) {
+        // Store local receipt data to render successful transfer screen
+        setDisbursalReceipt({
+          id: selectedLoan.id,
+          name: selectedLoan.name,
+          amount: selectedLoan.amount,
+          fee: feeVal,
+          net: netPayout,
+          date: new Date().toLocaleDateString(),
+          ref: `TXN-${Math.floor(10000000 + Math.random() * 90000000)}`
+        });
+        setDisbursalSuccess(true);
+      }
+    } catch (err) {
+      console.error("Disbursal error:", err);
+    } finally {
       setIsDisbursing(false);
-      setDisbursalSuccess(true);
-    }, 1800);
+    }
   };
 
   return (
@@ -392,409 +395,432 @@ const LoanApprovalsTab = ({ approvedLoans, handleDisburseMoney }) => {
       </div>
 
       {/* ── EXPORT CONFIRMATION MODAL ── */}
-      {showExportModal && (
-        <div className="admin-modal-overlay" onClick={() => setShowExportModal(false)}>
-          <div className="admin-modal-container" style={{ width: '450px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Export Approved Loans Data</h3>
-              <button className="close-btn" onClick={() => setShowExportModal(false)}>×</button>
-            </div>
-            <div className="modal-body" style={{ padding: '24px' }}>
-              <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '20px', lineHeight: '1.4' }}>
-                You are about to export <strong>{filteredLoans.length}</strong> sanctioned loan records. Select compliance format:
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '25px' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 16px',
-                  backgroundColor: 'var(--admin-bg)',
-                  border: '1px solid var(--admin-border)',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  color: 'var(--admin-text)'
-                }}>
-                  <input 
-                    type="radio" 
-                    name="exportFormat" 
-                    value="csv"
-                    checked={exportFormat === 'csv'}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                  />
-                  <span>Commas Separated Sheet (.CSV)</span>
-                </label>
-
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 16px',
-                  backgroundColor: 'var(--admin-bg)',
-                  border: '1px solid var(--admin-border)',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  color: 'var(--admin-text)'
-                }}>
-                  <input 
-                    type="radio" 
-                    name="exportFormat" 
-                    value="pdf"
-                    checked={exportFormat === 'pdf'}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                  />
-                  <span>Standard Printable Report (.PDF)</span>
-                </label>
+      {showExportModal && createPortal(
+        <div className={`admin-dashboard-wrapper ${document.querySelector('.admin-dashboard-wrapper')?.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme'}`} style={{ display: 'contents' }}>
+          <div className="admin-modal-overlay" onClick={() => setShowExportModal(false)}>
+            <div className="admin-modal-container" style={{ width: '450px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Export Approved Loans Data</h3>
+                <button className="close-btn" onClick={() => setShowExportModal(false)}>×</button>
               </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                <button className="btn-action-secondary" onClick={() => setShowExportModal(false)}>
-                  Cancel
-                </button>
-                <button 
-                  className="btn-action-primary" 
-                  onClick={() => {
-                    if (exportFormat === 'csv') {
-                      handleExportCSV();
-                    } else {
-                      handleExportPDF();
-                    }
-                    setShowExportModal(false);
-                  }}
-                  style={{
-                    backgroundColor: '#10b981',
-                    color: '#fff',
-                    boxShadow: '0 4px 10px rgba(16, 185, 129, 0.2)'
-                  }}
-                >
-                  ✓ Confirm Download
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── SEND MONEY TO WALLET MODAL ── */}
-      {selectedLoan && (
-        <div className="admin-modal-overlay animate-fade-in" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(5, 8, 15, 0.85)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 999
-        }} onClick={() => {
-          if (!isDisbursing) setSelectedLoan(null);
-        }}>
-          <div className="admin-modal-container scale-up" style={{
-            width: '520px',
-            backgroundColor: 'var(--admin-sidebar)',
-            border: '1px solid var(--admin-border)',
-            borderRadius: '16px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-            overflow: 'hidden'
-          }} onClick={(e) => e.stopPropagation()}>
-            
-            {/* Modal Header */}
-            <div className="modal-header" style={{
-              padding: '20px 24px',
-              borderBottom: '1px solid var(--admin-border)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              background: 'rgba(255,255,255,0.01)'
-            }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--admin-text)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                Wallet Disbursal System
-              </h3>
-              {!isDisbursing && (
-                <button 
-                  className="close-btn" 
-                  onClick={() => setSelectedLoan(null)}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'var(--admin-text-light)',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    transition: 'color 0.2s'
-                  }}
-                >×</button>
-              )}
-            </div>
-
-            {/* Modal Body */}
-            {!disbursalSuccess ? (
               <div className="modal-body" style={{ padding: '24px' }}>
-                {/* Borrower Card */}
-                <div style={{
-                  backgroundColor: 'var(--admin-bg)',
-                  border: '1px solid var(--admin-border)',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  marginBottom: '20px'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Recipient Borrower</span>
-                    <span style={{ fontSize: '0.8rem', color: '#0066ff', fontWeight: '800' }}>{selectedLoan.id}</span>
-                  </div>
-                  <h4 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--admin-text)', margin: '0 0 4px 0' }}>{selectedLoan.name}</h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--admin-text-light)', margin: 0 }}>{selectedLoan.type}</p>
-                </div>
+                <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '20px', lineHeight: '1.4' }}>
+                  You are about to export <strong>{filteredLoans.length}</strong> sanctioned loan records. Select compliance format:
+                </p>
 
-                {/* Calculation Fields */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
-                  {/* Approved Amount */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)' }}>Capital Sanctioned</span>
-                    <span style={{ fontSize: '1.1rem', color: 'var(--admin-text)', fontWeight: '800' }}>₹{selectedLoan.amount.toLocaleString('en-IN')}.00</span>
-                  </div>
-
-                  {/* Fee Deduction Select */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)' }}>Platform Processing Fee</span>
-                      <span style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: '600' }}>Deducted prior to vault payout</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <select
-                        value={feeOption}
-                        onChange={(e) => setFeeOption(e.target.value)}
-                        className="form-input-admin"
-                        style={{
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem',
-                          height: '34px',
-                          cursor: 'pointer',
-                          backgroundColor: 'var(--admin-input)',
-                          border: '1px solid var(--admin-border)',
-                          color: 'var(--admin-text)'
-                        }}
-                      >
-                        <option value="2.5%">Standard (2.5%)</option>
-                        <option value="5.0%">Premium (5.0%)</option>
-                        <option value="custom">Custom Flat Fee</option>
-                      </select>
-                      
-                      {feeOption === 'custom' && (
-                        <input
-                          type="number"
-                          placeholder="₹ Flat Amount"
-                          value={customFee}
-                          onChange={(e) => setCustomFee(e.target.value)}
-                          className="form-input-admin"
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: '8px',
-                            fontSize: '0.85rem',
-                            width: '110px',
-                            height: '34px',
-                            backgroundColor: 'var(--admin-input)',
-                            border: '1px solid var(--admin-border)',
-                            color: 'var(--admin-text)'
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Fee Amount Row */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed var(--admin-border)', paddingTop: '10px' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)' }}>Platform Fee Charge</span>
-                    <span style={{ fontSize: '1rem', color: '#ef4444', fontWeight: '700' }}>- ₹{getFeeAmount().toLocaleString('en-IN')}.00</span>
-                  </div>
-
-                  {/* Net Wallet Payout */}
-                  <div style={{
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '25px' }}>
+                  <label style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    backgroundColor: 'rgba(0,102,255,0.06)',
-                    border: '1px solid rgba(0,102,255,0.15)',
-                    borderRadius: '8px',
+                    gap: '12px',
                     padding: '12px 16px',
-                    marginTop: '6px'
+                    backgroundColor: 'var(--admin-bg)',
+                    border: '1px solid var(--admin-border)',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    color: 'var(--admin-text)'
                   }}>
-                    <span style={{ fontSize: '0.95rem', color: 'var(--admin-text)', fontWeight: '700' }}>Net Wallet Payout</span>
-                    <span style={{ fontSize: '1.3rem', color: '#10b981', fontWeight: '900' }}>
-                      ₹{(selectedLoan.amount - getFeeAmount()).toLocaleString('en-IN')}.00
-                    </span>
-                  </div>
+                    <input 
+                      type="radio" 
+                      name="exportFormat" 
+                      value="csv"
+                      checked={exportFormat === 'csv'}
+                      onChange={(e) => setExportFormat(e.target.value)}
+                    />
+                    <span>Commas Separated Sheet (.CSV)</span>
+                  </label>
+
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    backgroundColor: 'var(--admin-bg)',
+                    border: '1px solid var(--admin-border)',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    color: 'var(--admin-text)'
+                  }}>
+                    <input 
+                      type="radio" 
+                      name="exportFormat" 
+                      value="pdf"
+                      checked={exportFormat === 'pdf'}
+                      onChange={(e) => setExportFormat(e.target.value)}
+                    />
+                    <span>Standard Printable Report (.PDF)</span>
+                  </label>
                 </div>
 
-                {/* Routing & Verification info */}
-                <div style={{
-                  backgroundColor: 'rgba(255,255,255,0.02)',
-                  border: '1px solid var(--admin-border)',
-                  borderRadius: '10px',
-                  padding: '12px',
-                  fontSize: '0.8rem',
-                  color: 'var(--admin-text-light)',
-                  lineHeight: '1.4',
-                  marginBottom: '20px'
-                }}>
-                  <div style={{ fontWeight: '700', color: 'var(--admin-text)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    Destination Node Verified
-                  </div>
-                  Destination: <strong>LendoGo Hot-Wallet (LGO-WLT-${selectedLoan.id}-${selectedLoan.name.split(' ')[0].toUpperCase()})</strong>
-                </div>
-
-                {/* Authorize checkbox */}
-                <label style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer', marginBottom: '24px' }}>
-                  <input
-                    type="checkbox"
-                    checked={authorizedChecked}
-                    onChange={(e) => setAuthorizedChecked(e.target.checked)}
-                    disabled={isDisbursing}
-                    style={{ marginTop: '3px', cursor: 'pointer' }}
-                  />
-                  <span style={{ fontSize: '0.82rem', color: 'var(--admin-text-light)', lineHeight: '1.4' }}>
-                    I authorize this immediate vault disbursal. I confirm that all KYC paperwork has been fully audited and platform fee structures are settled.
-                  </span>
-                </label>
-
-                {/* Actions */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                  <button
-                    className="btn-action-secondary"
-                    onClick={() => setSelectedLoan(null)}
-                    disabled={isDisbursing}
+                  <button 
+                    className="btn-secondary-admin" 
+                    onClick={() => setShowExportModal(false)}
                     style={{
-                      height: '42px',
-                      padding: '0 20px',
-                      borderRadius: '8px',
-                      fontWeight: '700',
+                      backgroundColor: 'var(--admin-input)',
+                      border: '1px solid var(--admin-border)',
+                      color: 'var(--admin-text)',
                       cursor: 'pointer'
                     }}
                   >
                     Cancel
                   </button>
-                  <button
-                    onClick={handleConfirmDisbursal}
-                    disabled={!authorizedChecked || isDisbursing || getFeeAmount() >= selectedLoan.amount}
+                  <button 
+                    className="btn-primary-admin" 
+                    onClick={() => {
+                      if (exportFormat === 'csv') {
+                        handleExportCSV();
+                      } else {
+                        handleExportPDF();
+                      }
+                      setShowExportModal(false);
+                    }}
                     style={{
-                      height: '42px',
-                      padding: '0 24px',
-                      borderRadius: '8px',
-                      fontWeight: '800',
-                      background: authorizedChecked && !isDisbursing ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255,255,255,0.05)',
-                      color: authorizedChecked && !isDisbursing ? '#fff' : 'var(--admin-text-light)',
-                      border: 'none',
-                      cursor: authorizedChecked && !isDisbursing ? 'pointer' : 'not-allowed',
-                      boxShadow: authorizedChecked && !isDisbursing ? '0 4px 12px rgba(16,185,129,0.3)' : 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      transition: 'all 0.25s'
+                      backgroundColor: '#10b981',
+                      color: '#fff',
+                      boxShadow: '0 4px 10px rgba(16, 185, 129, 0.2)',
+                      cursor: 'pointer'
                     }}
                   >
-                    {isDisbursing ? (
-                      <>
-                        <span className="spinner-dots" style={{ display: 'inline-block' }}>Processing...</span>
-                      </>
-                    ) : (
-                      <>
-                        Authorize & Send
-                      </>
-                    )}
+                    ✓ Confirm Download
                   </button>
                 </div>
               </div>
-            ) : (
-              /* Success Screen */
-              <div className="modal-body" style={{ padding: '36px 24px', textAlign: 'center' }}>
-                <div style={{
-                  width: '72px',
-                  height: '72px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                  color: '#10b981',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '2rem',
-                  marginBottom: '20px'
-                }}>
-                  ✓
-                </div>
-                
-                <h4 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--admin-text)', margin: '0 0 8px 0' }}>
-                  Wallet Disbursal Success
-                </h4>
-                
-                <p style={{ fontSize: '0.88rem', color: 'var(--admin-text-light)', margin: '0 0 24px 0', lineHeight: '1.4' }}>
-                  Payout transaction authorized and finalized. The capital has been successfully credited directly to the borrower's digital account wallet.
-                </p>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
-                {/* Receipt Card */}
-                {disbursalReceipt && (
+      {/* ── SEND MONEY TO WALLET MODAL ── */}
+      {selectedLoan && createPortal(
+        <div className={`admin-dashboard-wrapper ${document.querySelector('.admin-dashboard-wrapper')?.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme'}`} style={{ display: 'contents' }}>
+          <div className="admin-modal-overlay animate-fade-in" style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(5, 8, 15, 0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 999
+          }} onClick={() => {
+            if (!isDisbursing) setSelectedLoan(null);
+          }}>
+            <div className="admin-modal-container scale-up" style={{
+              width: '520px',
+              backgroundColor: 'var(--admin-sidebar)',
+              border: '1px solid var(--admin-border)',
+              borderRadius: '16px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+              overflow: 'hidden'
+            }} onClick={(e) => e.stopPropagation()}>
+              
+              {/* Modal Header */}
+              <div className="modal-header" style={{
+                padding: '20px 24px',
+                borderBottom: '1px solid var(--admin-border)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'rgba(255,255,255,0.01)'
+              }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--admin-text)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Wallet Disbursal System
+                </h3>
+                {!isDisbursing && (
+                  <button 
+                    className="close-btn" 
+                    onClick={() => setSelectedLoan(null)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: 'var(--admin-text-light)',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'color 0.2s'
+                    }}
+                  >×</button>
+                )}
+              </div>
+
+              {/* Modal Body */}
+              {!disbursalSuccess ? (
+                <div className="modal-body" style={{ padding: '24px', maxHeight: 'none', overflowY: 'visible' }}>
+                  {/* Borrower Card */}
                   <div style={{
                     backgroundColor: 'var(--admin-bg)',
                     border: '1px solid var(--admin-border)',
                     borderRadius: '12px',
                     padding: '16px',
-                    textAlign: 'left',
-                    marginBottom: '24px',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px'
+                    marginBottom: '20px'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--admin-text-light)' }}>Transaction Reference</span>
-                      <strong style={{ color: 'var(--admin-text)', fontFamily: 'monospace' }}>{disbursalReceipt.ref}</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Recipient Borrower</span>
+                      <span style={{ fontSize: '0.8rem', color: '#0066ff', fontWeight: '800' }}>{selectedLoan.id}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--admin-text-light)' }}>Borrower Ledger</span>
-                      <strong style={{ color: 'var(--admin-text)' }}>{disbursalReceipt.name} ({disbursalReceipt.id})</strong>
+                    <h4 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--admin-text)', margin: '0 0 4px 0' }}>{selectedLoan.name}</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--admin-text-light)', margin: 0 }}>{selectedLoan.type}</p>
+                  </div>
+
+                  {/* Calculation Fields */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+                    {/* Approved Amount */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)' }}>Capital Sanctioned</span>
+                      <span style={{ fontSize: '1.1rem', color: 'var(--admin-text)', fontWeight: '800' }}>₹{selectedLoan.amount.toLocaleString('en-IN')}.00</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--admin-border)', paddingTop: '10px' }}>
-                      <span style={{ color: 'var(--admin-text-light)' }}>Approved Principal</span>
-                      <span style={{ color: 'var(--admin-text)', fontWeight: '700' }}>₹{disbursalReceipt.amount.toLocaleString('en-IN')}.00</span>
+
+                    {/* Fee Deduction Select */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)' }}>Platform Processing Fee</span>
+                        <span style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: '600' }}>Deducted prior to vault payout</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <select
+                          value={feeOption}
+                          onChange={(e) => setFeeOption(e.target.value)}
+                          className="form-input-admin"
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '8px',
+                            fontSize: '0.85rem',
+                            height: '34px',
+                            cursor: 'pointer',
+                            backgroundColor: 'var(--admin-input)',
+                            border: '1px solid var(--admin-border)',
+                            color: 'var(--admin-text)'
+                          }}
+                        >
+                          <option value="2.5%">Standard (2.5%)</option>
+                          <option value="5.0%">Premium (5.0%)</option>
+                          <option value="custom">Custom Flat Fee</option>
+                        </select>
+                        
+                        {feeOption === 'custom' && (
+                          <input
+                            type="number"
+                            placeholder="₹ Flat Amount"
+                            value={customFee}
+                            onChange={(e) => setCustomFee(e.target.value)}
+                            className="form-input-admin"
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              fontSize: '0.85rem',
+                              width: '110px',
+                              height: '34px',
+                              backgroundColor: 'var(--admin-input)',
+                              border: '1px solid var(--admin-border)',
+                              color: 'var(--admin-text)'
+                            }}
+                          />
+                        )}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--admin-text-light)' }}>Platform Fee (Settled)</span>
-                      <span style={{ color: '#ef4444', fontWeight: '700' }}>₹{disbursalReceipt.fee.toLocaleString('en-IN')}.00</span>
+
+                    {/* Fee Amount Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed var(--admin-border)', paddingTop: '10px' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)' }}>Platform Fee Charge</span>
+                      <span style={{ fontSize: '1rem', color: '#ef4444', fontWeight: '700' }}>- ₹{getFeeAmount().toLocaleString('en-IN')}.00</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--admin-border)', paddingTop: '10px' }}>
-                      <span style={{ color: 'var(--admin-text)', fontWeight: '700' }}>Net Credited to Wallet</span>
-                      <strong style={{ color: '#10b981', fontSize: '1.05rem', fontWeight: '800' }}>₹{disbursalReceipt.net.toLocaleString('en-IN')}.00</strong>
+
+                    {/* Net Wallet Payout */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0,102,255,0.06)',
+                      border: '1px solid rgba(0,102,255,0.15)',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      marginTop: '6px'
+                    }}>
+                      <span style={{ fontSize: '0.95rem', color: 'var(--admin-text)', fontWeight: '700' }}>Net Wallet Payout</span>
+                      <span style={{ fontSize: '1.3rem', color: '#10b981', fontWeight: '900' }}>
+                        ₹{(selectedLoan.amount - getFeeAmount()).toLocaleString('en-IN')}.00
+                      </span>
                     </div>
                   </div>
-                )}
 
-                <button
-                  className="btn-action-primary"
-                  onClick={() => setSelectedLoan(null)}
-                  style={{
-                    height: '42px',
-                    padding: '0 32px',
-                    borderRadius: '8px',
-                    fontWeight: '800',
-                    background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,102,255,0.3)',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            )}
+                  {/* Routing & Verification info */}
+                  <div style={{
+                    backgroundColor: 'var(--admin-bg)',
+                    border: '1px solid var(--admin-border)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    fontSize: '0.8rem',
+                    color: 'var(--admin-text-light)',
+                    lineHeight: '1.4',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ fontWeight: '700', color: 'var(--admin-text)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      Destination Node Verified
+                    </div>
+                    Destination: <strong>LendoGo Hot-Wallet (LGO-WLT-${selectedLoan.id}-${selectedLoan.name.split(' ')[0].toUpperCase()})</strong>
+                  </div>
+
+                  {/* Authorize checkbox */}
+                  <label style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer', marginBottom: '24px' }}>
+                    <input
+                      type="checkbox"
+                      checked={authorizedChecked}
+                      onChange={(e) => setAuthorizedChecked(e.target.checked)}
+                      disabled={isDisbursing}
+                      style={{ marginTop: '3px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: '0.82rem', color: 'var(--admin-text-light)', lineHeight: '1.4' }}>
+                      I authorize this immediate vault disbursal. I confirm that all KYC paperwork has been fully audited and platform fee structures are settled.
+                    </span>
+                  </label>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                    <button
+                      className="btn-secondary-admin"
+                      onClick={() => setSelectedLoan(null)}
+                      disabled={isDisbursing}
+                      style={{
+                        height: '42px',
+                        padding: '0 20px',
+                        borderRadius: '8px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        backgroundColor: 'var(--admin-input)',
+                        border: '1px solid var(--admin-border)',
+                        color: 'var(--admin-text)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirmDisbursal}
+                      disabled={!authorizedChecked || isDisbursing || getFeeAmount() >= selectedLoan.amount}
+                      style={{
+                        height: '42px',
+                        padding: '0 24px',
+                        borderRadius: '8px',
+                        fontWeight: '800',
+                        background: authorizedChecked && !isDisbursing ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'var(--admin-input)',
+                        color: authorizedChecked && !isDisbursing ? '#fff' : 'var(--admin-text-light)',
+                        border: authorizedChecked && !isDisbursing ? 'none' : '1px solid var(--admin-border)',
+                        cursor: authorizedChecked && !isDisbursing ? 'pointer' : 'not-allowed',
+                        boxShadow: authorizedChecked && !isDisbursing ? '0 4px 12px rgba(16,185,129,0.3)' : 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        transition: 'all 0.25s'
+                      }}
+                    >
+                      {isDisbursing ? (
+                        <>
+                          <span className="spinner-dots" style={{ display: 'inline-block' }}>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          Authorize & Send
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Success Screen */
+                <div className="modal-body" style={{ padding: '36px 24px', textAlign: 'center', maxHeight: 'none', overflowY: 'visible' }}>
+                  <div style={{
+                    width: '72px',
+                    height: '72px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                    color: '#10b981',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '2rem',
+                    marginBottom: '20px'
+                  }}>
+                    ✓
+                  </div>
+                  
+                  <h4 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--admin-text)', margin: '0 0 8px 0' }}>
+                    Wallet Disbursal Success
+                  </h4>
+                  
+                  <p style={{ fontSize: '0.88rem', color: 'var(--admin-text-light)', margin: '0 0 24px 0', lineHeight: '1.4' }}>
+                    Payout transaction authorized and finalized. The capital has been successfully credited directly to the borrower's digital account wallet.
+                  </p>
+
+                  {/* Receipt Card */}
+                  {disbursalReceipt && (
+                    <div style={{
+                      backgroundColor: 'var(--admin-bg)',
+                      border: '1px solid var(--admin-border)',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      textAlign: 'left',
+                      marginBottom: '24px',
+                      fontSize: '0.85rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--admin-text-light)' }}>Transaction Reference</span>
+                        <strong style={{ color: 'var(--admin-text)', fontFamily: 'monospace' }}>{disbursalReceipt.ref}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--admin-text-light)' }}>Borrower Ledger</span>
+                        <strong style={{ color: 'var(--admin-text)' }}>{disbursalReceipt.name} ({disbursalReceipt.id})</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--admin-border)', paddingTop: '10px' }}>
+                        <span style={{ color: 'var(--admin-text-light)' }}>Approved Principal</span>
+                        <span style={{ color: 'var(--admin-text)', fontWeight: '700' }}>₹{disbursalReceipt.amount.toLocaleString('en-IN')}.00</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--admin-text-light)' }}>Platform Fee (Settled)</span>
+                        <span style={{ color: '#ef4444', fontWeight: '700' }}>₹{disbursalReceipt.fee.toLocaleString('en-IN')}.00</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--admin-border)', paddingTop: '10px' }}>
+                        <span style={{ color: 'var(--admin-text)', fontWeight: '700' }}>Net Credited to Wallet</span>
+                        <strong style={{ color: '#10b981', fontSize: '1.05rem', fontWeight: '800' }}>₹{disbursalReceipt.net.toLocaleString('en-IN')}.00</strong>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    className="btn-action-primary"
+                    onClick={() => setSelectedLoan(null)}
+                    style={{
+                      height: '42px',
+                      padding: '0 32px',
+                      borderRadius: '8px',
+                      fontWeight: '800',
+                      background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(0,102,255,0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

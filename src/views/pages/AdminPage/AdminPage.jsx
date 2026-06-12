@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAdminController } from './hooks/useAdminController';
+import { useAuthController } from '../../../controllers/auth/useAuthController';
 import './AdminPage.css';
 
 // Import Modular Components
@@ -16,8 +17,30 @@ import CustomerCareTab from './components/CustomerCareTab/CustomerCareTab';
 import WebConfigurationTab from './components/WebConfigurationTab/WebConfigurationTab';
 import AuditLogsTab from './components/AuditLogsTab/AuditLogsTab';
 import AdminSettingsTab from './components/AdminSettingsTab/AdminSettingsTab';
+import BlogManagementTab from './components/BlogManagementTab/BlogManagementTab';
 
 const AdminPage = () => {
+  const { user } = useAuthController();
+
+  const hasPermission = (itemName, groupName) => {
+    if (user.role === 'admin' || user.email === 'admin@gmail.com') return true;
+    const p = user.permissions || {};
+    
+    // Direct matches
+    if (p[itemName]) return true;
+
+    // Mapping sidebar names to backend area toggles
+    if (groupName === 'Administrative' || ['Staff Management', 'Role Permissions', 'Activity Logs', 'User Management'].includes(itemName)) return !!p['User Management'];
+    if (groupName === 'Careers Management' || ['View Applications', 'Post a Job', 'Post Job Openings'].includes(itemName)) return !!p['Careers'];
+    if (groupName === 'Customer Care' || ['Free Consultation', 'Chat Support'].includes(itemName)) return !!p['Customer Care'];
+    if (['Due Date Reminders', 'Overdue & Collections'].includes(itemName)) return !!p['Due Date'];
+    if (itemName === 'Blog Management') return !!p['Blog Management'];
+    if (itemName === 'Web Configuration') return false; // strictly master admin
+    if (itemName === 'Admin Settings') return true; // available to all for personal settings
+    
+    return false;
+  };
+
   const {
     darkMode, setDarkMode,
     activeTab, setActiveTab,
@@ -211,7 +234,7 @@ const AdminPage = () => {
           )
         },
         { 
-          name: 'Assign Roles', 
+          name: 'Staff Management', 
           icon: (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -326,6 +349,15 @@ const AdminPage = () => {
       )
     },
     { 
+      name: 'Blog Management', 
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      )
+    },
+    { 
       name: 'Admin Settings', 
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -360,6 +392,7 @@ const AdminPage = () => {
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
           pendingChatCount={pendingChatCount}
+          hasPermission={hasPermission}
         />
 
         {/* ── MAIN DASHBOARD CONTENT AREA ── */}
@@ -375,6 +408,7 @@ const AdminPage = () => {
             adminName={adminName}
             adminEmail={adminEmail}
             handleRechargeWallet={handleRechargeWallet}
+            hasPermission={hasPermission}
           />
 
           <div className="dashboard-scroll-container">
@@ -462,7 +496,7 @@ const AdminPage = () => {
               <RolePermissionsTab />
             )}
 
-            {activeTab === 'Assign Roles' && (
+            {activeTab === 'Staff Management' && (
               <AssignRolesTab 
                 handleAddStaff={handleAddStaff}
                 newStaffName={newStaffName}
@@ -489,6 +523,10 @@ const AdminPage = () => {
                 setIsConsultationsEnabled={setIsConsultationsEnabled}
                 handleSaveWebConfig={handleSaveWebConfig}
               />
+            )}
+
+            {activeTab === 'Blog Management' && (
+              <BlogManagementTab showToast={showToast} />
             )}
 
             {(activeTab === 'Audit Logs' || activeTab === 'Activity Logs') && (

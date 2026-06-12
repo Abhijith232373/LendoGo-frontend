@@ -39,12 +39,16 @@ export const AuthProvider = ({ children }) => {
       const loggedInUser = new UserModel({
         id: backendUser.id || 'unknown',
         email: backendUser.email || email,
-        name: backendUser.fullName || 'LendoGO User', // Map Go's snake_case
+        name: backendUser.fullName || backendUser.name || 'LendoGO User', // Map Go's snake_case
         role: backendUser.role || 'user',              // Capture the role!
+        permissions: backendUser.permissions || {},    // Capture permissions!
         isAuthenticated: true,
       });
       
       localStorage.setItem('lendogo_user', JSON.stringify(loggedInUser));
+      if (data.token) {
+        localStorage.setItem('lendogo_token', data.token);
+      }
       setUser(loggedInUser);
       
       // 👇 FIX: Return the user so SignInForm can use it for routing
@@ -78,9 +82,13 @@ export const AuthProvider = ({ children }) => {
       email: userData.email,
       name: userData.name || userData.fullName || 'LendoGO User',
       role: userData.role || 'user',
+      permissions: userData.permissions || {},
       isAuthenticated: true,
     });
     localStorage.setItem('lendogo_user', JSON.stringify(loggedInUser));
+    if (userData.token) {
+      localStorage.setItem('lendogo_token', userData.token);
+    }
     setUser(loggedInUser);
   };
 
