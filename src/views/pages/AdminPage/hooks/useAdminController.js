@@ -14,15 +14,17 @@ export const useAdminController = () => {
   const [activeTab, setActiveTab] = useState(() => {
     const p = user?.permissions || {};
     const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
-    if (isAdmin || p['Dashboard']) return 'Dashboard';
-    if (p['User Management']) return 'User Management';
-    if (p['Loan Applications']) return 'Loan Applications';
-    if (p['KYC Verifications']) return 'KYC Verifications';
-    if (p['Customer Care']) return 'Customer Care';
-    if (p['Careers']) return 'Careers Management';
-    if (p['Blog Management']) return 'Blog Management';
-    if (p['Due Date']) return 'Due Date Reminders';
-    return 'Dashboard'; // Fallback
+    if (isAdmin || p['dashboard_view']) return 'Dashboard';
+    if (p['loan_app_view']) return 'Loan Applications';
+    if (p['kyc_view']) return 'KYC Verifications';
+    if (p['user_read']) return 'User Management';
+    if (p['career_app_view']) return 'View Applications';
+    if (p['career_job_create'] || p['career_job_update']) return 'Post Job Openings';
+    if (p['cc_consult_view']) return 'Free Consultation';
+    if (p['cc_chat_view']) return 'Chat Support';
+    if (p['blog_read']) return 'Blog Management';
+    if (p['due_view']) return 'Due Date Reminders';
+    return 'Admin Settings'; // Fallback to personal settings if no permissions
   });
 
   const [searchQuery, setSearchQuery] = useState('');

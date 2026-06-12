@@ -1,8 +1,66 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserModel } from '../../models/UserModel';
 import { apiClient } from '../../utils/apiClient';
 
 const AuthContext = createContext(null);
+
+const getEffectivePermissions = (assignedAreas, globalPermsOverride = null) => {
+  try {
+    let globalPerms = globalPermsOverride;
+    
+    if (!globalPerms) {
+      const savedGlobalPermsStr = localStorage.getItem('lendogo_role_permissions_ui');
+      if (savedGlobalPermsStr) {
+        globalPerms = JSON.parse(savedGlobalPermsStr);
+      } else {
+        globalPerms = [
+          'dashboard_view', 'loan_app_view', 'loan_app_update', 'kyc_view', 'kyc_update',
+          'user_create', 'user_read', 'user_update', 'user_delete',
+          'career_app_view', 'career_app_update', 'career_job_create', 'career_job_update',
+          'cc_consult_view', 'cc_chat_view', 'due_view', 'blog_create', 'blog_read', 'blog_update', 'blog_delete'
+        ];
+      }
+    }
+    
+    const effective = {};
+    const mapping = {
+      'Dashboard': ['dashboard_view'],
+      'Loan Applications': ['loan_app_view', 'loan_app_update'],
+      'KYC Verifications': ['kyc_view', 'kyc_update'],
+      'User Management': ['user_create', 'user_read', 'user_update', 'user_delete'],
+      'Careers': ['career_app_view', 'career_app_update', 'career_job_create', 'career_job_update'],
+      'Customer Care': ['cc_consult_view', 'cc_chat_view'],
+      'Due Date': ['due_view'],
+      'Blog Management': ['blog_create', 'blog_read', 'blog_update', 'blog_delete']
+    };
+
+    // First, copy everything
+    Object.keys(assignedAreas).forEach(k => {
+      effective[k] = assignedAreas[k];
+    });
+
+    // Then strictly override the granular operations based on global toggles + area assignment
+    Object.keys(mapping).forEach(area => {
+      // If the area is assigned, intersection with global perms
+      if (assignedAreas[area] === true || effective[area] === true) {
+        effective[area] = true;
+        mapping[area].forEach(op => {
+          effective[op] = globalPerms.includes(op);
+        });
+      } else {
+        // Area not assigned, all operations disabled
+        effective[area] = false;
+        mapping[area].forEach(op => {
+          effective[op] = false;
+        });
+      }
+    });
+
+    return effective;
+  } catch (err) {
+    return assignedAreas;
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -11,6 +69,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.isAuthenticated) {
+          parsed.permissions = getEffectivePermissions(parsed.permissions || {});
           return new UserModel(parsed);
         }
       } catch (e) {
@@ -22,6 +81,53 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Global Permissions Syncer & Realtime WebSocket Updater
+  useEffect(() => {
+    if (user && user.isAuthenticated && user.id) {
+      const fetchGlobalPerms = async () => {
+        try {
+          const res = await apiClient('/admin/global-permissions');
+          let perms = [];
+          if (res.permissions && res.permissions !== '[]') {
+            perms = JSON.parse(res.permissions);
+          } else {
+            perms = [
+              'dashboard_view', 'loan_app_view', 'loan_app_update', 'kyc_view', 'kyc_update',
+              'user_create', 'user_read', 'user_update', 'user_delete',
+              'career_app_view', 'career_app_update', 'career_job_create', 'career_job_update',
+              'cc_consult_view', 'cc_chat_view', 'due_view', 'blog_create', 'blog_read', 'blog_update', 'blog_delete'
+            ];
+          }
+          localStorage.setItem('lendogo_role_permissions_ui', JSON.stringify(perms));
+          setUser(prev => {
+             const updated = new UserModel(prev);
+             updated.permissions = getEffectivePermissions(prev.permissions || {}, perms);
+             return updated;
+          });
+        } catch (e) {
+          console.error("Failed to fetch global perms", e);
+        }
+      };
+
+      fetchGlobalPerms();
+
+      // Realtime System Broadcast WebSockets
+      const wsUrl = `ws://localhost:8080/api/ws/chat?user_id=${user.id}&role=${encodeURIComponent(user.role)}&name=SystemSync&email=system`;
+      const ws = new WebSocket(wsUrl);
+      ws.onmessage = (event) => {
+         try {
+           const data = JSON.parse(event.data);
+           if (data.text === 'SYS_PERMISSIONS_UPDATE') {
+             console.log("🔥 System broadcast received: Reloading permissions!");
+             fetchGlobalPerms();
+           }
+         } catch(e) {}
+      };
+      
+      return () => ws.close();
+    }
+  }, [user?.id]);
 
   const signIn = async (email, password) => {
     setLoading(true);
@@ -41,7 +147,7 @@ export const AuthProvider = ({ children }) => {
         email: backendUser.email || email,
         name: backendUser.fullName || backendUser.name || 'LendoGO User', // Map Go's snake_case
         role: backendUser.role || 'user',              // Capture the role!
-        permissions: backendUser.permissions || {},    // Capture permissions!
+        permissions: getEffectivePermissions(backendUser.permissions || {}),    // Capture permissions!
         isAuthenticated: true,
       });
       
@@ -82,7 +188,7 @@ export const AuthProvider = ({ children }) => {
       email: userData.email,
       name: userData.name || userData.fullName || 'LendoGO User',
       role: userData.role || 'user',
-      permissions: userData.permissions || {},
+      permissions: getEffectivePermissions(userData.permissions || {}),
       isAuthenticated: true,
     });
     localStorage.setItem('lendogo_user', JSON.stringify(loggedInUser));

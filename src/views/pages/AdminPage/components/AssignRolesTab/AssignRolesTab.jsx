@@ -10,15 +10,15 @@ const AVAILABLE_ROLES = [
   "Customer Care Support"
 ];
 
-const AVAILABLE_AREAS = [
-  "Dashboard", 
-  "Loan Applications", 
-  "KYC Verifications", 
-  "User Management", 
-  "Careers", 
-  "Customer Care", 
-  "Due Date", 
-  "Blog Management"
+const AVAILABLE_MODULES = [
+  { id: 'Dashboard', permissions: [{ id: 'dashboard_view', label: 'View Dashboard' }] },
+  { id: 'Loan Applications', permissions: [{ id: 'loan_app_view', label: 'View Applications' }, { id: 'loan_app_update', label: 'Update Applications' }] },
+  { id: 'KYC Verifications', permissions: [{ id: 'kyc_view', label: 'View KYC' }, { id: 'kyc_update', label: 'Update KYC' }] },
+  { id: 'User Management', permissions: [{ id: 'user_create', label: 'Create User' }, { id: 'user_read', label: 'Read User' }, { id: 'user_update', label: 'Update User' }, { id: 'user_delete', label: 'Delete User' }] },
+  { id: 'Careers', permissions: [{ id: 'career_app_view', label: 'View Applications' }, { id: 'career_app_update', label: 'Update Applications' }, { id: 'career_job_create', label: 'Create Post' }, { id: 'career_job_update', label: 'Update Post' }] },
+  { id: 'Customer Care', permissions: [{ id: 'cc_consult_view', label: 'View Consultation' }, { id: 'cc_chat_view', label: 'View Chat' }] },
+  { id: 'Due Date', permissions: [{ id: 'due_view', label: 'View Due Date' }] },
+  { id: 'Blog Management', permissions: [{ id: 'blog_create', label: 'Create Blog' }, { id: 'blog_read', label: 'Read Blog' }, { id: 'blog_update', label: 'Update Blog' }, { id: 'blog_delete', label: 'Delete Blog' }] }
 ];
 
 const AssignRolesTab = () => {
@@ -63,6 +63,16 @@ const AssignRolesTab = () => {
   const [role, setRole] = useState(AVAILABLE_ROLES[0]);
   const [selectedAreas, setSelectedAreas] = useState([]);
 
+  // Toast State
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
+  const showToastNotification = (msg) => {
+    setToastMessage(msg);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -86,8 +96,8 @@ const AssignRolesTab = () => {
     }
 
     const permissionsMap = {};
-    AVAILABLE_AREAS.forEach(area => {
-      permissionsMap[area] = selectedAreas.includes(area);
+    AVAILABLE_MODULES.forEach(mod => {
+      permissionsMap[mod.id] = selectedAreas.includes(mod.id);
     });
 
     if (isEditing) {
@@ -99,6 +109,7 @@ const AssignRolesTab = () => {
       ));
       setIsEditing(false);
       setEditId(null);
+      showToastNotification("Staff updated successfully!");
     } else {
       if (!password) {
         alert("Password is required for new accounts.");
@@ -115,7 +126,7 @@ const AssignRolesTab = () => {
             permissions: permissionsMap
           })
         });
-        alert("Staff account successfully provisioned!");
+        showToastNotification("Staff created successfully!");
         fetchStaff();
       } catch (err) {
         console.error("Failed to provision staff:", err);
@@ -264,13 +275,15 @@ const AssignRolesTab = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px', backgroundColor: 'var(--admin-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--admin-border)' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--admin-text)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Area Permissions</label>
-              {AVAILABLE_AREAS.map(area => (
-                <div key={area} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--admin-text)' }}>{area}</span>
-                  <label className="toggle-switch" style={{ transform: 'scale(0.85)', margin: 0 }}>
-                    <input type="checkbox" checked={selectedAreas.includes(area)} onChange={() => toggleArea(area)} />
-                    <span className="slider-round" />
-                  </label>
+              {AVAILABLE_MODULES.map(mod => (
+                <div key={mod.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '12px', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--admin-text)', fontWeight: 600 }}>{mod.id}</span>
+                    <label className="toggle-switch" style={{ transform: 'scale(0.85)', margin: 0 }}>
+                      <input type="checkbox" checked={selectedAreas.includes(mod.id)} onChange={() => toggleArea(mod.id)} />
+                      <span className="slider-round" />
+                    </label>
+                  </div>
                 </div>
               ))}
             </div>
@@ -458,6 +471,19 @@ const AssignRolesTab = () => {
         </div>
 
       </div>
+
+      {/* Professional Toast Notification */}
+      {showToast && (
+        <div className="staff-action-toast">
+          <div className="toast-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div className="toast-content">
+            <span className="toast-title">Success</span>
+            <span className="toast-msg">{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

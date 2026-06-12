@@ -53,3 +53,69 @@ input:disabled + .slider-round {
 input:disabled + .slider-round:before {
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* ── Toast Notification ── */
+.staff-action-toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: var(--admin-card);
+  border-left: 4px solid #10b981;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  z-index: 9999;
+  animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.3s ease 2.7s forwards;
+}
+
+.staff-action-toast .toast-icon {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.staff-action-toast .toast-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-action-toast .toast-title {
+  color: var(--admin-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.staff-action-toast .toast-msg {
+  color: var(--admin-text-light);
+  font-size: 0.8rem;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}

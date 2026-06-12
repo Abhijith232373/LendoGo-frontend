@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuthController } from '../../../../../controllers/auth/useAuthController';
 import "./CareersManagementTab.css";
 
 const CareersManagementTab = ({ 
@@ -9,6 +10,13 @@ const CareersManagementTab = ({
   handleCreateJobOpening,
   showOnly // "applications" or "jobs"
 }) => {
+  const { user } = useAuthController();
+  const p = user?.permissions || {};
+  const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+  const canJobCreate = isAdmin || !!p['career_job_create'];
+  const canJobUpdate = isAdmin || !!p['career_job_update'];
+  const canAppUpdate = isAdmin || !!p['career_app_update'];
+
   const [jobStatusFilter, setJobStatusFilter] = useState('All');
   const [jobDeptFilter, setJobDeptFilter] = useState('All');
   const [appStatusFilter, setAppStatusFilter] = useState('All');
@@ -162,26 +170,28 @@ const CareersManagementTab = ({
             <option value="Closed">Closed</option>
           </select>
 
-          <button 
-            className="btn-action-primary" 
-            onClick={() => setShowCreateModal(true)}
-            style={{
-              height: '34px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '0 14px',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: '700',
-              cursor: 'pointer',
-              border: 'none',
-              background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
-              color: '#fff',
-              boxShadow: '0 2px 6px rgba(0,102,255,0.2)'
-            }}
-          >
-            + Create Job Opening
-          </button>
+          {canJobCreate && (
+            <button 
+              className="btn-action-primary" 
+              onClick={() => setShowCreateModal(true)}
+              style={{
+                height: '34px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '0 14px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                border: 'none',
+                background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
+                color: '#fff',
+                boxShadow: '0 2px 6px rgba(0,102,255,0.2)'
+              }}
+            >
+              + Create Job Opening
+            </button>
+          )}
         </div>
       </div>
 
@@ -227,12 +237,16 @@ const CareersManagementTab = ({
                   <span className={`status-tag ${job.status.toLowerCase()}`}>{job.status}</span>
                 </td>
                 <td>
-                  <button 
-                    className="btn-action-toggle-job"
-                    onClick={() => handleToggleJobStatus(job.id, job.title, job.status)}
-                  >
-                    {job.status === 'Open' ? 'Close' : 'Reopen'}
-                  </button>
+                  {canJobUpdate ? (
+                    <button 
+                      className="btn-action-toggle-job"
+                      onClick={() => handleToggleJobStatus(job.id, job.title, job.status)}
+                    >
+                      {job.status === 'Open' ? 'Close' : 'Reopen'}
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-light)', fontStyle: 'italic' }}>View Only</span>
+                  )}
                 </td>
               </tr>
             ))
@@ -350,77 +364,81 @@ const CareersManagementTab = ({
                   <span className={`recru-status ${app.status.toLowerCase()}`}>{app.status}</span>
                 </td>
                 <td>
-                  {app.status === 'Reviewing' || app.status === 'Interviewing' ? (
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button 
-                        className="btn-action-primary" 
-                        style={{ 
-                          padding: '5px 12px', 
-                          fontSize: '0.78rem', 
-                          fontWeight: '700',
-                          borderRadius: '6px', 
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                          color: '#fff', 
-                          border: 'none', 
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handleActionClick(app.id, app.name, app.email, 'Shortlisted', app.role)}
-                      >
-                        Shortlist
-                      </button>
-                      <button 
-                        className="btn-action-secondary" 
-                        style={{ 
-                          padding: '5px 12px', 
-                          fontSize: '0.78rem', 
-                          fontWeight: '700',
-                          borderRadius: '6px', 
-                          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
-                          color: '#fff', 
-                          border: 'none', 
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handleActionClick(app.id, app.name, app.email, 'Rejected', app.role)}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  ) : app.status === 'Shortlisted' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700' }}>✓ Shortlisted</span>
-                      <button 
-                        style={{ 
-                          padding: '4px 8px', 
-                          fontSize: '0.75rem', 
-                          borderRadius: '6px', 
-                          background: 'rgba(239, 68, 68, 0.1)', 
-                          color: '#ef4444', 
-                          border: '1px solid rgba(239, 68, 68, 0.2)', 
-                          cursor: 'pointer' 
-                        }}
-                        onClick={() => handleActionClick(app.id, app.name, app.email, 'Rejected', app.role)}
-                      >
-                        Reject
-                      </button>
-                    </div>
+                  {canAppUpdate ? (
+                    app.status === 'Reviewing' || app.status === 'Interviewing' ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          className="btn-action-primary" 
+                          style={{ 
+                            padding: '5px 12px', 
+                            fontSize: '0.78rem', 
+                            fontWeight: '700',
+                            borderRadius: '6px', 
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                            color: '#fff', 
+                            border: 'none', 
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handleActionClick(app.id, app.name, app.email, 'Shortlisted', app.role)}
+                        >
+                          Shortlist
+                        </button>
+                        <button 
+                          className="btn-action-secondary" 
+                          style={{ 
+                            padding: '5px 12px', 
+                            fontSize: '0.78rem', 
+                            fontWeight: '700',
+                            borderRadius: '6px', 
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
+                            color: '#fff', 
+                            border: 'none', 
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handleActionClick(app.id, app.name, app.email, 'Rejected', app.role)}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : app.status === 'Shortlisted' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700' }}>✓ Shortlisted</span>
+                        <button 
+                          style={{ 
+                            padding: '4px 8px', 
+                            fontSize: '0.75rem', 
+                            borderRadius: '6px', 
+                            background: 'rgba(239, 68, 68, 0.1)', 
+                            color: '#ef4444', 
+                            border: '1px solid rgba(239, 68, 68, 0.2)', 
+                            cursor: 'pointer' 
+                          }}
+                          onClick={() => handleActionClick(app.id, app.name, app.email, 'Rejected', app.role)}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700' }}>✕ Rejected</span>
+                        <button 
+                          style={{ 
+                            padding: '4px 8px', 
+                            fontSize: '0.75rem', 
+                            borderRadius: '6px', 
+                            background: 'rgba(16, 185, 129, 0.1)', 
+                            color: '#10b981', 
+                            border: '1px solid rgba(16, 185, 129, 0.2)', 
+                            cursor: 'pointer' 
+                          }}
+                          onClick={() => handleActionClick(app.id, app.name, app.email, 'Shortlisted', app.role)}
+                        >
+                          Shortlist
+                        </button>
+                      </div>
+                    )
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700' }}>✕ Rejected</span>
-                      <button 
-                        style={{ 
-                          padding: '4px 8px', 
-                          fontSize: '0.75rem', 
-                          borderRadius: '6px', 
-                          background: 'rgba(16, 185, 129, 0.1)', 
-                          color: '#10b981', 
-                          border: '1px solid rgba(16, 185, 129, 0.2)', 
-                          cursor: 'pointer' 
-                        }}
-                        onClick={() => handleActionClick(app.id, app.name, app.email, 'Shortlisted', app.role)}
-                      >
-                        Shortlist
-                      </button>
-                    </div>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-light)', fontStyle: 'italic' }}>View Only</span>
                   )}
                 </td>
               </tr>

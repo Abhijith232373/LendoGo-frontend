@@ -20,7 +20,8 @@ const ChatWidget = () => {
 
   // Initialize and load chat history when user changes or logs in
   useEffect(() => {
-    if (user && user.isAuthenticated && user.id) {
+    const isAdminRoute = location.pathname.startsWith('/admin') || user?.role === 'admin';
+    if (user && user.isAuthenticated && user.id && !isAdminRoute) {
       // No more fake local storage dummy threads!
       setMessages([]);
 

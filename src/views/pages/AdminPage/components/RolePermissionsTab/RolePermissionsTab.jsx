@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { apiClient } from '../../../../../utils/apiClient';
 
 const permissionModules = [
   {
@@ -113,7 +114,61 @@ const allPermissionIds = permissionModules.flatMap(m => {
 });
 
 const RolePermissionsTab = () => {
-  const [selectedPerms, setSelectedPerms] = useState([]);
+  const [selectedPerms, setSelectedPerms] = useState(allPermissionIds);
+  const [isLoading, setIsLoading] = useState(true);
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    const fetchPerms = async () => {
+      try {
+        const res = await apiClient('/admin/global-permissions');
+        if (res.permissions && res.permissions !== '[]') {
+          setSelectedPerms(JSON.parse(res.permissions));
+        } else {
+          // If empty in backend, default to all on
+          setSelectedPerms(allPermissionIds);
+        }
+      } catch (e) {
+        console.error("Failed to fetch global permissions", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPerms();
+  }, []);
+
+  useEffect(() => {
+    if (isFirstLoad.current || isLoading) {
+      isFirstLoad.current = false;
+      return;
+    }
+
+    const savePerms = async () => {
+      try {
+        // Save to backend
+        await apiClient('/admin/global-permissions', {
+          method: 'POST',
+          body: JSON.stringify({ permissions: selectedPerms })
+        });
+
+        // Broadcast to all connected clients via Chat Websocket Hub
+        const wsUrl = `ws://localhost:8080/api/ws/chat?user_id=0&role=admin&name=System&email=system`;
+        const ws = new WebSocket(wsUrl);
+        ws.onopen = () => {
+          ws.send(JSON.stringify({
+            text: 'SYS_PERMISSIONS_UPDATE',
+            is_from_admin: true,
+            receiver_id: 'ALL'
+          }));
+          setTimeout(() => ws.close(), 500);
+        };
+      } catch (e) {
+        console.error("Failed to save global permissions", e);
+      }
+    };
+    
+    savePerms();
+  }, [selectedPerms, isLoading]);
 
   const isAllSelected = selectedPerms.length === allPermissionIds.length && allPermissionIds.length > 0;
 
