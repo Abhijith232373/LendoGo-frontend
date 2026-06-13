@@ -12,9 +12,6 @@ const AuditLogsTab = ({ auditLogs, setAuditLogs }) => {
       <div className="audit-ledger-box">
         <div className="ledger-header-row">
           <span>SECURITY CHRONICLE</span>
-          <button className="btn-clear-logs" onClick={() => { setAuditLogs([]); alert('Platform log wiped locally.'); }}>
-            Wipe Logs
-          </button>
         </div>
 
         <div className="audit-scroll-ledger">

@@ -27,6 +27,11 @@ const AssignRolesTab = () => {
 
   useEffect(() => {
     fetchStaff();
+
+    // Listen for WebSocket global updates
+    const handleUpdate = () => fetchStaff();
+    window.addEventListener('admin-staff-updated', handleUpdate);
+    return () => window.removeEventListener('admin-staff-updated', handleUpdate);
   }, []);
 
   const fetchStaff = async () => {
@@ -65,10 +70,12 @@ const AssignRolesTab = () => {
 
   // Toast State
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
   const [showToast, setShowToast] = useState(false);
 
-  const showToastNotification = (msg) => {
+  const showToastNotification = (msg, type = 'success') => {
     setToastMessage(msg);
+    setToastType(type);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
@@ -82,6 +89,48 @@ const AssignRolesTab = () => {
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
 
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    type: '', // 'block', 'activate', 'delete'
+    staffId: null,
+    staffName: ''
+  });
+
+  const openModal = (type, staff) => {
+    setModalConfig({ isOpen: true, type, staffId: staff.id, staffName: staff.name });
+  };
+
+  const closeModal = () => {
+    setModalConfig({ isOpen: false, type: '', staffId: null, staffName: '' });
+  };
+
+  const confirmAction = async () => {
+    const { type, staffId, staffName } = modalConfig;
+    
+    try {
+      if (type === 'delete') {
+        await apiClient(`/admin/staff/${staffId}`, { method: 'DELETE' });
+        setLocalStaff(prev => prev.filter(staff => staff.id !== staffId));
+        showToastNotification(`Staff member ${staffName} deleted successfully.`);
+      } else if (type === 'block' || type === 'activate') {
+        const nextStatus = type === 'block' ? 'Blocked' : 'Active';
+        await apiClient(`/admin/staff/${staffId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: nextStatus })
+        });
+        setLocalStaff(prev => prev.map(staff => 
+          staff.id === staffId ? { ...staff, status: nextStatus } : staff
+        ));
+        showToastNotification(`Staff member ${staffName} ${type === 'block' ? 'blocked' : 'activated'} successfully.`, 'success');
+      }
+    } catch (err) {
+      console.error(`Failed to ${type} staff:`, err);
+      showToastNotification(`Error: ${err.message}`, 'error');
+    }
+    closeModal();
+  };
+
   const toggleArea = (area) => {
     setSelectedAreas(prev => 
       prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
@@ -91,7 +140,7 @@ const AssignRolesTab = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !role) {
-      alert("Name, Email, and Role are required.");
+      showToastNotification("Name, Email, and Role are required.", "error");
       return;
     }
 
@@ -109,10 +158,10 @@ const AssignRolesTab = () => {
       ));
       setIsEditing(false);
       setEditId(null);
-      showToastNotification("Staff updated successfully!");
+      showToastNotification("Staff updated successfully!", "success");
     } else {
       if (!password) {
-        alert("Password is required for new accounts.");
+        showToastNotification("Password is required for new accounts.", "error");
         return;
       }
       try {
@@ -126,11 +175,14 @@ const AssignRolesTab = () => {
             permissions: permissionsMap
           })
         });
-        showToastNotification("Staff created successfully!");
+        showToastNotification("Staff created successfully!", "success");
         fetchStaff();
       } catch (err) {
         console.error("Failed to provision staff:", err);
-        alert(`Failed to create staff account: ${err.message}`);
+        const errorMsg = err.message.includes("500") || err.message === "Internal Server Error" 
+          ? "Failed: Email already exists or server error." 
+          : `Failed: ${err.message}`;
+        showToastNotification(errorMsg, "error");
         return;
       }
     }
@@ -165,17 +217,7 @@ const AssignRolesTab = () => {
     setSelectedAreas([]);
   };
 
-  const toggleStatus = (id) => {
-    setLocalStaff(prev => prev.map(staff => 
-      staff.id === id ? { ...staff, status: staff.status === 'Active' ? 'Blocked' : 'Active' } : staff
-    ));
-  };
 
-  const deleteStaff = (id) => {
-    if (window.confirm("Are you sure you want to delete this staff member?")) {
-      setLocalStaff(prev => prev.filter(staff => staff.id !== id));
-    }
-  };
 
   const filteredStaff = localStaff.filter(staff => {
     const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -443,13 +485,13 @@ const AssignRolesTab = () => {
                           Edit
                         </button>
                         <button 
-                          onClick={() => toggleStatus(staff.id)}
+                          onClick={() => openModal(staff.status === 'Active' ? 'block' : 'activate', staff)}
                           style={{ padding: '6px 12px', borderRadius: '6px', backgroundColor: staff.status === 'Active' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: staff.status === 'Active' ? '#ef4444' : '#10b981', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
                         >
                           {staff.status === 'Active' ? 'Block' : 'Activate'}
                         </button>
                         <button 
-                          onClick={() => deleteStaff(staff.id)}
+                          onClick={() => openModal('delete', staff)}
                           style={{ padding: '6px 12px', borderRadius: '6px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
                         >
                           Delete
@@ -474,13 +516,55 @@ const AssignRolesTab = () => {
 
       {/* Professional Toast Notification */}
       {showToast && (
-        <div className="staff-action-toast">
-          <div className="toast-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div className="staff-action-toast" style={{ backgroundColor: toastType === 'error' ? '#fef2f2' : '#f0fdf4', borderColor: toastType === 'error' ? '#fecaca' : '#bbf7d0' }}>
+          <div className="toast-icon" style={{ color: toastType === 'error' ? '#ef4444' : '#16a34a', backgroundColor: toastType === 'error' ? '#fee2e2' : '#dcfce3' }}>
+            {toastType === 'error' ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            )}
           </div>
           <div className="toast-content">
-            <span className="toast-title">Success</span>
-            <span className="toast-msg">{toastMessage}</span>
+            <span className="toast-title" style={{ color: toastType === 'error' ? '#991b1b' : '#166534' }}>{toastType === 'error' ? 'Error' : 'Success'}</span>
+            <span className="toast-msg" style={{ color: toastType === 'error' ? '#b91c1c' : '#15803d' }}>{toastMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {modalConfig.isOpen && (
+        <div className="staff-modal-overlay">
+          <div className="staff-modal-content animate-scale-up">
+            <div className="modal-icon-wrapper theme-icon">
+              {modalConfig.type === 'delete' ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              ) : modalConfig.type === 'block' ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              ) : (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              )}
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)', marginBottom: '10px' }}>
+              Confirm {modalConfig.type === 'delete' ? 'Deletion' : modalConfig.type === 'block' ? 'Block' : 'Activation'}
+            </h3>
+            <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.5 }}>
+              Are you sure you want to {modalConfig.type} <strong>{modalConfig.staffName}</strong>? 
+              {modalConfig.type === 'delete' ? ' This action cannot be undone and will permanently remove their access.' : modalConfig.type === 'block' ? ' They will be instantly signed out.' : ' They will regain access.'}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+              <button 
+                onClick={closeModal}
+                className="btn-modal-cancel"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmAction}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+              >
+                Yes, {modalConfig.type}
+              </button>
+            </div>
           </div>
         </div>
       )}

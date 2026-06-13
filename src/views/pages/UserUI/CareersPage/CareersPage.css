@@ -210,8 +210,15 @@
 }
 
 .perk-icon {
-  font-size: 2rem;
   margin-bottom: 0.9rem;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 102, 255, 0.08);
+  border-radius: 12px;
 }
 
 .perk-title {

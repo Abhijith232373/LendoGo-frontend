@@ -135,6 +135,13 @@ const RolePermissionsTab = () => {
       }
     };
     fetchPerms();
+
+    const handleUpdate = () => {
+      isFirstLoad.current = true; // prevent circular save
+      fetchPerms();
+    };
+    window.addEventListener('admin-permissions-updated', handleUpdate);
+    return () => window.removeEventListener('admin-permissions-updated', handleUpdate);
   }, []);
 
   useEffect(() => {

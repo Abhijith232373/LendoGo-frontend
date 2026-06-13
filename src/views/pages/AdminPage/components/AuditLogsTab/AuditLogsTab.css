@@ -22,20 +22,7 @@
   letter-spacing: 0.05em;
 }
 
-.btn-clear-logs {
-  background: none;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-  padding: 0.35rem 0.8rem;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  cursor: pointer;
-}
 
-.btn-clear-logs:hover {
-  background-color: rgba(239, 68, 68, 0.08);
-}
 
 .audit-scroll-ledger {
   max-height: 480px;

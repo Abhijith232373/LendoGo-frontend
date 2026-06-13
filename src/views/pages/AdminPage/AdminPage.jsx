@@ -36,7 +36,7 @@ const AdminPage = () => {
     
     if (groupName === 'Administrative') {
        if (itemName === 'Administrative') return !!p['user_read'] || !!p['dashboard_view'];
-       if (['Staff Management', 'Role Permissions', 'Activity Logs', 'Audit Logs'].includes(itemName)) {
+       if (['Staff Management', 'Role Permissions', 'Audit Logs'].includes(itemName)) {
           return !!p['user_read'];
        }
     }
@@ -264,7 +264,7 @@ const AdminPage = () => {
           )
         },
         { 
-          name: 'Activity Logs', 
+          name: 'Audit Logs', 
           icon: (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 20h9"/>
@@ -435,7 +435,7 @@ const AdminPage = () => {
             {/* Conditional Tab Views rendering with RBAC protection */}
             {(() => {
               let group = activeTab;
-              if (['User Management', 'Role Permissions', 'Staff Management', 'Activity Logs', 'Audit Logs'].includes(activeTab)) group = 'Administrative';
+              if (['User Management', 'Role Permissions', 'Staff Management', 'Audit Logs'].includes(activeTab)) group = 'Administrative';
               if (['View Applications', 'Post Job Openings'].includes(activeTab)) group = 'Careers Management';
               if (['Free Consultation', 'Chat Support'].includes(activeTab)) group = 'Customer Care';
               
@@ -573,7 +573,7 @@ const AdminPage = () => {
               <BlogManagementTab showToast={showToast} />
             )}
 
-            {(activeTab === 'Audit Logs' || activeTab === 'Activity Logs') && (
+            {activeTab === 'Audit Logs' && (
               <AuditLogsTab 
                 auditLogs={auditLogs}
                 setAuditLogs={setAuditLogs}

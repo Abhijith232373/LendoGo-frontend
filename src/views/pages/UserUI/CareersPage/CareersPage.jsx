@@ -5,15 +5,32 @@ import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
 import hiringImg from '../../../../assets/hiring.jpg';
+import { 
+  TrendingUp, 
+  Building, 
+  Lightbulb, 
+  BookOpen, 
+  ShieldPlus, 
+  Users,
+  Briefcase,
+  Target,
+  Award
+} from 'lucide-react';
 import './CareersPage.css';
 
 const perks = [
-  { icon: '🚀', title: 'High Growth', desc: 'Accelerate your career in a fast-moving fintech startup.' },
-  { icon: '🏠', title: 'Flexible Work', desc: 'Hybrid & remote-friendly culture that respects your life.' },
-  { icon: '💡', title: 'Innovation First', desc: 'Ship real features that reach millions of borrowers.' },
-  { icon: '🎓', title: 'Learning Budget', desc: '₹50,000/year for courses, books, and conferences.' },
-  { icon: '❤️', title: 'Health Cover', desc: 'Comprehensive medical insurance for you and your family.' },
-  { icon: '🤝', title: 'Inclusive Culture', desc: 'Diverse teams, zero-hierarchy, and open communication.' },
+  { icon: <TrendingUp size={28} />, title: 'High Growth Trajectory', desc: 'Accelerate your career in a fast-moving, high-impact fintech ecosystem.' },
+  { icon: <Building size={28} />, title: 'Flexible Infrastructure', desc: 'Hybrid and remote-friendly infrastructure designed for professional autonomy.' },
+  { icon: <Lightbulb size={28} />, title: 'Innovation First', desc: 'Engineer sophisticated financial products that empower millions of borrowers.' },
+  { icon: <BookOpen size={28} />, title: 'Professional Development', desc: 'Comprehensive annual budget for continuous education and certification.' },
+  { icon: <ShieldPlus size={28} />, title: 'Premium Health Coverage', desc: 'Top-tier medical insurance securing the health of you and your dependents.' },
+  { icon: <Users size={28} />, title: 'Collaborative Environment', desc: 'Cross-functional teams, transparent communication, and meritocratic culture.' },
+];
+
+const values = [
+  { icon: <Target size={32} />, title: 'Data-Driven Precision', desc: 'Every decision we make is backed by rigorous data analysis and institutional metrics, ensuring robust and scalable financial solutions.' },
+  { icon: <Briefcase size={32} />, title: 'Uncompromising Integrity', desc: 'Trust is our primary currency. We uphold the highest ethical standards in every transaction, code deployment, and customer interaction.' },
+  { icon: <Award size={32} />, title: 'Excellence in Execution', desc: 'We do not settle for average. From our engineering architecture to our customer service protocols, we demand excellence.' },
 ];
 
 const CareersPage = () => {
@@ -28,7 +45,7 @@ const CareersPage = () => {
         <ParallaxShapes preset="hero" />
         
         <ScrollReveal variant="fade-right" className="careers-hero-content" style={{ position: 'relative', zIndex: 2 }}>
-          <span className="careers-badge">We're Hiring 🎉</span>
+          <span className="careers-badge">Join the Institution</span>
           <h1 className="careers-hero-title">
             Build the Future of <br />
             <span className="careers-highlight">Finance in India</span>
@@ -75,6 +92,38 @@ const CareersPage = () => {
                   <div className="perk-icon">{perk.icon}</div>
                   <h3 className="perk-title">{perk.title}</h3>
                   <p className="perk-desc">{perk.desc}</p>
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ── CORE VALUES ── */}
+      <section className="careers-values" style={{ position: 'relative', overflow: 'hidden', padding: '100px 5%', background: '#ffffff' }}>
+        <div className="careers-section-inner" style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '0 auto' }}>
+          <ScrollReveal variant="fade-up">
+            <h2 className="careers-section-title">Our Institutional Core Values</h2>
+            <p className="careers-section-sub">The foundational principles that guide our architecture and our culture.</p>
+          </ScrollReveal>
+          
+          <ScrollReveal variant="fade-up" delay={0.15}>
+            <div className="values-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', marginTop: '50px' }}>
+              {values.map((value) => (
+                <div key={value.title} className="value-card" style={{ background: '#fafbff', padding: '40px', borderRadius: '16px', border: '1px solid rgba(0, 102, 255, 0.12)', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}>
+                  <div className="value-icon" style={{ 
+                    color: 'var(--primary)', 
+                    marginBottom: '20px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '60px',
+                    height: '60px',
+                    background: 'rgba(0, 102, 255, 0.08)',
+                    borderRadius: '12px'
+                  }}>{value.icon}</div>
+                  <h3 className="value-title" style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-dark)' }}>{value.title}</h3>
+                  <p className="value-desc" style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-light)' }}>{value.desc}</p>
                 </div>
               ))}
             </div>

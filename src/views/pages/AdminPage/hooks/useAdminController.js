@@ -54,12 +54,7 @@ export const useAdminController = () => {
   const [transferKey, setTransferKey] = useState('');
 
   // 1. Audit Logs Dataset State
-  const [auditLogs, setAuditLogs] = useState([
-    { id: 1, timestamp: '2026-05-25 15:42:01', user: 'System Sentinel', action: 'KYC Auto-Sync completed successfully', type: 'info' },
-    { id: 2, timestamp: '2026-05-25 14:15:30', user: 'Lending Officer (Admin)', action: 'Interest rate minimum index set to 14%', type: 'info' },
-    { id: 3, timestamp: '2026-05-25 11:20:10', user: 'Security Bot', action: 'Failed login warning: 3 incorrect attempts for user test@lendo.go', type: 'warning' },
-    { id: 4, timestamp: '2026-05-25 09:05:12', user: 'System Sentinel', action: 'Cron Ledger backup archived to cloud container', type: 'success' }
-  ]);
+  const [auditLogs, setAuditLogs] = useState([]);
 
   const addAuditLog = (action, type = 'info') => {
     const now = new Date();
@@ -267,40 +262,98 @@ export const useAdminController = () => {
     }
   };
 
+  const fetchAuditLogs = async () => {
+    try {
+      const res = await apiClient('/admin/audit-logs');
+      const data = res?.data || res || [];
+      const mappedLogs = data.map(log => ({
+        id: log.id || log.ID,
+        timestamp: log.created_at ? new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19) : '',
+        user: log.actor_name,
+        action: log.description,
+        type: log.action_type ? log.action_type.toLowerCase() : 'info'
+      }));
+      setAuditLogs(mappedLogs);
+    } catch (err) {
+      console.error("Failed to fetch audit logs:", err);
+    }
+  };
+
   useEffect(() => {
     const p = user?.permissions || {};
     const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
     
-    if (isAdmin || p['User Management']) fetchUsers();
-    if (isAdmin || p['Loan Applications']) fetchApplications();
-    if (isAdmin || p['Dashboard']) fetchWalletBalance();
-    if (isAdmin || p['Customer Care']) fetchConsultations();
+    if (isAdmin || p['User Management'] || p['user_read']) fetchUsers();
+    if (isAdmin || p['Loan Applications'] || p['loan_app_view']) fetchApplications();
+    if (isAdmin || p['Dashboard'] || p['dashboard_view']) fetchWalletBalance();
+    if (isAdmin || p['Customer Care'] || p['cc_consult_view'] || p['cc_chat_view']) fetchConsultations();
+    if (isAdmin || p['user_read'] || p['audit_read']) fetchAuditLogs();
     
     // Chats can be fetched by anyone who can see Customer Care or Dashboard
-    if (isAdmin || p['Customer Care'] || p['Dashboard']) fetchChatSessions();
+    if (isAdmin || p['Customer Care'] || p['Dashboard'] || p['cc_chat_view']) fetchChatSessions();
   }, [auditedScores, user]);
+
+  // Real-time Audit Logs WebSocket
+  useEffect(() => {
+    const p = user?.permissions || {};
+    const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+    
+    if (isAdmin || p['audit_read'] || p['user_read']) {
+      // Connect to the new dedicated Admin WebSocket Hub!
+      const wsUrl = `ws://localhost:8080/api/admin/ws`;
+      const ws = new WebSocket(wsUrl);
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'NEW_AUDIT_LOG') {
+            const log = data.data;
+            setAuditLogs(prev => {
+              const newLog = {
+                id: log.ID || log.id || Date.now(),
+                timestamp: log.created_at ? new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19) : new Date().toISOString().replace('T', ' ').substring(0, 19),
+                user: log.actor_name,
+                action: log.description,
+                type: log.action_type ? log.action_type.toLowerCase() : 'info'
+              };
+              // avoid duplicate keys by filtering if it somehow already exists
+              if (prev.find(p => p.id === newLog.id)) return prev;
+              return [newLog, ...prev];
+            });
+          } else if (data.event === 'STAFF_PROVISIONED' || data.event === 'STAFF_STATUS_UPDATED' || data.event === 'STAFF_DELETED') {
+            window.dispatchEvent(new Event('admin-staff-updated'));
+          } else if (data.event === 'USER_CREATED' || data.event === 'USER_UPDATED' || data.event === 'USER_DELETED' || data.event === 'USER_STATUS_UPDATED') {
+            fetchUsers();
+          } else if (data.event === 'LOAN_STATUS_UPDATED' || data.event === 'LOAN_DISBURSED') {
+            fetchApplications();
+            if (data.event === 'LOAN_DISBURSED') {
+              fetchWalletBalance();
+            }
+          } else if (data.event === 'GLOBAL_PERMISSIONS_UPDATED') {
+            window.dispatchEvent(new Event('admin-permissions-updated'));
+          }
+        } catch(e) {}
+      };
+      return () => ws.close();
+    }
+  }, [user]);
 
   // No more local storage sync for live chats; it's handled by WS and REST API
 
   const handleToggleUserStatus = (userId, userName, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: nextStatus } : u));
-    addAuditLog(`User ${userName} (${userId}) status updated to ${nextStatus}`, nextStatus === 'Blocked' ? 'warning' : 'success');
   };
 
   const handleCreateUser = (newUser) => {
     setUsers(prev => [newUser, ...prev]);
-    addAuditLog(`User profile created for ${newUser.name} (${newUser.id})`, 'success');
   };
 
   const handleUpdateUser = (updatedUser) => {
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-    addAuditLog(`User profile updated for ${updatedUser.name} (${updatedUser.id})`, 'info');
   };
 
   const handleDeleteUser = (userId, userName) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    addAuditLog(`User ${userName} (${userId}) deleted from system`, 'warning');
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'Deleted' } : u));
   };
 
   // KYC Verification Dataset & Handlers (kept for interface match, though KYCVerificationsTab handles it internally)
@@ -342,7 +395,7 @@ export const useAdminController = () => {
         body: JSON.stringify({ status: 'APPROVED' })
       });
       
-      addAuditLog(`Sanctioned loan approval for ${request.name}. Reference: ${request.referenceNumber}`, 'success');
+      // Log is handled by backend WebSocket broadcast
       alert(`Loan successfully approved and moved to disbursements ledger.`);
       
       setLiveMarquee(prev => [
@@ -366,7 +419,7 @@ export const useAdminController = () => {
         method: 'PATCH',
         body: JSON.stringify({ status: 'REJECTED' })
       });
-      addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
+      // Log is handled by backend WebSocket broadcast
       alert(`Application ${reqId} rejected.`);
       fetchApplications();
       return true;
@@ -397,7 +450,6 @@ export const useAdminController = () => {
 
       await fetchWalletBalance();
 
-      addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
       alert(`Loan disbursed successfully.`);
       fetchApplications();
       return true;
