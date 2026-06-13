@@ -106,6 +106,7 @@ const AdminPage = () => {
     handleDisburseMoney,
     handleToggleJobStatus,
     handleCreateJobOpening,
+    handleUpdateJobOpening,
     handleUpdateApplicantStatus,
     handleRechargeWallet,
     handleResolveTicket,
@@ -512,6 +513,7 @@ const AdminPage = () => {
                 jobApplications={jobApplications}
                 handleUpdateApplicantStatus={handleUpdateApplicantStatus}
                 handleCreateJobOpening={handleCreateJobOpening}
+                handleUpdateJobOpening={handleUpdateJobOpening}
                 showOnly="jobs"
               />
             )}

@@ -124,9 +124,56 @@ const JobCard = ({ job }) => {
 };
 
 const JobListingsPage = () => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
-  const depts = ['All', ...Array.from(new Set(JOBS.map((j) => j.dept)))];
-  const filtered = filter === 'All' ? JOBS : JOBS.filter((j) => j.dept === filter);
+
+  React.useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/careers/openings?status=Open');
+        const resData = await response.json();
+        const data = resData?.data || resData || [];
+
+        const safeParse = (field) => Array.isArray(field) ? field : (typeof field === 'string' ? JSON.parse(field || '[]') : []);
+
+        const formattedJobs = data.map(job => {
+          const about = job.about_role || '';
+          const resps = safeParse(job.responsibilities).map(r => `• ${r}`).join('\n');
+          const reqs = safeParse(job.requirements).map(r => `• ${r}`).join('\n');
+          const bens = safeParse(job.benefits).map(b => `• ${b}`).join('\n');
+          
+          let fullJD = about;
+          if (resps.trim()) fullJD += `\n\nResponsibilities\n${resps}`;
+          if (reqs.trim()) fullJD += `\n\nRequirements\n${reqs}`;
+          if (bens.trim()) fullJD += `\n\nPerks & Benefits\n${bens}`;
+
+          return {
+            id: job.id,
+            dept: job.department || 'Product',
+            title: job.title,
+            location: job.location,
+            experience: job.experience_range,
+            workMode: job.work_mode,
+            type: job.employment_type,
+            skills: safeParse(job.skills),
+            shortDesc: job.short_description,
+            jd: fullJD
+          };
+        });
+
+        setJobs(formattedJobs);
+      } catch (error) {
+        console.error("Failed to fetch jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  const depts = ['All', ...Array.from(new Set(jobs.map((j) => j.dept)))];
+  const filtered = filter === 'All' ? jobs : jobs.filter((j) => j.dept === filter);
 
   return (
     <div className="jl-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -142,8 +189,7 @@ const JobListingsPage = () => {
             <span className="jl-header-eyebrow">LendoGO Careers</span>
             <h1 className="jl-header-title">Current Openings</h1>
             <p className="jl-header-sub">
-              {JOBS.length} open roles · Join us and help build India's most
-              trusted digital lending platform
+              {loading ? "Loading open roles..." : `${jobs.length} open roles · Join us and help build India's most trusted digital lending platform`}
             </p>
           </div>
         </ScrollReveal>
@@ -170,15 +216,25 @@ const JobListingsPage = () => {
       {/* ── listings ── */}
       <main className="jl-listings" style={{ position: 'relative', zIndex: 2 }}>
         <div className="jl-listings-inner">
-          {filtered.map((job, index) => (
-            <ScrollReveal 
-              key={job.id} 
-              variant="fade-up" 
-              delay={(index % 3) * 0.08}
-            >
-              <JobCard job={job} />
-            </ScrollReveal>
-          ))}
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '50px', color: 'var(--text-light)' }}>
+              Loading...
+            </div>
+          ) : filtered.length > 0 ? (
+            filtered.map((job, index) => (
+              <ScrollReveal 
+                key={job.id} 
+                variant="fade-up" 
+                delay={(index % 3) * 0.08}
+              >
+                <JobCard job={job} />
+              </ScrollReveal>
+            ))
+          ) : (
+            <div style={{ textAlign: 'center', padding: '50px', color: 'var(--text-light)' }}>
+              No openings found matching your criteria.
+            </div>
+          )}
         </div>
       </main>
 

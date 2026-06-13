@@ -279,6 +279,34 @@ export const useAdminController = () => {
     }
   };
 
+  const fetchCareerOpenings = async () => {
+    try {
+      const res = await apiClient('/careers/openings');
+      const data = res?.data || res || [];
+      const safeParse = (field) => Array.isArray(field) ? field : (typeof field === 'string' ? JSON.parse(field || '[]') : []);
+      const formatted = data.map(job => ({
+        id: job.id,
+        title: job.title,
+        dept: job.department,
+        type: job.employment_type,
+        status: job.status,
+        applicants: 0,
+        experience: job.experience_range,
+        location: job.location,
+        mode: job.work_mode,
+        skills: safeParse(job.skills),
+        briefNote: job.short_description,
+        aboutRole: job.about_role,
+        responsibilities: safeParse(job.responsibilities),
+        requirements: safeParse(job.requirements),
+        benefits: safeParse(job.benefits)
+      }));
+      setCareersOpenings(formatted);
+    } catch (e) {
+      console.error("Failed to fetch careers:", e);
+    }
+  };
+
   useEffect(() => {
     const p = user?.permissions || {};
     const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
@@ -288,6 +316,10 @@ export const useAdminController = () => {
     if (isAdmin || p['Dashboard'] || p['dashboard_view']) fetchWalletBalance();
     if (isAdmin || p['Customer Care'] || p['cc_consult_view'] || p['cc_chat_view']) fetchConsultations();
     if (isAdmin || p['user_read'] || p['audit_read']) fetchAuditLogs();
+    if (isAdmin || p['career_job_read']) {
+      fetchCareerOpenings();
+      fetchJobApplications();
+    }
     
     // Chats can be fetched by anyone who can see Customer Care or Dashboard
     if (isAdmin || p['Customer Care'] || p['Dashboard'] || p['cc_chat_view']) fetchChatSessions();
@@ -328,6 +360,8 @@ export const useAdminController = () => {
             if (data.event === 'LOAN_DISBURSED') {
               fetchWalletBalance();
             }
+          } else if (data.event === 'CAREER_OPENING_CREATED' || data.event === 'CAREER_OPENING_UPDATED') {
+            fetchCareerOpenings();
           } else if (data.event === 'GLOBAL_PERMISSIONS_UPDATED') {
             window.dispatchEvent(new Event('admin-permissions-updated'));
           }
@@ -461,92 +495,64 @@ export const useAdminController = () => {
   };
 
   // 5. Careers & Recruiting Dataset
-  const [careersOpenings, setCareersOpenings] = useState([
-    { id: 'JOB-01', title: 'Senior Credit Analyst', dept: 'Credit & Risk', type: 'Full-Time', status: 'Open', applicants: 12, experience: '3-5 yrs', location: 'Ernakulam, Palarivattom', mode: 'Hybrid', skills: ['Credit Analysis', 'Underwriting'], briefNote: 'Assess borrower credit rating.', aboutRole: 'Analyze income statement profiles...' },
-    { id: 'JOB-02', title: 'Loan Officer', dept: 'Operations', type: 'Full-Time', status: 'Open', applicants: 8, experience: '1-3 yrs', location: 'Ernakulam, Palarivattom', mode: 'On-site', skills: ['Customer Support', 'Loan Origination'], briefNote: 'Process customer lending requests.', aboutRole: 'Verify applications details...' },
-    { id: 'JOB-03', title: 'Lead Compliance Architect', dept: 'Engineering', type: 'Full-Time', status: 'Closed', applicants: 4, experience: '5+ yrs', location: 'Ernakulam, Palarivattom', mode: 'Remote', skills: ['Regulatory Compliance', 'Fintech Architecture'], briefNote: 'Ensure architecture compliance.', aboutRole: 'Build compliant backend routing...' }
-  ]);
+  const [careersOpenings, setCareersOpenings] = useState([]);
 
-  const [jobApplications, setJobApplications] = useState([
-    { 
-      id: 'APP-901', 
-      name: 'Rohan Sharma', 
-      firstName: 'Rohan',
-      lastName: 'Sharma',
-      email: 'rohan.s@gmail.com', 
-      phone: '98765 43210',
-      address: '12B, Skyline Apartments, Palarivattom',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682025',
-      cvName: 'cv_rohan_sharma.pdf',
-      role: 'Senior Credit Analyst', 
-      dept: 'Credit & Risk', 
-      applied: '2026-05-24', 
-      status: 'Reviewing' 
-    },
-    { 
-      id: 'APP-402', 
-      name: 'Divya Iyer', 
-      firstName: 'Divya',
-      lastName: 'Iyer',
-      email: 'divya.iyer@outlook.com', 
-      phone: '94471 23456',
-      address: 'Apt 4G, Choice Marina, Kundannoor',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682304',
-      cvName: 'cv_divya_iyer.pdf',
-      role: 'Loan Officer', 
-      dept: 'Operations', 
-      applied: '2026-05-22', 
-      status: 'Shortlisted' 
-    },
-    { 
-      id: 'APP-105', 
-      name: 'Vikram Seth', 
-      firstName: 'Vikram',
-      lastName: 'Seth',
-      email: 'vikram.seth@yahoo.com', 
-      phone: '90012 34567',
-      address: 'Plot 88, Kaloor-Kadavanthra Rd',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682017',
-      cvName: 'resume_vikram_seth.pdf',
-      role: 'Senior Credit Analyst', 
-      dept: 'Credit & Risk', 
-      applied: '2026-05-20', 
-      status: 'Interviewing' 
-    },
-    { 
-      id: 'APP-339', 
-      name: 'Nisha Varma', 
-      firstName: 'Nisha',
-      lastName: 'Varma',
-      email: 'nisha.v@gmail.com', 
-      phone: '97441 55667',
-      address: '33C, Olive Heights, Kakkanad',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682030',
-      cvName: 'cv_nisha_varma.pdf',
-      role: 'Lead Compliance Architect', 
-      dept: 'Engineering', 
-      applied: '2026-05-18', 
-      status: 'Rejected' 
+  const [jobApplications, setJobApplications] = useState([]);
+
+  const fetchJobApplications = async () => {
+    try {
+      const data = await apiClient('/careers/admin/applications');
+      const apps = data.data || [];
+      const formatted = apps.map(app => ({
+        id: app.id,
+        firstName: app.first_name,
+        lastName: app.last_name,
+        name: `${app.first_name} ${app.last_name}`,
+        email: app.email,
+        phone: app.phone,
+        address: app.address,
+        city: app.city,
+        state: app.state,
+        zip: app.postal_code,
+        cvName: app.resume_path ? app.resume_path.split('/').pop() : 'resume.pdf',
+        cvUrl: app.resume_path ? (app.resume_path.startsWith('http') ? app.resume_path : `http://localhost:8080/${app.resume_path}`) : '',
+        role: app.CareerOpening ? app.CareerOpening.title : 'Unknown Role',
+        dept: app.CareerOpening ? app.CareerOpening.department : 'Unknown Dept',
+        applied: app.created_at ? new Date(app.created_at).toISOString().split('T')[0] : 'N/A',
+        status: (app.status === 'Under Review' ? 'Reviewing' : app.status) || 'Reviewing'
+      }));
+      setJobApplications(formatted);
+    } catch (e) {
+      console.error("Failed to fetch job applications:", e);
     }
-  ]);
-
-  const handleToggleJobStatus = (jobId, title, currentStatus) => {
-    const nextStatus = currentStatus === 'Open' ? 'Closed' : 'Open';
-    setCareersOpenings(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus } : j));
-    addAuditLog(`Job opening '${title}' (${jobId}) status set to ${nextStatus}`, 'info');
   };
 
-  const handleUpdateApplicantStatus = (appId, applicantName, nextStatus) => {
-    setJobApplications(prev => prev.map(a => a.id === appId ? { ...a, status: nextStatus } : a));
-    addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
+  const handleToggleJobStatus = async (jobId, title, currentStatus) => {
+    const nextStatus = currentStatus === 'Open' ? 'Closed' : 'Open';
+    try {
+      await apiClient(`/careers/admin/openings/${jobId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus })
+      });
+      fetchCareerOpenings();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update job status');
+    }
+  };
+
+  const handleUpdateApplicantStatus = async (appId, applicantName, nextStatus) => {
+    try {
+      await apiClient(`/careers/admin/applications/${appId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus })
+      });
+      setJobApplications(prev => prev.map(a => a.id === appId ? { ...a, status: nextStatus } : a));
+      addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update application status');
+    }
   };
 
   const handleRechargeWallet = async (amount) => {
@@ -614,24 +620,32 @@ export const useAdminController = () => {
     }
   };
 
-  const handleCreateJobOpening = (job) => {
-    const newId = `JOB-0${careersOpenings.length + 1}`;
-    const newJob = {
-      id: newId,
-      title: job.title,
-      dept: job.dept,
-      type: job.type || 'Full-Time',
-      status: 'Open',
-      applicants: 0,
-      experience: job.experience || '1-3 yrs',
-      location: job.location || 'Ernakulam, Palarivattom',
-      mode: job.mode || 'Hybrid',
-      skills: job.skills || [],
-      briefNote: job.briefNote || '',
-      aboutRole: job.aboutRole || ''
-    };
-    setCareersOpenings(prev => [newJob, ...prev]);
-    addAuditLog(`Job opening '${job.title}' (${newId}) created successfully`, 'success');
+  const handleCreateJobOpening = async (job) => {
+    try {
+      await apiClient('/careers/admin/openings', {
+        method: 'POST',
+        body: JSON.stringify(job)
+      });
+      fetchCareerOpenings();
+      addAuditLog(`Job opening '${job.title}' created successfully`, 'success');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to create job opening: ' + err.message);
+    }
+  };
+
+  const handleUpdateJobOpening = async (jobId, job) => {
+    try {
+      await apiClient(`/careers/admin/openings/${jobId}`, {
+        method: 'PUT',
+        body: JSON.stringify(job)
+      });
+      fetchCareerOpenings();
+      addAuditLog(`Job opening '${job.title}' updated successfully`, 'success');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update job opening: ' + err.message);
+    }
   };
 
   const handleResolveTicket = (ticketId, customerName) => {
@@ -830,6 +844,7 @@ export const useAdminController = () => {
     handleDisburseMoney,
     handleToggleJobStatus,
     handleCreateJobOpening,
+    handleUpdateJobOpening,
     handleUpdateApplicantStatus,
     handleRechargeWallet,
     handleResolveTicket,

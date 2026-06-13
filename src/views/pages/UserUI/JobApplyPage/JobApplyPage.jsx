@@ -4,7 +4,6 @@ import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import { JOBS } from '../JobListingsPage/jobsData';
 import jobAppImg from '../../../../assets/jobapplication.png';
 import './JobApplyPage.css';
 
@@ -36,8 +35,8 @@ const JobApplyPage = () => {
   const navigate = useNavigate();
   const fileRef = useRef(null);
 
-  const job = JOBS.find((j) => j.id === jobId);
-
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '',
     address: '', city: '', state: '', postal: '',
@@ -45,7 +44,34 @@ const JobApplyPage = () => {
   const [resume, setResume] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
+  React.useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/careers/openings/${jobId}`);
+        const resData = await response.json();
+        if (resData && resData.data) {
+          setJob(resData.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch job details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJob();
+  }, [jobId]);
+
+  if (loading) {
+    return (
+      <div className="ja-page-wrapper">
+        <Navbar />
+        <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-light)' }}>Loading role details...</div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!job) {
     return (
@@ -101,45 +127,86 @@ const JobApplyPage = () => {
     return e;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const e2 = validate();
     if (Object.keys(e2).length) { setErrors(e2); return; }
-    setSubmitted(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('first_name', form.firstName);
+      formData.append('last_name', form.lastName);
+      formData.append('email', form.email);
+      formData.append('phone', form.phone);
+      formData.append('address', form.address);
+      formData.append('city', form.city);
+      formData.append('state', form.state);
+      formData.append('postal_code', form.postal);
+      formData.append('resume', resume);
+
+      const submitBtn = document.getElementById('submit-application-btn');
+      if (submitBtn) submitBtn.innerText = 'Submitting...';
+
+      const response = await fetch(`http://localhost:8080/api/careers/openings/${jobId}/apply`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to submit application');
+      }
+
+      setToastMsg("🎉 Application Submitted Successfully!");
+      
+      setForm({
+        firstName: '', lastName: '', email: '', phone: '',
+        address: '', city: '', state: '', postal: '',
+      });
+      setResume(null);
+      setErrors({});
+
+      if (submitBtn) submitBtn.innerText = 'Submit Application';
+
+      setTimeout(() => {
+        setToastMsg("");
+        navigate('/careers/openings');
+      }, 2000);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+      const submitBtn = document.getElementById('submit-application-btn');
+      if (submitBtn) submitBtn.innerText = 'Submit Application';
+    }
   };
-
-  /* success */
-  if (submitted) {
-    return (
-      <div className="ja-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
-        <Navbar />
-
-        {/* Dynamic ambient moving shapes background */}
-        <ParallaxShapes preset="side-decor" />
-
-        <ScrollReveal variant="zoom-in">
-          <div className="ja-success" style={{ position: 'relative', zIndex: 2 }}>
-            <div className="ja-success-icon">🎉</div>
-            <h2 className="ja-success-title">Application Submitted!</h2>
-            <p className="ja-success-msg">
-              Thanks, <strong>{form.firstName}</strong>! We've received your application for{' '}
-              <strong>{job.title}</strong>. Our team will be in touch at{' '}
-              <strong>{form.email}</strong> within 5–7 business days.
-            </p>
-            <div className="ja-success-actions">
-              <button className="ja-btn-primary" onClick={() => navigate('/careers/openings')}>Browse More Roles</button>
-              <button className="ja-btn-outline" onClick={() => navigate('/careers')}>Back to Careers</button>
-            </div>
-          </div>
-        </ScrollReveal>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="ja-page-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <Navbar />
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          zIndex: 9999,
+          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          color: 'white',
+          padding: '16px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          transform: 'translateX(0)',
+          animation: 'slideIn 0.3s ease-out'
+        }}>
+          {toastMsg}
+        </div>
+      )}
 
       {/* Dynamic ambient moving shapes background */}
       <ParallaxShapes preset="side-decor" />
