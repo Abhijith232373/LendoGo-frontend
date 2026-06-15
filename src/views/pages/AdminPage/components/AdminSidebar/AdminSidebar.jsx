@@ -175,20 +175,7 @@ const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode
         </ul>
       </nav>
 
-      {/* Theme Switcher Toggle */}
-      <div className="sidebar-theme-toggle">
-        {!collapsed && (
-          <span className="toggle-label">{darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-        )}
-        <label className="toggle-switch">
-          <input
-            type="checkbox"
-            checked={darkMode}
-            onChange={() => setDarkMode(!darkMode)}
-          />
-          <span className="slider-round" />
-        </label>
-      </div>
+
     </aside>
   );
 };

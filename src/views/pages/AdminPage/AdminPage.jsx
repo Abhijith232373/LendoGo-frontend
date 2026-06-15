@@ -604,6 +604,8 @@ const AdminPage = () => {
                 setTransferEmail={setTransferEmail}
                 transferKey={transferKey}
                 setTransferKey={setTransferKey}
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
                 handleAdminLogout={handleAdminLogout}
               />
             )}

@@ -433,7 +433,7 @@ export const useAdminController = () => {
       alert(`Loan successfully approved and moved to disbursements ledger.`);
       
       setLiveMarquee(prev => [
-        { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
+        { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: 'Approved' },
         ...prev
       ]);
 
@@ -712,10 +712,10 @@ export const useAdminController = () => {
 
   // 8. Live Marquee approvals
   const [liveMarquee, setLiveMarquee] = useState([
-    { name: 'Rahul S. (PAN: A****32P)', type: 'Personal Loan', amount: '₹1,50,000', status: '⚡' },
-    { name: 'Aarav M. (PAN: B****91K)', type: 'Business Loan', amount: '₹5,00,000', status: '💼' },
-    { name: 'Priya K. (PAN: D****84D)', type: 'Auto Loan', amount: '₹3,50,000', status: '🚗' },
-    { name: 'Sneha R. (PAN: C****74S)', type: 'Home Loan', amount: '₹12,00,000', status: '🏠' }
+    { name: 'Rahul S. (PAN: A****32P)', type: 'Personal Loan', amount: '₹1,50,000', status: 'Approved' },
+    { name: 'Aarav M. (PAN: B****91K)', type: 'Business Loan', amount: '₹5,00,000', status: 'Approved' },
+    { name: 'Priya K. (PAN: D****84D)', type: 'Auto Loan', amount: '₹3,50,000', status: 'Approved' },
+    { name: 'Sneha R. (PAN: C****74S)', type: 'Home Loan', amount: '₹12,00,000', status: 'Approved' }
   ]);
 
   // Web Config save success alert
@@ -728,16 +728,35 @@ export const useAdminController = () => {
 
   // ─── SETTINGS HANDLERS ───
 
-  // 1. Simulated Custom Photo Upload
-  const handleSimulatePhotoUpload = (e) => {
+  // 1. Upload Admin Photo to AWS S3
+  const handleSimulatePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setAdminAvatar(uploadEvent.target.result);
-        addAuditLog('Admin updated profile picture via custom image upload', 'info');
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const res = await apiClient('/admin/profile/avatar', {
+          method: 'POST',
+          body: formData, // apiClient will automatically handle FormData and omit Content-Type header
+        });
+
+        if (res && res.avatar) {
+          setAdminAvatar(res.avatar);
+          // Update the user session in localStorage so it persists
+          const userDataStr = localStorage.getItem('lendogo_user');
+          if (userDataStr) {
+            const userData = JSON.parse(userDataStr);
+            userData.avatar = res.avatar;
+            localStorage.setItem('lendogo_user', JSON.stringify(userData));
+          }
+          addAuditLog('Admin updated profile picture via AWS S3 upload', 'info');
+          alert('Profile picture updated successfully!');
+        }
+      } catch (err) {
+        console.error("Failed to upload avatar:", err);
+        alert(`Failed to upload avatar: ${err.message}`);
+      }
     }
   };
 
