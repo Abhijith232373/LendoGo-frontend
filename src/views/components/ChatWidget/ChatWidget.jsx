@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
+import { useWebConfig } from '../../../context/WebConfigContext';
 import './ChatWidget.css';
 import askCredyAvatar from '../../../assets/ask_credy_avatar.webp';
 
 const ChatWidget = () => {
   const { user } = useAuthController();
+  const { webConfig } = useWebConfig();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -21,7 +23,9 @@ const ChatWidget = () => {
   // Initialize and load chat history when user changes or logs in
   useEffect(() => {
     const isAdminRoute = location.pathname.startsWith('/admin') || user?.role === 'admin';
-    if (user && user.isAuthenticated && user.id && !isAdminRoute) {
+    const isChatEnabled = !webConfig || webConfig.chat_support_enabled !== false;
+    
+    if (user && user.isAuthenticated && user.id && !isAdminRoute && isChatEnabled) {
       // No more fake local storage dummy threads!
       setMessages([]);
 
@@ -165,6 +169,12 @@ const ChatWidget = () => {
   };
 
   const handleOpenChat = () => {
+    if (webConfig && webConfig.chat_support_enabled === false) {
+      window.dispatchEvent(new CustomEvent('lendogo-toast', { 
+        detail: { message: "Chat Support is currently temporarily disabled by the administrator.", type: "warning" } 
+      }));
+      return;
+    }
     setIsClosing(false);
     setIsOpen(true);
   };

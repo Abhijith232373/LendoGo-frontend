@@ -5,6 +5,7 @@ import './Navbar.css';
 import ConsultationModal from '../ConsultationModal/ConsultationModal';
 import TrustScoreView from './TrustScoreView';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
+import { useWebConfig } from '../../../context/WebConfigContext';
 import { apiClient } from '../../../utils/apiClient';
 
 const getCleanDpUrl = (imgUrl) => {
@@ -167,12 +168,11 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   // Applied Loan History State
   const [loanHistory, setLoanHistory] = useState(() => {
     const saved = localStorage.getItem('lendogo_loan_history');
-    if (saved) return JSON.parse(saved);
-    return [
-      { id: 'LGO-1092', type: 'Personal Loan', amount: 50000, status: 'DISBURSED', date: 'May 12, 2026' },
-      { id: 'LGO-0871', type: 'Instant Mobile Loan', amount: 15000, status: 'APPROVED', date: 'May 24, 2026' },
-      { id: 'LGO-0654', type: 'Credit Builder Loan', amount: 10000, status: 'PENDING', date: 'May 25, 2026' }
-    ];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.filter(loan => !['LGO-1092', 'LGO-0871', 'LGO-0654'].includes(loan.id));
+    }
+    return [];
   });
 
   // Bank Accounts Coordinates State
@@ -469,7 +469,12 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
       }
       
       const savedHistory = localStorage.getItem('lendogo_loan_history');
-      if (savedHistory) setLoanHistory(JSON.parse(savedHistory));
+      if (savedHistory) {
+        const parsed = JSON.parse(savedHistory);
+        setLoanHistory(parsed.filter(loan => !['LGO-1092', 'LGO-0871', 'LGO-0654'].includes(loan.id)));
+      } else {
+        setLoanHistory([]);
+      }
     };
     window.addEventListener('loan-state-changed', handleSync);
     return () => window.removeEventListener('loan-state-changed', handleSync);
@@ -1223,19 +1228,26 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
               <form onSubmit={handleSubmitFeedback} className="sidebar-form">
                 <h5 className="sidebar-subpage-sub-title">Rate LendoGo Platform</h5>
                 
-                <div className="sidebar-input-group">
-                  <label>Satisfactory Rating ({feedbackRating} / 5 Stars)</label>
-                  <input 
-                    type="range" 
-                    min="1" 
-                    max="5" 
-                    value={feedbackRating} 
-                    onChange={(e) => setFeedbackRating(parseInt(e.target.value))}
-                    style={{ width: '100%', cursor: 'pointer', accentColor: '#0f66ff' }}
-                  />
-                  <div className="rating-slider-labels">
-                    <span>Poor</span>
-                    <span>Excellent</span>
+                <div className="sidebar-input-group" style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 600, color: '#334155', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Satisfactory Rating
+                  </label>
+                  <div className="emoji-rating-container">
+                    {['😡', '😞', '😐', '🙂', '😍'].map((emoji, index) => {
+                      const ratingValue = index + 1;
+                      const isSelected = feedbackRating === ratingValue;
+                      return (
+                        <button
+                          key={ratingValue}
+                          type="button"
+                          onClick={() => setFeedbackRating(ratingValue)}
+                          className={`emoji-rating-btn ${isSelected ? 'selected' : ''}`}
+                          title={`Rate ${ratingValue} stars`}
+                        >
+                          {emoji}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -1250,26 +1262,14 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                   />
                 </div>
 
-                <button type="submit" className="sidebar-submit-btn-unified">Submit Feedback Coordinates</button>
+                <button type="submit" className="sidebar-submit-btn-unified">Submit Feedback</button>
               </form>
 
               {/* App Settings block */}
               <div className="sidebar-app-settings-card-wrapper mt-3">
                 <h5 className="sidebar-subpage-sub-title">Fintech App Configuration</h5>
                 
-                <div className="sidebar-settings-toggle-row">
-                  <label className="toggle-lbl">Language Selection</label>
-                  <select 
-                    value={language} 
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="sidebar-input-field"
-                    style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', minWidth: '110px' }}
-                  >
-                    <option value="English">English</option>
-                    <option value="Hindi">Hindi</option>
-                    <option value="Spanish">Spanish</option>
-                  </select>
-                </div>
+
 
                 <div className="sidebar-settings-toggle-row mt-2">
                   <label className="toggle-lbl">Push App Notifications</label>
@@ -1298,6 +1298,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
 
 const Navbar = () => {
   const { user, signOut } = useAuthController();
+  const { webConfig } = useWebConfig();
   const navigate = useNavigate();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -1508,8 +1509,13 @@ const Navbar = () => {
 
         {/* Action Buttons */}
         <div className="navbar-actions">
-          <button className="btn-outline" onClick={() => setModalOpen(true)}>Free Consultation</button>
-          
+          <button className="btn-outline" onClick={() => {
+            if (webConfig && webConfig.free_consultation_enabled === false) {
+              showToast("This feature is currently temporarily disabled by the administrator.", "warning");
+            } else {
+              setModalOpen(true);
+            }
+          }}>Free Consultation</button>
           {user.isAuthenticated ? (
             <>
               {/* Notification Bell Dropdown */}
@@ -1676,7 +1682,15 @@ const Navbar = () => {
         </div>
 
         <div className="mobile-actions">
-          <button className="btn-outline" onClick={() => { setModalOpen(true); setMenuOpen(false); }}>Free Consultation</button>
+          <button className="btn-outline" onClick={() => {
+            if (webConfig && webConfig.free_consultation_enabled === false) {
+              setMenuOpen(false);
+              showToast("This feature is currently temporarily disabled by the administrator.", "warning");
+            } else {
+              setModalOpen(true);
+              setMenuOpen(false);
+            }
+          }}>Free Consultation</button>
           
           {user.isAuthenticated ? (
             <div className="mobile-profile-info">

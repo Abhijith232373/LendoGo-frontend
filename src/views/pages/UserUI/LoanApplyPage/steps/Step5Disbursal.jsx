@@ -90,18 +90,9 @@ const Step5Disbursal = () => {
 
     // Add to loan history
     const savedHistoryStr = localStorage.getItem('lendogo_loan_history');
-    let history = savedHistoryStr ? JSON.parse(savedHistoryStr) : [
-      { id: 'LGO-1092', type: 'Personal Loan', amount: 50000, status: 'DISBURSED', date: 'May 12, 2026' },
-      { id: 'LGO-0871', type: 'Instant Mobile Loan', amount: 15000, status: 'APPROVED', date: 'May 24, 2026' },
-      { id: 'LGO-0654', type: 'Credit Builder Loan', amount: 10000, status: 'PENDING', date: 'May 25, 2026' }
-    ];
-    // Remove or mark old active loan as CLOSED in history
-    history = history.map(item => {
-      if (item.id === 'LGO-1092' && item.status === 'DISBURSED') {
-        return { ...item, status: 'CLOSED' };
-      }
-      return item;
-    });
+    let history = savedHistoryStr ? JSON.parse(savedHistoryStr) : [];
+    // Filter out dummy loans if they were previously saved
+    history = history.filter(item => !['LGO-1092', 'LGO-0871', 'LGO-0654'].includes(item.id));
     // Add new loan to history
     history.unshift({
       id: refNumber,

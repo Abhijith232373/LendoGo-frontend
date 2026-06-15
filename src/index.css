@@ -61,3 +61,63 @@ button {
   border: none;
   font-family: var(--font-main);
 }
+
+/* ====== GLOBAL MOBILE RESPONSIVENESS SAFEGUARDS ====== */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Stack most grids on mobile */
+  [class*="-grid"]:not(.tenure-grid):not(.kyc-grid-2x2):not(.kyc-grid-3x3), 
+  [class*="grid-"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Some specific grids that can wrap properly instead of full stacking */
+  .tenure-grid, .kyc-grid-2x2, .kyc-grid-3x3 {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  }
+
+  /* Make sure large titles scale properly */
+  h1, .hero-headline, .product-hero-title, .pillars-title, .product-cta-title, .row-main-title {
+    font-size: clamp(2rem, 8vw, 2.5rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Reduce massive paddings that squish mobile content */
+  section, 
+  .product-hero-section,
+  .product-alternating-details-section,
+  .product-final-cta-section,
+  .product-trust-pillars-section,
+  .product-testimonial-section,
+  .product-thought-section {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  /* Ensure containers stack */
+  .product-hero-container,
+  .details-alt-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2rem !important;
+    text-align: center;
+  }
+  
+  .details-row-info {
+    align-items: center !important;
+  }
+
+  /* Images shouldn't overflow */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Adjust modal widths and padding */
+  .loan-step-card {
+    padding: 1.5rem 1.25rem !important;
+  }
+}
