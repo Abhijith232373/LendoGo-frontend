@@ -86,6 +86,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user && user.isAuthenticated && user.id) {
       const fetchGlobalPerms = async () => {
+        // Only fetch global permissions if the user is staff/admin
+        if (user.role === 'user') return;
+        
         try {
           const res = await apiClient('/admin/global-permissions');
           let perms = [];
@@ -146,6 +149,7 @@ export const AuthProvider = ({ children }) => {
         id: backendUser.id || 'unknown',
         email: backendUser.email || email,
         name: backendUser.fullName || backendUser.name || 'LendoGO User', // Map Go's snake_case
+        avatar: backendUser.avatar || '',
         role: backendUser.role || 'user',              // Capture the role!
         permissions: getEffectivePermissions(backendUser.permissions || {}),    // Capture permissions!
         isAuthenticated: true,
@@ -187,6 +191,7 @@ export const AuthProvider = ({ children }) => {
       id: userData.id || 'unknown',
       email: userData.email,
       name: userData.name || userData.fullName || 'LendoGO User',
+      avatar: userData.avatar || '',
       role: userData.role || 'user',
       permissions: getEffectivePermissions(userData.permissions || {}),
       isAuthenticated: true,

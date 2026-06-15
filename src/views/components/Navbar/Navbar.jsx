@@ -166,14 +166,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const [expandedRepaymentInstallment, setExpandedRepaymentInstallment] = useState(1);
 
   // Applied Loan History State
-  const [loanHistory, setLoanHistory] = useState(() => {
-    const saved = localStorage.getItem('lendogo_loan_history');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return parsed.filter(loan => !['LGO-1092', 'LGO-0871', 'LGO-0654'].includes(loan.id));
-    }
-    return [];
-  });
+  // (Note: Updated directly via fetchLoans from backend)
 
   // Bank Accounts Coordinates State
   const [bankAccounts, setBankAccounts] = useState([
@@ -347,81 +340,13 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   };
 
   // Active Loan parameters state
-  const [activeLoan, setActiveLoan] = useState(() => {
-    const saved = localStorage.getItem('lendogo_active_loan');
-    if (saved) return JSON.parse(saved);
-    return {
-      id: '1092a1a1-1234-4321-abcd-1234567890ab',
-      referenceNumber: 'LGO-1092',
-      amountApplied: 100000,
-      dateApplied: 'May 10, 2026',
-      amountDistributed: 100000,
-      dateDistributed: 'May 12, 2026',
-      dailyInterestRate: '0.05%',
-      numberOfEmis: 24,
-      emiFrequency: 'Monthly',
-      nextEmiAmount: 1532,
-      nextEmiDueDate: '1 Jul 2026',
-      remainingBalance: 7660,
-      status: 'ACTIVE'
-    };
-  });
+  const [activeLoan, setActiveLoan] = useState(null);
 
   // Repayments schedule with Principal / Interest breakdowns state
-  const [repaymentSchedule, setRepaymentSchedule] = useState(() => {
-    const saved = localStorage.getItem('lendogo_repayment_schedule');
-    if (saved) return JSON.parse(saved);
-    return [
-      { 
-        installment: 1, 
-        date: '1 Jun 2026', 
-        amount: 1532, 
-        status: 'Paid',
-        principal: 1370.17,
-        interest: 161.83
-      },
-      { 
-        installment: 2, 
-        date: '1 Jul 2026', 
-        amount: 1532, 
-        status: 'Next Due',
-        principal: 1370.17,
-        interest: 161.83
-      },
-      { 
-        installment: 3, 
-        date: '31 Jul 2026', 
-        amount: 1532, 
-        status: 'Upcoming',
-        principal: 1370.17,
-        interest: 161.83
-      },
-      { 
-        installment: 4, 
-        date: '30 Aug 2026', 
-        amount: 1532, 
-        status: 'Upcoming',
-        principal: 1370.17,
-        interest: 161.83
-      },
-      { 
-        installment: 5, 
-        date: '29 Sep 2026', 
-        amount: 1532, 
-        status: 'Upcoming',
-        principal: 1370.17,
-        interest: 161.83
-      },
-      { 
-        installment: 6, 
-        date: '29 Oct 2026', 
-        amount: 1532, 
-        status: 'Upcoming',
-        principal: 1370.17,
-        interest: 161.83
-      }
-    ];
-  });
+  const [repaymentSchedule, setRepaymentSchedule] = useState([]);
+  
+  // Loan history state
+  const [loanHistory, setLoanHistory] = useState([]);
 
   // Payment Selection Form states
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
@@ -429,56 +354,82 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
   const [customAmountText, setCustomAmountText] = useState('');
   const [paymentError, setPaymentError] = useState('');
 
-  // Synchronize state dynamically when localStorage changes elsewhere
-  useEffect(() => {
-    const handleSync = () => {
-      const savedLoan = localStorage.getItem('lendogo_active_loan');
-      if (savedLoan) {
-        setActiveLoan(JSON.parse(savedLoan));
-      } else {
-        // If cleared from localStorage, reset activeLoan to original default
-        setActiveLoan({
-          id: '1092a1a1-1234-4321-abcd-1234567890ab',
-          referenceNumber: 'LGO-1092',
-          amountApplied: 100000,
-          dateApplied: 'May 10, 2026',
-          amountDistributed: 100000,
-          dateDistributed: 'May 12, 2026',
-          dailyInterestRate: '0.05%',
-          numberOfEmis: 24,
+  // Fetch loans from backend
+  const fetchLoans = async () => {
+    if (!user || !user.isAuthenticated) return;
+    try {
+      const res = await apiClient('/loans/my-loans');
+      if (res && res.loans) {
+        const history = res.loans.map(l => ({
+          id: l.id,
+          referenceNumber: l.reference_number,
+          type: l.product_category || l.loan_track,
+          amount: l.principal_amount,
+          status: l.status,
+          date: l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN') : '',
+          amountApplied: l.principal_amount,
+          amountDistributed: l.principal_amount,
+          dateApplied: l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN') : '',
+          dateDistributed: l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN') : '',
+          dailyInterestRate: (l.interest_rate ? (l.interest_rate / 365).toFixed(3) : '0.038') + '%',
+          numberOfEmis: l.tenure_months,
           emiFrequency: 'Monthly',
-          nextEmiAmount: 1532,
-          nextEmiDueDate: '1 Jul 2026',
-          remainingBalance: 7660,
-          status: 'ACTIVE'
-        });
-      }
-      
-      const savedSchedule = localStorage.getItem('lendogo_repayment_schedule');
-      if (savedSchedule) {
-        setRepaymentSchedule(JSON.parse(savedSchedule));
-      } else {
-        setRepaymentSchedule([
-          { installment: 1, date: '1 Jun 2026', amount: 1532, status: 'Paid', principal: 1370.17, interest: 161.83 },
-          { installment: 2, date: '1 Jul 2026', amount: 1532, status: 'Next Due', principal: 1370.17, interest: 161.83 },
-          { installment: 3, date: '31 Jul 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 },
-          { installment: 4, date: '30 Aug 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 },
-          { installment: 5, date: '29 Sep 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 },
-          { installment: 6, date: '29 Oct 2026', amount: 1532, status: 'Upcoming', principal: 1370.17, interest: 161.83 }
-        ]);
-      }
-      
-      const savedHistory = localStorage.getItem('lendogo_loan_history');
-      if (savedHistory) {
-        const parsed = JSON.parse(savedHistory);
-        setLoanHistory(parsed.filter(loan => !['LGO-1092', 'LGO-0871', 'LGO-0654'].includes(loan.id)));
+          nextEmiAmount: l.estimated_emi,
+          remainingBalance: l.estimated_emi * l.tenure_months // simple approx for now
+        }));
+        
+        setLoanHistory(history);
+
+        const active = history.find(l => ['ACTIVE', 'APPROVED', 'DISBURSED', 'UNDER_REVIEW'].includes(l.status));
+        setActiveLoan(active || null);
+
+        if (active) {
+          const repRes = await apiClient(`/loans/${active.id}/repayments`);
+          if (repRes && repRes.repayments) {
+            const schedule = repRes.repayments.map(r => ({
+              installment: r.InstallmentNo,
+              date: new Date(r.DueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+              amount: r.EMI,
+              principal: r.PrincipalPart,
+              interest: r.InterestPart,
+              status: r.Status === 'PENDING' ? 'Upcoming' : r.Status,
+              paidAmount: r.Status === 'PAID' ? r.EMI : 0
+            }));
+            
+            const firstUpcoming = schedule.find(s => s.status === 'Upcoming');
+            if (firstUpcoming) firstUpcoming.status = 'Next Due';
+            
+            if (active && schedule.length > 0) {
+                const nextUnpaid = schedule.find(s => s.status !== 'PAID' && s.status !== 'Paid');
+                if (nextUnpaid) {
+                    active.nextEmiAmount = nextUnpaid.amount;
+                    active.nextEmiDueDate = nextUnpaid.date;
+                }
+            }
+            
+            setRepaymentSchedule(schedule);
+          } else {
+            setRepaymentSchedule([]);
+          }
+        } else {
+          setRepaymentSchedule([]);
+        }
       } else {
         setLoanHistory([]);
+        setActiveLoan(null);
+        setRepaymentSchedule([]);
       }
-    };
-    window.addEventListener('loan-state-changed', handleSync);
-    return () => window.removeEventListener('loan-state-changed', handleSync);
-  }, []);
+    } catch (err) {
+      console.error("Failed to fetch loans:", err);
+    }
+  };
+
+  // Synchronize state dynamically when loan state changes
+  useEffect(() => {
+    fetchLoans();
+    window.addEventListener('loan-state-changed', fetchLoans);
+    return () => window.removeEventListener('loan-state-changed', fetchLoans);
+  }, [user, isOpen]);
 
   const handleRepaySubmit = async () => {
     let amountPaid = 0;
@@ -547,86 +498,9 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
             });
 
             if (verifyRes && verifyRes.status === "success") {
-              // 4. Update frontend state post-verification
-              let newSchedule = [...repaymentSchedule];
-              let newActiveLoan = { ...activeLoan };
+              // Let the backend refetch handle the state update!
 
-              if (paymentType === 'entire' || amountPaid >= remainingToPay) {
-                newSchedule = newSchedule.map(emi => ({
-                  ...emi,
-                  status: 'Paid',
-                  paidAmount: emi.amount
-                }));
-                newActiveLoan.remainingBalance = 0;
-                newActiveLoan.nextEmiAmount = 0;
-                newActiveLoan.status = 'CLOSED';
-              } else {
-                let remainingPayment = amountPaid;
-                
-                for (let i = 0; i < newSchedule.length; i++) {
-                  const emi = newSchedule[i];
-                  if (emi.status === 'Paid') continue;
-                  
-                  const emiAmount = emi.amount;
-                  const currentPaid = emi.paidAmount || 0;
-                  const leftForThisEmi = emiAmount - currentPaid;
-                  
-                  if (remainingPayment >= leftForThisEmi) {
-                    remainingPayment -= leftForThisEmi;
-                    newSchedule[i] = {
-                      ...emi,
-                      status: 'Paid',
-                      paidAmount: emiAmount
-                    };
-                  } else {
-                    newSchedule[i] = {
-                      ...emi,
-                      paidAmount: currentPaid + remainingPayment,
-                      status: 'Next Due'
-                    };
-                    remainingPayment = 0;
-                    break;
-                  }
-                }
-
-                const allPaid = newSchedule.every(emi => emi.status === 'Paid');
-                if (allPaid) {
-                  newActiveLoan.remainingBalance = 0;
-                  newActiveLoan.nextEmiAmount = 0;
-                  newActiveLoan.status = 'CLOSED';
-                } else {
-                  const nextUnpaidIdx = newSchedule.findIndex(emi => emi.status !== 'Paid');
-                  if (nextUnpaidIdx !== -1) {
-                    newSchedule[nextUnpaidIdx].status = 'Next Due';
-                    for (let j = nextUnpaidIdx + 1; j < newSchedule.length; j++) {
-                      newSchedule[j].status = 'Upcoming';
-                    }
-                    
-                    const nextUnpaid = newSchedule[nextUnpaidIdx];
-                    newActiveLoan.nextEmiAmount = nextUnpaid.amount - (nextUnpaid.paidAmount || 0);
-                    newActiveLoan.nextEmiDueDate = nextUnpaid.date;
-                  }
-                  
-                  newActiveLoan.remainingBalance = Math.max(0, newActiveLoan.remainingBalance - amountPaid);
-                }
-              }
-
-              setActiveLoan(newActiveLoan);
-              setRepaymentSchedule(newSchedule);
-              localStorage.setItem('lendogo_active_loan', JSON.stringify(newActiveLoan));
-              localStorage.setItem('lendogo_repayment_schedule', JSON.stringify(newSchedule));
-
-              let newHistory = [...loanHistory];
-              const targetIdx = newHistory.findIndex(h => h.id === newActiveLoan.id);
-              if (targetIdx !== -1) {
-                if (newActiveLoan.status === 'CLOSED') {
-                  newHistory[targetIdx].status = 'CLOSED';
-                }
-                setLoanHistory(newHistory);
-                localStorage.setItem('lendogo_loan_history', JSON.stringify(newHistory));
-              }
-
-              if (newActiveLoan.status === 'CLOSED') {
+              if (amountPaid >= remainingToPay) {
                 const emailKey = user?.email || 'user';
                 const currentScore = parseInt(localStorage.getItem(`trust_score_${emailKey}`)) || 736;
                 const newScore = Math.min(850, currentScore + 85);
@@ -899,7 +773,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
             </div>
 
             <div className="sidebar-scroll-content">
-              {activeLoan && activeLoan.status === 'ACTIVE' ? (
+              {activeLoan && ['ACTIVE', 'DISBURSED'].includes(activeLoan.status) ? (
                 <>
                   {/* Top next due card matching third image */}
                   <div className="sidebar-repayment-quick-summary-card">
@@ -1062,7 +936,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
 
                         {paymentError && (
                           <div className="repayment-error-msg mt-2">
-                            ⚠️ {paymentError}
+                            {paymentError}
                           </div>
                         )}
 
@@ -1092,10 +966,9 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                     )}
                   </div>
                 </>
-              ) : (
+              ) : activeLoan && activeLoan.status === 'CLOSED' ? (
                 <div className="loan-closed-celebration-card mt-3">
                   <div className="celebration-glow" />
-                  <span className="celebration-trophy">🏆</span>
                   <h4 className="celebration-title">Loan Fully Closed!</h4>
                   <p className="celebration-desc">
                     Congratulations! Your loan accounts are fully closed. 
@@ -1110,6 +983,25 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                     }}
                   >
                     Apply for Another Loan
+                  </button>
+                </div>
+              ) : (
+                <div className="loan-closed-celebration-card mt-3" style={{ padding: '2rem 1.25rem', textAlign: 'center' }}>
+                  <div className="celebration-glow" />
+                  <h4 className="celebration-title">No Active Loans</h4>
+                  <p className="celebration-desc">
+                    You currently have no active loans or repayment schedules.
+                    Apply for a loan to get started!
+                  </p>
+                  <button
+                    type="button"
+                    className="sidebar-apply-new-loan-btn"
+                    onClick={() => {
+                      onClose();
+                      navigate('/products/personal');
+                    }}
+                  >
+                    Explore Loan Products
                   </button>
                 </div>
               )}
@@ -1128,7 +1020,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
 
             <div className="sidebar-scroll-content">
               {/* Parameter List */}
-              {activeLoan && activeLoan.status === 'ACTIVE' ? (
+              {activeLoan && ['ACTIVE', 'DISBURSED'].includes(activeLoan.status) ? (
                 <div className="sidebar-loan-parameters-vertical-list">
                   <h5 className="sidebar-subpage-sub-title">Active Loan Specifications</h5>
 
@@ -1174,7 +1066,6 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                 </div>
               ) : (
                 <div className="loan-closed-celebration-card" style={{ padding: '1.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                  <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>🎉</span>
                   <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>No Active Loans</h4>
                   <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
                     You currently have no active credit liabilities on LendoGo. Make an application to explore capital options!
@@ -1193,7 +1084,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                       <div key={loan.id} className="loan-history-item">
                         <div className="loan-item-details">
                           <div className="loan-type-row">
-                            <span className="loan-icon-bullet">📄</span>
+                            <span className="loan-icon-bullet">•</span>
                             <div className="loan-meta-info">
                               <h4>{loan.type}</h4>
                               <span className="loan-id-sub">{loan.id} • {loan.date}</span>
@@ -1307,6 +1198,7 @@ const Navbar = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sidebarInitialView, setSidebarInitialView] = useState('menu');
   const [notificationsDropdownOpen, setNotificationsDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const navbarRef = useRef(null);
 
   const [toast, setToast] = useState(null);
@@ -1386,9 +1278,26 @@ const Navbar = () => {
       setFullName(localStorage.getItem('user_full_name') || getFallbackName());
     };
     window.addEventListener('user-dp-changed', handleDpChange);
+    window.addEventListener('user-dp-changed', handleDpChange);
     window.addEventListener('user-details-changed', handleDetailsChange);
 
+    const fetchNotifications = async () => {
+      try {
+        if (!user || !user.isAuthenticated) return;
+        const res = await apiClient('/notifications');
+        if (res && res.notifications) {
+          setNotifications(res.notifications);
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications", err);
+      }
+    };
+
     if (user && user.isAuthenticated) {
+      fetchNotifications();
+      // Polling for notifications every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      
       const fetchProfileInit = async () => {
         try {
           const res = await apiClient('/user/profile');
@@ -1420,6 +1329,7 @@ const Navbar = () => {
     return () => {
       window.removeEventListener('user-dp-changed', handleDpChange);
       window.removeEventListener('user-details-changed', handleDetailsChange);
+      if (typeof interval !== 'undefined') clearInterval(interval);
     };
   }, [user]);
 
@@ -1530,60 +1440,56 @@ const Navbar = () => {
                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                   </svg>
-                  <span className="bell-badge-dot">2</span>
+                  {notifications.length > 0 && (
+                    <span className="bell-badge-dot">{notifications.length}</span>
+                  )}
                 </button>
                 
                 {notificationsDropdownOpen && (
                   <div className="notifications-dropdown-menu">
                     <div className="notifications-header">
                       <h5>Notifications</h5>
-                      <button type="button" className="mark-all-read-btn" onClick={() => showToast('All notifications marked as read!', 'success')}>Mark all read</button>
+                      <button 
+                        type="button" 
+                        className="mark-all-read-btn" 
+                        onClick={async () => {
+                          try {
+                            await apiClient('/notifications/mark-read', { method: 'POST' });
+                            setNotifications([]);
+                            showToast('All notifications marked as read!', 'success');
+                          } catch (err) {
+                            showToast('Failed to mark read', 'error');
+                          }
+                        }}
+                      >
+                        Mark all read
+                      </button>
                     </div>
                     <div className="notifications-list">
-                      <div 
-                        className="notification-item unread" 
-                        onClick={() => { 
-                          setSidebarInitialView('trustScore'); 
-                          setProfileDropdownOpen(true); 
-                          setNotificationsDropdownOpen(false); 
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <span className="notification-dot"></span>
-                        <div className="notification-text-group">
-                          <p className="notification-msg">Your LendoGo Trust Score was updated.</p>
-                          <span className="notification-time">10 mins ago</span>
-                        </div>
-                      </div>
-                      <div 
-                        className="notification-item unread" 
-                        onClick={() => { 
-                          setSidebarInitialView('repayment'); 
-                          setProfileDropdownOpen(true); 
-                          setNotificationsDropdownOpen(false); 
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <span className="notification-dot"></span>
-                        <div className="notification-text-group">
-                          <p className="notification-msg">Repayment due: EMI of ₹1,532 on Jul 01, 2026.</p>
-                          <span className="notification-time">2 hours ago</span>
-                        </div>
-                      </div>
-                      <div 
-                        className="notification-item" 
-                        onClick={() => { 
-                          setSidebarInitialView('profile'); 
-                          setProfileDropdownOpen(true); 
-                          setNotificationsDropdownOpen(false); 
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="notification-text-group">
-                          <p className="notification-msg">Welcome to LendoGo! Secure your profile coordinates today.</p>
-                          <span className="notification-time">2 days ago</span>
-                        </div>
-                      </div>
+                      {notifications.length === 0 ? (
+                        <p style={{ padding: '1rem', fontSize: '0.85rem', color: '#64748b', textAlign: 'center', margin: 0 }}>No new notifications.</p>
+                      ) : (
+                        notifications.map((n) => (
+                          <div 
+                            key={n.id}
+                            className="notification-item unread" 
+                            onClick={() => { 
+                              if (n.target) {
+                                setSidebarInitialView(n.target); 
+                                setProfileDropdownOpen(true); 
+                              }
+                              setNotificationsDropdownOpen(false); 
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <span className="notification-dot"></span>
+                            <div className="notification-text-group">
+                              <p className="notification-msg">{n.message}</p>
+                              <span className="notification-time">{new Date(n.created_at).toLocaleDateString('en-IN')}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}

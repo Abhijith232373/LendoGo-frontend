@@ -5,7 +5,7 @@ import { useAuthController } from '../../../../controllers/auth/useAuthControlle
 
 export const useAdminController = () => {
   const navigate = useNavigate();
-  const { user } = useAuthController();
+  const { user, signOut } = useAuthController();
 
   // Theme & Navigation States
   const [darkMode, setDarkMode] = useState(true);
@@ -810,7 +810,7 @@ export const useAdminController = () => {
 
   // 5. System Logout
   const handleAdminLogout = () => {
-    localStorage.removeItem('lendogo_user');
+    signOut();
     alert('Logged out from Admin Dashboard successfully.');
     navigate('/');
   };
