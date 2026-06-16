@@ -332,11 +332,24 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
     setCurrentView('menu');
   };
 
-  const handleSubmitFeedback = (e) => {
+  const handleSubmitFeedback = async (e) => {
     e.preventDefault();
-    showToast(`Thank you for your feedback! Rating: ${feedbackRating}/5 stars. Comments submitted.`, 'success');
-    setFeedbackComment('');
-    setCurrentView('menu');
+    try {
+      await apiClient('/feedback', {
+        method: 'POST',
+        body: JSON.stringify({
+          rating: feedbackRating, // Backend expects integer 1-5
+          comment: feedbackComment
+        })
+      });
+      
+      showToast(`Thank you for your feedback! Rating: ${feedbackRating}/5 stars. Comments submitted.`, 'success');
+      setFeedbackComment('');
+      setCurrentView('menu');
+    } catch (err) {
+      console.error("Failed to submit feedback:", err);
+      showToast('Failed to submit feedback. Please try again.', 'error');
+    }
   };
 
   // Active Loan parameters state
@@ -385,7 +398,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
 
         if (active) {
           const repRes = await apiClient(`/loans/${active.id}/repayments`);
-          if (repRes && repRes.repayments) {
+          if (repRes && repRes.repayments && repRes.repayments.length > 0) {
             const schedule = repRes.repayments.map(r => ({
               installment: r.InstallmentNo,
               date: new Date(r.DueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -409,7 +422,42 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
             
             setRepaymentSchedule(schedule);
           } else {
-            setRepaymentSchedule([]);
+            // Fallback: Dynamically project the schedule if not yet generated in backend
+            const schedule = [];
+            const principal = active.amountApplied || 0;
+            const tenure = active.numberOfEmis || 0;
+            const rateStr = active.dailyInterestRate ? active.dailyInterestRate.replace('%', '') : '0.038';
+            const rate = parseFloat(rateStr) * 365;
+            
+            if (principal > 0 && tenure > 0) {
+              const monthlyRate = (rate / 100) / 12;
+              const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
+              let currentPrincipal = principal;
+              
+              for (let i = 1; i <= tenure; i++) {
+                const interestForMonth = currentPrincipal * monthlyRate;
+                const principalForMonth = emi - interestForMonth;
+                const dueDate = new Date();
+                dueDate.setMonth(dueDate.getMonth() + i);
+                
+                schedule.push({
+                  installment: i,
+                  date: dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                  amount: Math.round(emi * 100) / 100,
+                  principal: Math.round(principalForMonth * 100) / 100,
+                  interest: Math.round(interestForMonth * 100) / 100,
+                  status: i === 1 ? 'Next Due' : 'Upcoming',
+                  paidAmount: 0
+                });
+                currentPrincipal -= principalForMonth;
+              }
+            }
+            
+            if (active && schedule.length > 0) {
+                active.nextEmiAmount = schedule[0].amount;
+                active.nextEmiDueDate = schedule[0].date;
+            }
+            setRepaymentSchedule(schedule);
           }
         } else {
           setRepaymentSchedule([]);
@@ -768,7 +816,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
           <>
             <div className="sidebar-header subview-header-row">
               <button type="button" className="sidebar-back-nav-btn" onClick={() => setCurrentView('menu')}>← Back</button>
-              <h4 className="sidebar-subpage-title-text">Repay</h4>
+              <h4 className="sidebar-subpage-title-text">Repayment Schedule</h4>
               <div style={{ width: '40px' }} />
             </div>
 
@@ -787,7 +835,10 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                     </div>
                   </div>
 
-                  <h5 className="sidebar-subpage-sub-title">Upcoming & Past Installments</h5>
+                  <div className="repayment-table-header">
+                    <span className="repayment-th-left">EMI Date</span>
+                    <span className="repayment-th-right">Amount</span>
+                  </div>
 
                   {/* Installment dates cards list matching third image exactly */}
                   <div className="sidebar-repayment-list-stack">
@@ -799,6 +850,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                           <div 
                             className="repayment-card-row-header"
                             onClick={() => setExpandedRepaymentInstallment(isExpanded ? null : emi.installment)}
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
                           >
                             <div className="repayment-row-left-group">
                               <span className="repayment-emi-date-lbl">{emi.date}</span>
@@ -820,26 +872,28 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                                     ? `₹${(emi.amount - emi.paidAmount).toLocaleString('en-IN')} left` 
                                     : `₹${emi.amount.toLocaleString('en-IN')}`}
                               </span>
-                              <span className="repayment-arrow-toggle-indicator">
-                                {isExpanded ? '▲' : '▼'}
+                              <span className="repayment-arrow-static-indicator" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}>
+                                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
                               </span>
                             </div>
                           </div>
                           
                           {isExpanded && (
-                            <div className="repayment-card-row-body-details">
-                              <div className="repayment-breakdown-row">
-                                <span className="breakdown-lbl">Principal</span>
-                                <span className="breakdown-val">₹{emi.principal.toLocaleString('en-IN')}</span>
+                            <div className="repayment-card-row-body-details" style={{ padding: '0.5rem 1.25rem 1rem', borderTop: '1px solid #f1f5f9', backgroundColor: '#fafaf9' }}>
+                              <div className="repayment-breakdown-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                <span className="breakdown-lbl" style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Principal</span>
+                                <span className="breakdown-val" style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: 700 }}>₹{emi.principal.toLocaleString('en-IN')}</span>
                               </div>
-                              <div className="repayment-breakdown-row">
-                                <span className="breakdown-lbl">Interest + Fees</span>
-                                <span className="breakdown-val">₹{emi.interest.toLocaleString('en-IN')}</span>
+                              <div className="repayment-breakdown-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                <span className="breakdown-lbl" style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Interest + Fees</span>
+                                <span className="breakdown-val" style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: 700 }}>₹{emi.interest.toLocaleString('en-IN')}</span>
                               </div>
                               {emi.paidAmount > 0 && (
-                                <div className="repayment-breakdown-row partial-payment-breakdown">
-                                  <span className="breakdown-lbl">Paid Portion</span>
-                                  <span className="breakdown-val highlight-green">₹{emi.paidAmount.toLocaleString('en-IN')}</span>
+                                <div className="repayment-breakdown-row partial-payment-breakdown" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem', paddingTop: '0.25rem', borderTop: '1px dashed #cbd5e1' }}>
+                                  <span className="breakdown-lbl" style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 800 }}>Paid Portion</span>
+                                  <span className="breakdown-val highlight-green" style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 800 }}>₹{emi.paidAmount.toLocaleString('en-IN')}</span>
                                 </div>
                               )}
                             </div>
@@ -850,11 +904,11 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                   </div>
 
                   {/* Make a Repayment button or options selection panel */}
-                  <div className="repayment-action-section mt-3">
+                  <div className="repayment-action-section mt-3" style={{position: 'sticky', bottom: '0', backgroundColor: '#fff', paddingTop: '10px', paddingBottom: '10px', zIndex: 10, borderTop: '1px solid #e2e8f0', margin: '0 -1.5rem', paddingLeft: '1.5rem', paddingRight: '1.5rem'}}>
                     {!showPaymentOptions ? (
                       <button 
                         type="button" 
-                        className="sidebar-make-repayment-unified-btn"
+                        className="sidebar-pay-now-btn"
                         onClick={() => {
                           setShowPaymentOptions(true);
                           setPaymentError('');
@@ -877,7 +931,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                             </div>
                             <div className="option-card-content">
                               <span className="option-card-label">Next EMI Due</span>
-                              <span className="option-card-amount">₹{activeLoan.nextEmiAmount.toLocaleString('en-IN')}</span>
+                              <span className="option-card-amount">₹{activeLoan.nextEmiAmount ? activeLoan.nextEmiAmount.toLocaleString('en-IN') : 0}</span>
                               <span className="option-card-sub">Due on {activeLoan.nextEmiDueDate}</span>
                             </div>
                           </div>
@@ -893,7 +947,7 @@ const UserSidebar = ({ isOpen, onClose, user, signOut, navigate, initialView = '
                             <div className="option-card-content">
                               <span className="option-card-label">Pay Entire Loan</span>
                               <span className="option-card-amount">
-                                ₹{(repaymentSchedule.reduce((acc, emi) => emi.status !== 'Paid' ? acc + (emi.amount - (emi.paidAmount || 0)) : acc, 0)).toLocaleString('en-IN')}
+                                ₹{(repaymentSchedule.reduce((acc, emi) => (emi.status !== 'Paid' && emi.status !== 'PAID') ? acc + (emi.amount - (emi.paidAmount || 0)) : acc, 0)).toLocaleString('en-IN')}
                               </span>
                               <span className="option-card-sub">Close loan entirely & boost Trust Score</span>
                             </div>

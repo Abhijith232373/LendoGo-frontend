@@ -949,36 +949,37 @@
 
 /* Premium repayment schedule elements */
 .sidebar-repayment-quick-summary-card {
-  background-color: #f8fafc;
+  background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 1.1rem 1.35rem;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .summary-col {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.3rem;
 }
 
 .summary-col:last-child {
-  text-align: right;
+  text-align: left;
 }
 
 .summary-lbl {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: none;
 }
 
 .summary-val {
-  font-size: 1.25rem;
-  font-weight: 850;
-  color: #0f172a;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #334155;
 }
 
 .sidebar-repayment-list-stack {
@@ -987,26 +988,35 @@
   gap: 0.65rem;
 }
 
+.repayment-table-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem 0.25rem;
+  margin-top: 1rem;
+}
+
+.repayment-th-left, .repayment-th-right {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
 .sidebar-repayment-card-row {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: transparent;
+  border: none;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s ease;
 }
 
 .repayment-card-row-header {
-  padding: 1rem 1.25rem;
+  padding: 1.1rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  user-select: none;
   transition: background-color 0.2s ease;
-}
-
-.repayment-card-row-header:hover {
   background-color: #f8fafc;
+  border-radius: 14px;
 }
 
 .repayment-row-left-group {
@@ -1098,23 +1108,32 @@
   color: #1e293b;
 }
 
-.sidebar-make-repayment-unified-btn {
+.repayment-arrow-static-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+}
+
+.sidebar-pay-now-btn {
   width: 100%;
-  background-color: #0f66ff;
-  color: #ffffff;
+  background-color: #88cfff;
+  color: #0f172a;
   border: none;
-  padding: 0.85rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 800;
+  padding: 1.15rem;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 850;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(136, 207, 255, 0.4);
 }
 
-.sidebar-make-repayment-unified-btn:hover {
-  background-color: #0052cc;
-  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2);
+.sidebar-pay-now-btn:hover {
+  background-color: #6bbcf2;
+  box-shadow: 0 6px 16px rgba(107, 188, 242, 0.5);
+  transform: translateY(-2px);
 }
 
 /* Settings and Feedback sliders */
