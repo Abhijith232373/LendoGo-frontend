@@ -72,8 +72,9 @@ const LoanApplyLayout = ({ children }) => {
         <div
           className="loan-progress-logo"
           onClick={() => navigate('/home')}
+          style={{ display: 'flex', alignItems: 'center', gap: '0px', cursor: 'pointer' }}
         >
-          Lendo<span>Go</span>
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781705723/image-removebg-preview_3_lcqqog.png" alt="LendoGO Logo" style={{ width: 'auto', height: '110px', objectFit: 'contain', margin: '-30px -15px' }} />
         </div>
 
         {/* Custom Tab Row mimicking image */}

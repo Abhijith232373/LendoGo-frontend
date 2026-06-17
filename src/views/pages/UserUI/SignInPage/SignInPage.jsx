@@ -8,7 +8,6 @@ import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
 import { useAuthController } from '../../../../controllers/auth/useAuthController';
-import illustration from '../../../../assets/loan_illustration.png';
 import WhyChooseUs from '../../../components/WhyChooseUs/WhyChooseUs';
 import { StaggerFeatures } from '../../../components/StaggerFeatures/StaggerFeatures';
 import './SignInPage.css';
@@ -64,7 +63,7 @@ const SignInPage = () => {
             )}
           </div>
           <div className="hero-right" style={{ position: 'relative', zIndex: 2 }}>
-            <img src={illustration} alt="Loan Approval Illustration" className="hero-illustration" />
+            <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686366/loan_illustration_gy6c9c.png" alt="Loan Approval Illustration" className="hero-illustration" />
           </div>
         </section>
       </main>

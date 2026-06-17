@@ -18,6 +18,7 @@ import WebConfigurationTab from './components/WebConfigurationTab/WebConfigurati
 import AuditLogsTab from './components/AuditLogsTab/AuditLogsTab';
 import AdminSettingsTab from './components/AdminSettingsTab/AdminSettingsTab';
 import BlogManagementTab from './components/BlogManagementTab/BlogManagementTab';
+import UserFeedbackTab from './components/UserFeedbackTab/UserFeedbackTab';
 
 const AdminPage = () => {
   const { user } = useAuthController();
@@ -26,18 +27,42 @@ const AdminPage = () => {
     if (user.role === 'admin' || user.email === 'admin@gmail.com') return true;
     const p = user.permissions || {};
     
-    // Direct matches
-    if (p[itemName]) return true;
-
-    // Mapping sidebar names to backend area toggles
-    if (groupName === 'Administrative' || ['Staff Management', 'Role Permissions', 'Activity Logs', 'User Management'].includes(itemName)) return !!p['User Management'];
-    if (groupName === 'Careers Management' || ['View Applications', 'Post a Job', 'Post Job Openings'].includes(itemName)) return !!p['Careers'];
-    if (groupName === 'Customer Care' || ['Free Consultation', 'Chat Support'].includes(itemName)) return !!p['Customer Care'];
-    if (['Due Date Reminders', 'Overdue & Collections'].includes(itemName)) return !!p['Due Date'];
-    if (itemName === 'Blog Management') return !!p['Blog Management'];
+    if (itemName === 'Admin Settings') return true;
     if (itemName === 'Web Configuration') return false; // strictly master admin
-    if (itemName === 'Admin Settings') return true; // available to all for personal settings
     
+    if (itemName === 'Dashboard') return !!p['dashboard_view'];
+    if (itemName === 'Loan Applications') return !!p['loan_app_view'];
+    if (itemName === 'KYC Verifications') return !!p['kyc_view'];
+    if (itemName === 'User Management') return !!p['user_read'];
+    
+    if (groupName === 'Administrative') {
+       if (itemName === 'Administrative') return !!p['user_read'] || !!p['dashboard_view'];
+       if (['Staff Management', 'Role Permissions', 'Audit Logs'].includes(itemName)) {
+          return !!p['user_read'];
+       }
+    }
+    
+    if (itemName === 'View Applications') return !!p['career_app_view'];
+    if (['Post Job Openings', 'Post a Job'].includes(itemName)) return !!p['career_job_create'] || !!p['career_job_update'];
+    if (groupName === 'Careers Management' || itemName === 'Careers Management') {
+       return !!p['career_app_view'] || !!p['career_job_create'] || !!p['career_job_update'];
+    }
+    
+    if (itemName === 'Free Consultation') return !!p['cc_consult_view'];
+    if (itemName === 'Chat Support') return !!p['cc_chat_view'];
+    if (groupName === 'Customer Care' || itemName === 'Customer Care') {
+       return !!p['cc_consult_view'] || !!p['cc_chat_view'];
+    }
+    
+    if (['Due Date Reminders', 'Overdue & Collections', 'Completed Loans', 'Due Date'].includes(itemName)) return !!p['due_view'];
+    if (groupName === 'Collections & Dues' || itemName === 'Collections & Dues') {
+       return !!p['due_view'];
+    }
+    
+    if (itemName === 'User Feedback') return true;
+    
+    if (itemName === 'Blog Management') return !!p['blog_read'];
+
     return false;
   };
 
@@ -87,13 +112,14 @@ const AdminPage = () => {
     handleDisburseMoney,
     handleToggleJobStatus,
     handleCreateJobOpening,
+    handleUpdateJobOpening,
     handleUpdateApplicantStatus,
     handleRechargeWallet,
     handleResolveTicket,
     handleAddStaff,
     handleUpdateStaffRole,
     handleSaveWebConfig,
-    handleSimulatePhotoUpload,
+    handlePhotoUpload,
     handleUpdateAdminEmail,
     handleUpdateAdminPassword,
     handleTransferOwnership,
@@ -245,7 +271,7 @@ const AdminPage = () => {
           )
         },
         { 
-          name: 'Activity Logs', 
+          name: 'Audit Logs', 
           icon: (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 20h9"/>
@@ -314,7 +340,18 @@ const AdminPage = () => {
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           )
-        },
+        }
+      ]
+    },
+    {
+      name: 'Collections & Dues',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      ),
+      isGroup: true,
+      subItems: [
         { 
           name: 'Due Date Reminders', 
           icon: (
@@ -333,6 +370,15 @@ const AdminPage = () => {
               <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
               <line x1="12" y1="9" x2="12" y2="13"/>
               <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          )
+        },
+        { 
+          name: 'Completed Loans', 
+          icon: (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
           )
         }
@@ -354,6 +400,14 @@ const AdminPage = () => {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      )
+    },
+    {
+      name: 'User Feedback',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
         </svg>
       )
     },
@@ -413,7 +467,34 @@ const AdminPage = () => {
 
           <div className="dashboard-scroll-container">
 
-            {/* Conditional Tab Views rendering */}
+            {/* Conditional Tab Views rendering with RBAC protection */}
+            {(() => {
+              let group = activeTab;
+              if (['User Management', 'Role Permissions', 'Staff Management', 'Audit Logs'].includes(activeTab)) group = 'Administrative';
+              if (['View Applications', 'Post Job Openings'].includes(activeTab)) group = 'Careers Management';
+              if (['Free Consultation', 'Chat Support'].includes(activeTab)) group = 'Customer Care';
+              if (['Due Date Reminders', 'Overdue & Collections', 'Completed Loans'].includes(activeTab)) group = 'Collections & Dues';
+              if (activeTab === 'User Feedback') group = 'User Feedback';
+              
+              const isPermitted = hasPermission(activeTab, group);
+
+              if (!isPermitted && activeTab !== 'Admin Settings') {
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center' }}>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--admin-text-light)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '20px', opacity: 0.5 }}>
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--admin-text)', marginBottom: '10px' }}>Access Restricted</h2>
+                    <p style={{ color: 'var(--admin-text-light)', maxWidth: '400px', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                      You do not have the required security clearance to view this module. Please contact the main administrator to request access.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <>
             {activeTab === 'Dashboard' && (
               <DashboardTab 
                 activeBalance={activeBalance}
@@ -468,6 +549,7 @@ const AdminPage = () => {
                 jobApplications={jobApplications}
                 handleUpdateApplicantStatus={handleUpdateApplicantStatus}
                 handleCreateJobOpening={handleCreateJobOpening}
+                handleUpdateJobOpening={handleUpdateJobOpening}
                 showOnly="jobs"
               />
             )}
@@ -475,6 +557,7 @@ const AdminPage = () => {
             {(activeTab === 'Customer Care' || 
               activeTab === 'Free Consultation' || 
               activeTab === 'Chat Support' || 
+              activeTab === 'Collections & Dues' || 
               activeTab === 'Due Date Reminders' || 
               activeTab === 'Overdue & Collections') && (
               <CustomerCareTab 
@@ -529,11 +612,22 @@ const AdminPage = () => {
               <BlogManagementTab showToast={showToast} />
             )}
 
-            {(activeTab === 'Audit Logs' || activeTab === 'Activity Logs') && (
+            {activeTab === 'Audit Logs' && (
               <AuditLogsTab 
                 auditLogs={auditLogs}
                 setAuditLogs={setAuditLogs}
               />
+            )}
+
+            {activeTab === 'Completed Loans' && (
+              <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--admin-bg)', borderRadius: '12px', marginTop: '1rem' }}>
+                <h3 style={{ color: 'var(--admin-text)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>Completed Loans Archive</h3>
+                <p style={{ color: 'var(--admin-text-light)' }}>Historical records of fully paid and settled loans will appear here.</p>
+              </div>
+            )}
+
+            {activeTab === 'User Feedback' && (
+              <UserFeedbackTab />
             )}
 
             {activeTab === 'Admin Settings' && (
@@ -542,7 +636,7 @@ const AdminPage = () => {
                 adminName={adminName}
                 setAdminName={setAdminName}
                 adminEmail={adminEmail}
-                handleSimulatePhotoUpload={handleSimulatePhotoUpload}
+                handlePhotoUpload={handlePhotoUpload}
                 handleUpdateAdminEmail={handleUpdateAdminEmail}
                 emailInput={emailInput}
                 setEmailInput={setEmailInput}
@@ -558,9 +652,14 @@ const AdminPage = () => {
                 setTransferEmail={setTransferEmail}
                 transferKey={transferKey}
                 setTransferKey={setTransferKey}
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
                 handleAdminLogout={handleAdminLogout}
               />
             )}
+                </>
+              );
+            })()}
 
           </div>
         </main>

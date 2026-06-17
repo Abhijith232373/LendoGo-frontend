@@ -1,0 +1,57 @@
+.feedback-reply-modal {
+  max-width: 600px !important;
+}
+
+.feedback-details-box {
+  background-color: var(--admin-bg-secondary);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.feedback-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.meta-label {
+  font-size: 0.85rem;
+  color: var(--admin-text-light);
+  font-weight: 400;
+  width: 60px;
+}
+
+.meta-value {
+  font-size: 0.95rem;
+  color: var(--admin-text);
+  font-weight: 500;
+}
+
+.feedback-message {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--admin-border);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--admin-text);
+  font-style: italic;
+}
+
+.admin-textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background-color: var(--admin-bg-secondary);
+  color: var(--admin-text);
+  font-size: 0.95rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.admin-textarea:focus {
+  border-color: var(--admin-primary);
+}

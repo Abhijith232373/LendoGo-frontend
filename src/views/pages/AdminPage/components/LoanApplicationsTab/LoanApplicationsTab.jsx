@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuthController } from '../../../../../controllers/auth/useAuthController';
 import { apiClient } from '../../../../../utils/apiClient';
 import "./LoanApplicationsTab.css";
 import LoanRequestsTab from '../LoanRequestsTab/LoanRequestsTab';
@@ -12,6 +13,11 @@ const LoanApplicationsTab = ({
   approvedLoans,
   handleDisburseMoney
 }) => {
+  const { user } = useAuthController();
+  const p = user?.permissions || {};
+  const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+  const canUpdate = isAdmin || !!p['loan_app_update'];
+
   const [activeSubTab, setActiveSubTab] = useState('pending');
 
   // Fetch rejected logs from real PostgreSQL DB on mount
@@ -392,8 +398,8 @@ const LoanApplicationsTab = ({
         {activeSubTab === 'pending' ? (
           <LoanRequestsTab 
             loanRequests={loanRequests}
-            handleRunRiskAudit={handleRunRiskAudit}
-            handleApproveLoan={onApprove}
+            handleRunRiskAudit={canUpdate ? handleRunRiskAudit : () => {}}
+            handleApproveLoan={canUpdate ? onApprove : async () => false}
             handleRejectLoan={(reqId, name) => {
               // Open rejection modal instead of direct reject
               const req = loanRequests.find(r => r.id === reqId);
@@ -404,7 +410,8 @@ const LoanApplicationsTab = ({
         ) : activeSubTab === 'ledger' ? (
           <LoanApprovalsTab 
             approvedLoans={approvedLoans}
-            handleDisburseMoney={handleDisburseMoney}
+            handleDisburseMoney={canUpdate ? handleDisburseMoney : async () => false}
+            canUpdate={canUpdate}
           />
         ) : (
           /* ── REJECTED LOGS SUBTAB ── */
@@ -504,22 +511,28 @@ const LoanApplicationsTab = ({
                           </span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                            <button 
-                              className="btn-action-icon edit"
-                              style={{ width: '100px' }}
-                              onClick={() => handleOpenEditReason(log)}
-                            >
-                              Update Reason
-                            </button>
-                            <button 
-                              className="btn-action-icon delete"
-                              style={{ width: '80px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
-                              onClick={() => handleDeleteRejectedLog(log.id, log.name)}
-                            >
-                              Delete
-                            </button>
-                          </div>
+                          {canUpdate ? (
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                              <button 
+                                className="btn-action-icon edit"
+                                style={{ width: '100px' }}
+                                onClick={() => handleOpenEditReason(log)}
+                              >
+                                Update Reason
+                              </button>
+                              <button 
+                                className="btn-action-icon delete"
+                                style={{ width: '80px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                                onClick={() => handleDeleteRejectedLog(log.id, log.name)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ textAlign: 'center' }}>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-light)', fontStyle: 'italic' }}>View Only</span>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -655,22 +668,28 @@ const LoanApplicationsTab = ({
               <button className="btn-secondary-admin" onClick={() => setShowInspectModal(false)}>Close Portfolio</button>
               
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  className="btn-decision reject"
-                  disabled={selectedRequest.auditState === 'scanning'}
-                  onClick={() => handleRejectButtonClick(selectedRequest)}
-                  style={{ padding: '8px 24px', fontSize: '0.85rem' }}
-                >
-                  Reject Application
-                </button>
-                {selectedRequest.auditState === 'completed' && (
-                  <button 
-                    className="btn-decision approve"
-                    onClick={() => onApprove(selectedRequest)}
-                    style={{ padding: '8px 24px', fontSize: '0.85rem' }}
-                  >
-                    Approve & Disburse
-                  </button>
+                {canUpdate ? (
+                  <>
+                    <button 
+                      className="btn-decision reject"
+                      disabled={selectedRequest.auditState === 'scanning'}
+                      onClick={() => handleRejectButtonClick(selectedRequest)}
+                      style={{ padding: '8px 24px', fontSize: '0.85rem' }}
+                    >
+                      Reject Application
+                    </button>
+                    {selectedRequest.auditState === 'completed' && (
+                      <button 
+                        className="btn-decision approve"
+                        onClick={() => onApprove(selectedRequest)}
+                        style={{ padding: '8px 24px', fontSize: '0.85rem' }}
+                      >
+                        Approve & Disburse
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-light)', fontStyle: 'italic', display: 'flex', alignItems: 'center' }}>View Only Access</span>
                 )}
               </div>
             </div>

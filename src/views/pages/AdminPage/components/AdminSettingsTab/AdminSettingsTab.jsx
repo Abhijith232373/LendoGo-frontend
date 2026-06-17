@@ -6,7 +6,7 @@ const AdminSettingsTab = ({
   adminName,
   setAdminName,
   adminEmail,
-  handleSimulatePhotoUpload,
+  handlePhotoUpload,
   handleUpdateAdminEmail,
   emailInput,
   setEmailInput,
@@ -22,13 +22,14 @@ const AdminSettingsTab = ({
   setTransferEmail,
   transferKey,
   setTransferKey,
+  darkMode,
+  setDarkMode,
   handleAdminLogout
 }) => {
   return (
     <div className="tab-pane-container settings-dashboard-view animate-fade-in">
       <div className="section-header-row">
         <h2>Administrative Control Center</h2>
-        <p>Configure officer profiles, system credentials, integrations, and platform ownership in a single unified cockpit.</p>
       </div>
 
       <div className="settings-unified-grid">
@@ -60,7 +61,7 @@ const AdminSettingsTab = ({
                 <input 
                   type="file" 
                   accept="image/*" 
-                  onChange={handleSimulatePhotoUpload}
+                  onChange={handlePhotoUpload}
                   className="file-input-hidden"
                 />
               </label>
@@ -84,28 +85,30 @@ const AdminSettingsTab = ({
             </span>
             <h3>Profile Settings</h3>
           </div>
-          <form onSubmit={handleUpdateAdminEmail} className="settings-inner-form mt-1">
-            <div className="form-input-group mb-2">
-              <label>Officer Name</label>
-              <input 
-                type="text"
-                required
-                value={adminName}
-                onChange={(e) => setAdminName(e.target.value)}
-                className="staff-field"
-              />
+          <form onSubmit={handleUpdateAdminEmail} className="settings-inner-form mt-1" style={{ maxWidth: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', marginBottom: '1rem' }}>
+              <div className="form-input-group">
+                <label>Officer Name</label>
+                <input 
+                  type="text"
+                  required
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                  className="staff-field"
+                />
+              </div>
+              <div className="form-input-group">
+                <label>Officer Email Coordinate</label>
+                <input 
+                  type="email" 
+                  required
+                  value={emailInput} 
+                  onChange={(e) => setEmailInput(e.target.value)} 
+                  className="staff-field"
+                />
+              </div>
             </div>
-            <div className="form-input-group">
-              <label>Officer Email Coordinate</label>
-              <input 
-                type="email" 
-                required
-                value={emailInput} 
-                onChange={(e) => setEmailInput(e.target.value)} 
-                className="staff-field"
-              />
-            </div>
-            <button type="submit" className="btn-save-web-config mt-2">
+            <button type="submit" className="btn-save-web-config" style={{ width: 'fit-content' }}>
               Save Profile Details
             </button>
           </form>
@@ -122,146 +125,83 @@ const AdminSettingsTab = ({
             </span>
             <h3>Security Key Credentials</h3>
           </div>
-          <form className="settings-inner-form mt-1" onSubmit={handleUpdateAdminPassword}>
-            <div className="form-input-group mb-2">
-              <label>Current Key Pass</label>
-              <input 
-                type="password" 
-                required
-                placeholder="••••••••"
-                value={currentPassword} 
-                onChange={(e) => setCurrentPassword(e.target.value)} 
-                className="staff-field"
-              />
+          <form className="settings-inner-form mt-1" onSubmit={handleUpdateAdminPassword} style={{ maxWidth: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', marginBottom: '1rem' }}>
+              <div className="form-input-group">
+                <label>Current Key Pass</label>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="••••••••"
+                  value={currentPassword} 
+                  onChange={(e) => setCurrentPassword(e.target.value)} 
+                  className="staff-field"
+                />
+              </div>
+              <div className="form-input-group">
+                <label>New Strong Password</label>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="••••••••"
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  className="staff-field"
+                />
+              </div>
+              <div className="form-input-group">
+                <label>Confirm New Password</label>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  className="staff-field"
+                />
+              </div>
             </div>
-            <div className="form-input-group mb-2">
-              <label>New Strong Password</label>
-              <input 
-                type="password" 
-                required
-                placeholder="••••••••"
-                value={newPassword} 
-                onChange={(e) => setNewPassword(e.target.value)} 
-                className="staff-field"
-              />
-            </div>
-            <div className="form-input-group">
-              <label>Confirm New Password</label>
-              <input 
-                type="password" 
-                required
-                placeholder="••••••••"
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                className="staff-field"
-              />
-            </div>
-            <button type="submit" className="btn-save-web-config mt-2">
+            <button type="submit" className="btn-save-web-config" style={{ width: 'fit-content' }}>
               Save Operations Key
             </button>
           </form>
         </div>
 
-        {/* CARD 4: PLATFORM INTEGRATIONS */}
-        <div className="settings-group-card system-integrations-card">
+
+        {/* CARD 4: SESSION & PREFERENCES */}
+        <div className="settings-group-card danger-zone-group">
           <div className="settings-card-header">
             <span className="card-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
             </span>
-            <h3>Platform Integrations</h3>
-          </div>
-          
-          <div className="integrations-fields-wrap mt-1">
-            <div className="integration-row mb-2">
-              <div className="row-text">
-                <h4>2-Factor Verification</h4>
-                <p>For transfers &gt; ₹5,00,000</p>
-              </div>
-              <label className="toggle-switch">
-                <input type="checkbox" defaultChecked />
-                <span className="slider-round" />
-              </label>
-            </div>
-
-            <div className="integration-row mb-2">
-              <div className="row-text">
-                <h4>Database Synchronization</h4>
-                <p>Cloud offshore replicas</p>
-              </div>
-              <select className="settings-select-field">
-                <option>Every 1 Hour (Realtime)</option>
-                <option>Every 12 Hours</option>
-                <option>Every 24 Hours</option>
-              </select>
-            </div>
-
-            <div className="integration-row">
-              <div className="row-text">
-                <h4>Amazon SES Mailer</h4>
-                <p>Dispatch transaction alerts</p>
-              </div>
-              <strong className="text-green font-weight-bold">● Connected</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 5: DANGER ZONE & CLEARANCES (FULL WIDTH) */}
-        <div className="settings-group-card danger-zone-group full-width-card">
-          <div className="settings-card-header text-red">
-            <span className="card-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </span>
-            <h3>Master Clearances & Danger Operations</h3>
+            <h3>Session & Preferences</h3>
           </div>
           
           <div className="danger-dashboard-row">
             <div className="danger-form-column">
-              <p>Transfer master administrative clearances to a new coordinate. Your clearances will instantly revoke.</p>
-              <form className="settings-inner-form mt-2" onSubmit={handleTransferOwnership}>
-                <div className="form-input-group mb-2">
-                  <label>Designated Recipient Email</label>
-                  <input 
-                    type="email" 
-                    required
-                    placeholder="new.owner@lendogo.com"
-                    value={transferEmail} 
-                    onChange={(e) => setTransferEmail(e.target.value)} 
-                    className="staff-field danger-field"
-                  />
+              <div className="logout-prompt-box" style={{ borderColor: 'var(--admin-border)', background: 'transparent' }}>
+                <h4>Interface Appearance</h4>
+                <p>Toggle between light and dark visualization modes.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--admin-text)' }}>Dark Mode</span>
+                  <label className="toggle-switch" style={{ margin: 0 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={darkMode} 
+                      onChange={() => setDarkMode(!darkMode)} 
+                    />
+                    <span className="slider-round" />
+                  </label>
                 </div>
-                <div className="form-input-group mb-2">
-                  <label>Master Security Clearance Code</label>
-                  <input 
-                    type="password" 
-                    required
-                    placeholder="Clearance ID Code"
-                    value={transferKey} 
-                    onChange={(e) => setTransferKey(e.target.value)} 
-                    className="staff-field danger-field"
-                  />
-                </div>
-                <button type="submit" className="btn-transfer-ownership-submit" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  Transfer Master Clearances
-                </button>
-              </form>
+              </div>
             </div>
 
             <div className="danger-logout-column">
-              <div className="logout-prompt-box">
-                <h4>Administrative Session Control</h4>
+              <div className="logout-prompt-box" style={{ borderColor: 'var(--admin-border)' }}>
+                <h4 className="text-red">Administrative Session Control</h4>
                 <p>Close operational session registers and secure audit ledgers locally.</p>
                 <button type="button" className="btn-admin-logout-trigger mt-2" onClick={handleAdminLogout} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

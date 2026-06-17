@@ -74,7 +74,7 @@
 
 .loan-modal-header h2 {
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: -0.5px;
   background: linear-gradient(135deg, #3b82f6 0%, #00d2ff 100%);
   -webkit-background-clip: text;
@@ -131,7 +131,7 @@
   justify-content: center;
   align-items: center;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #9ca3af;
   position: relative;
   z-index: 2;
@@ -224,7 +224,7 @@
 
 .loan-type-card h3 {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 8px;
   color: #f3f4f6;
 }
@@ -239,7 +239,7 @@
 
 .loan-tier-tag {
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 400;
   text-transform: uppercase;
   padding: 4px 10px;
   border-radius: 100px;
@@ -271,7 +271,7 @@
 
 .emi-calculator-header h3 {
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #ffffff;
   letter-spacing: -0.5px;
 }
@@ -313,7 +313,7 @@
 
 .emi-slider-title {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #9ca3af;
   letter-spacing: 0.2px;
 }
@@ -338,7 +338,7 @@
   border: none;
   color: #ffffff;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 400;
   width: 78px;
   outline: none;
   text-align: right;
@@ -442,7 +442,7 @@
 
 .donut-center-value {
   font-size: 1.1rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #ffffff;
 }
 
@@ -499,13 +499,13 @@
 }
 
 .emi-table-row.total-highlight .emi-row-label {
-  font-weight: 800;
+  font-weight: 400;
   color: #3b82f6;
   font-size: 0.9rem;
 }
 
 .emi-table-row.total-highlight .emi-row-value {
-  font-weight: 850;
+  font-weight: 500;
   color: #3b82f6;
   font-size: 1.15rem;
 }
@@ -527,7 +527,7 @@
 
 .kyc-fast-pass-box h4 {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #34d399;
   margin-bottom: 6px;
 }
@@ -601,7 +601,7 @@
 
 .upload-meta h4 {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #f3f4f6;
   margin-bottom: 2px;
 }
@@ -618,7 +618,7 @@
   padding: 6px 14px;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.25s ease;
 }
@@ -649,7 +649,7 @@
 
 .uploaded-tick {
   color: #10b981;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.85rem;
   display: flex;
   align-items: center;
@@ -682,7 +682,7 @@
 
 .esign-summary-card h4 {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -703,7 +703,7 @@
 
 .summary-data-val {
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #f3f4f6;
 }
 
@@ -733,7 +733,7 @@
   background: none;
   border: none;
   color: #ef4444;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -802,7 +802,7 @@
 
 .audit-ticker-status h3 {
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #60a5fa;
   margin-bottom: 8px;
 }
@@ -882,7 +882,7 @@
 
 .success-screen-wrapper h2 {
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #34d399;
   margin-bottom: 8px;
 }
@@ -908,7 +908,7 @@
   padding: 12px 24px;
   border-radius: 12px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
   outline: none;

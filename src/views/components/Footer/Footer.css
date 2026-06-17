@@ -27,13 +27,13 @@
 .footer-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0px;
   margin-bottom: 1rem;
 }
 
 .company-name {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-dark);
   margin-bottom: 1.5rem;
   line-height: 1.4;
@@ -122,12 +122,12 @@
 
 .store-badge .large-text {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .footer-heading {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-dark);
   margin-bottom: 1.5rem;
 }
@@ -175,7 +175,7 @@
 .footer-careers-link {
   font-size: 0.9rem;
   color: #374151 !important;
-  font-weight: 600;
+  font-weight: 400;
   transition: opacity 0.2s;
 }
 
@@ -212,7 +212,7 @@
 
 .footer-hiring-link {
   color: var(--primary) !important;
-  font-weight: 600;
+  font-weight: 400;
   transition: opacity 0.2s;
 }
 
@@ -228,17 +228,54 @@
 }
 
 @media (max-width: 768px) {
+  .footer {
+    padding: 3rem 0 1.5rem;
+    margin-top: 2rem;
+  }
+  
   .footer-container {
-    padding: 0 2rem;
+    padding: 0 1.5rem;
   }
   
   .footer-grid {
     grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  .footer-col {
+    align-items: center;
+  }
+
+  .footer-logo {
+    justify-content: center;
+  }
+
+  .social-icons {
+    justify-content: center;
+  }
+
+  .app-badges {
+    align-items: center;
+  }
+
+  .footer-links {
+    align-items: center;
   }
 
   .footer-bottom {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     text-align: center;
+  }
+
+  .footer-hiring-pill {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    padding: 0 1rem;
   }
 }

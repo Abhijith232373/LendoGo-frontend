@@ -43,7 +43,7 @@
   border: none;
   color: var(--admin-text-light);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
@@ -134,7 +134,7 @@
 
 .admin-chat-thread-name {
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   white-space: nowrap;
   overflow: hidden;
@@ -158,7 +158,7 @@
   background-color: #ef4444;
   color: #ffffff;
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 400;
   padding: 1px 5px;
   border-radius: 10px;
   align-self: center;
@@ -166,7 +166,7 @@
 
 .admin-chat-thread-status {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 2px 6px;
   border-radius: 4px;
   text-transform: uppercase;
@@ -242,7 +242,7 @@
 
 .admin-chat-header-name {
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
 }
 
@@ -264,7 +264,7 @@
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -283,7 +283,7 @@
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
@@ -398,7 +398,7 @@
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -417,7 +417,7 @@
   color: #10b981;
   padding: 12px;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 500;
   gap: 8px;
 }
 
@@ -441,7 +441,7 @@
 .admin-history-table th {
   background-color: var(--admin-sidebar);
   color: var(--admin-text);
-  font-weight: 700;
+  font-weight: 500;
   padding: 16px 20px;
   border-bottom: 1px solid var(--admin-border);
 }
@@ -479,7 +479,7 @@
   background-color: rgba(0, 102, 255, 0.08);
   color: #0066ff;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 10px;
   border-radius: 20px;
   border: 1px solid rgba(0, 102, 255, 0.15);
@@ -493,7 +493,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -560,7 +560,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 1rem;
   flex-shrink: 0;
   border: 1.5px solid var(--admin-border);
@@ -575,7 +575,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 1.1rem;
   border: 2px solid var(--admin-border);
 }
@@ -589,7 +589,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.9rem;
   border: 1.5px solid var(--admin-border);
 }

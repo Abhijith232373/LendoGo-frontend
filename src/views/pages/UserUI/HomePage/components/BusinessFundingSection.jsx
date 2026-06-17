@@ -1,5 +1,4 @@
 import React from 'react';
-import laptopImg from '../../../../../assets/laptop_business_funding.png';
 import ParallaxShapes from '../../../../components/ParallaxShapes/ParallaxShapes';
 
 const BusinessFundingSection = ({ navigate }) => {
@@ -43,7 +42,7 @@ const BusinessFundingSection = ({ navigate }) => {
             
             {/* Base Laptop graphic */}
             <img 
-              src={laptopImg} 
+              src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686372/laptop_business_funding_uets00.png" 
               alt="LendoGO Corporate Business Funding Analytics Dashboard" 
               className="laptop-showcase-img" 
             />

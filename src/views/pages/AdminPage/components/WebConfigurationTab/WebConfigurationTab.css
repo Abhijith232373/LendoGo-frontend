@@ -19,7 +19,7 @@
   padding: 0.8rem 1.2rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .config-row-item {
@@ -41,7 +41,7 @@
 
 .config-info-text h4 {
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 400;
   margin-bottom: 0.3rem;
 }
 
@@ -83,7 +83,7 @@
 
 .slider-score-indicator {
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--primary);
   width: 45px;
 }
@@ -94,7 +94,7 @@
   padding: 0.9rem;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;

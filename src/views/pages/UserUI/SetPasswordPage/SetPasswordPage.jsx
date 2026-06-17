@@ -4,7 +4,6 @@ import SetPasswordForm from '../../../components/SetPasswordForm/SetPasswordForm
 import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import passwordImg from '../../../../assets/password.jpg';
 import './SetPasswordPage.css';
 
 const SetPasswordPage = () => {
@@ -22,7 +21,7 @@ const SetPasswordPage = () => {
           <ScrollReveal variant="fade-right" className="sppage-hero-left">
             <div className="sppage-img-block">
               <img
-                src={passwordImg}
+                src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686366/password_hwbh4i.jpg"
                 alt="Secure your LendoGO account"
                 className="sppage-hero-img"
               />

@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useAuthController } from '../../../../../controllers/auth/useAuthController';
 import "./UserManagementTab.css";
 import { apiClient } from '../../../../../utils/apiClient';
 
 const UserManagementTab = () => {
+  const { user } = useAuthController();
+  const p = user?.permissions || {};
+  const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+  
+  const canCreate = isAdmin || !!p['user_create'];
+  const canUpdate = isAdmin || !!p['user_update'];
+  const canDelete = isAdmin || !!p['user_delete'];
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -361,17 +370,19 @@ const UserManagementTab = () => {
         <div>
           <h2>User Management</h2>
         </div>
-        <button 
-          className="btn-action-primary" 
-          onClick={openAddModal}
-          style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0 16px', borderRadius: '8px', fontWeight: '700' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Add New User
-        </button>
+        {canCreate && (
+          <button 
+            className="btn-action-primary" 
+            onClick={openAddModal}
+            style={{ height: '38px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0 16px', borderRadius: '8px', fontWeight: '700' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add New User
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -436,19 +447,28 @@ const UserManagementTab = () => {
                   <td className="p-4">
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                       <button className="bg-blue-600/20 text-blue-500 px-3 py-1 rounded hover:bg-blue-600/30" onClick={() => openViewModal(user)}>Inspect</button>
-                      <button className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600" onClick={() => openEditModal(user)}>Edit</button>
-                      <button 
-                        className={`px-3 py-1 rounded ${user.status === 'Active' || !user.status ? 'bg-orange-600/20 text-orange-500 hover:bg-orange-600/30' : 'bg-green-600/20 text-green-500 hover:bg-green-600/30'}`}
-                        onClick={() => requestToggleUserStatus(user.id, user.status || 'Active', user.fullName)}
-                      >
-                        {user.status === 'Active' || !user.status ? 'Block' : 'Activate'}
-                      </button>
-                      <button 
-                        className="bg-red-900/40 text-red-500 px-3 py-1 rounded border border-red-500/20 hover:bg-red-900/60"
-                        onClick={() => requestDeleteUser(user.id, user.fullName)}
-                      >
-                        Delete
-                      </button>
+                      {canUpdate && (
+                        <>
+                          <button className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600" onClick={() => openEditModal(user)}>Edit</button>
+                          <button 
+                            className={`px-3 py-1 rounded ${user.status === 'Active' || !user.status ? 'bg-orange-600/20 text-orange-500 hover:bg-orange-600/30' : 'bg-green-600/20 text-green-500 hover:bg-green-600/30'}`}
+                            onClick={() => requestToggleUserStatus(user.id, user.status || 'Active', user.fullName)}
+                          >
+                            {user.status === 'Active' || !user.status ? 'Block' : 'Activate'}
+                          </button>
+                        </>
+                      )}
+                      {canDelete && (
+                        <button 
+                          className="bg-red-900/40 text-red-500 px-3 py-1 rounded border border-red-500/20 hover:bg-red-900/60"
+                          onClick={() => requestDeleteUser(user.id, user.fullName)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                      {!canUpdate && !canDelete && (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-light)', fontStyle: 'italic' }}>View Only</span>
+                      )}
                     </div>
                   </td>
                 </tr>

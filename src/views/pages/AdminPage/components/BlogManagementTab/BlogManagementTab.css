@@ -15,7 +15,7 @@
   border: none;
   border-radius: 12px;
   padding: 0.65rem 1.35rem;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.85rem;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2);
@@ -50,7 +50,7 @@
 
 .form-card-header h3 {
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
   margin: 0;
   letter-spacing: -0.3px;
@@ -98,7 +98,7 @@
 
 .form-label-styled {
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
 }
 
@@ -110,7 +110,7 @@
 
 .word-count-badge {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
   letter-spacing: 0.2px;
@@ -191,7 +191,7 @@ select.form-input-styled {
   color: var(--admin-text);
   padding: 0.7rem 1.4rem;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -207,7 +207,7 @@ select.form-input-styled {
   color: #ffffff !important;
   padding: 0.7rem 1.4rem;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0, 102, 255, 0.15);
   transition: all 0.2s ease;
@@ -269,7 +269,7 @@ select.form-input-styled {
 
 .filter-label {
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
 }
 
@@ -309,7 +309,7 @@ select.form-input-styled {
   background-color: var(--admin-input);
   color: var(--admin-text-light);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 1.15rem 1.5rem;
@@ -351,7 +351,7 @@ select.form-input-styled {
 
 .table-article-title {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   max-width: 260px;
   overflow: hidden;
@@ -366,7 +366,7 @@ select.form-input-styled {
 
 .table-article-category-badge {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   background-color: rgba(0, 102, 255, 0.08);
   color: #0066ff;
   border: 1px solid rgba(0, 102, 255, 0.15);
@@ -392,7 +392,7 @@ select.form-input-styled {
 
 .summary-word-indicator {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .summary-word-indicator.ok {
@@ -452,7 +452,7 @@ select.form-input-styled {
   margin: 0 0 0.35rem 0;
   color: var(--admin-text);
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .no-blogs-found p {

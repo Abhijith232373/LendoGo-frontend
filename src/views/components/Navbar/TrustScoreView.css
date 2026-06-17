@@ -99,7 +99,7 @@
 
 .report-title-label {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #3c4043;
   margin-bottom: 0.75rem;
   align-self: flex-start;
@@ -118,7 +118,7 @@
 
 .gauge-label-text {
   font-size: 0.65rem;
-  font-weight: 600;
+  font-weight: 400;
   fill: #80868b;
 }
 
@@ -131,7 +131,7 @@
 
 .gauge-big-number {
   font-size: 2.25rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #1f1f1f;
   margin: 0;
   letter-spacing: -0.02em;
@@ -139,7 +139,7 @@
 
 .gauge-status-badge {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
   background-color: #f1f3f4;
@@ -166,7 +166,7 @@
   color: #1a73e8;
   text-align: center;
   margin: 0.75rem 0 0 0;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.35;
   max-width: 220px;
 }
@@ -185,7 +185,7 @@
 
 .col-chart-title {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #5f6368;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -295,12 +295,12 @@
 
 .x-axis-label.active {
   fill: #1a73e8;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .tooltip-score-text {
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 500;
   fill: #ffffff;
 }
 
@@ -341,7 +341,7 @@
 
 .impact-section-title {
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #202124;
   margin: 0 0 0.15rem 0;
   letter-spacing: -0.01em;
@@ -413,13 +413,13 @@
 
 .factor-item-name {
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #202124;
 }
 
 .factor-item-badge {
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #80868b;
 }
 
@@ -471,7 +471,7 @@
 
 .details-panel-title {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #5f6368;
   margin: 0 0 0.45rem 0;
   text-transform: uppercase;
@@ -499,7 +499,7 @@
 }
 
 .loan-compact-name {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .loan-compact-val {
@@ -517,7 +517,7 @@
   border-radius: 9999px;
   color: #1a73e8;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 400;
   padding: 0.6rem 1.2rem;
   cursor: pointer;
   margin-top: 0.4rem;
@@ -543,7 +543,7 @@
   color: #3c4043;
   padding: 0.65rem;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   margin-top: 0.4rem;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);

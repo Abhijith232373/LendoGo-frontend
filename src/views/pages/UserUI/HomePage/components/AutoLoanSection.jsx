@@ -1,6 +1,4 @@
 import React from 'react';
-import sleekBlueSedan from '../../../../../assets/sleek_blue_sedan.png';
-import ruggedWhiteSuv from '../../../../../assets/rugged_white_suv.png';
 import ParallaxShapes from '../../../../components/ParallaxShapes/ParallaxShapes';
 
 const AutoLoanSection = ({ navigate }) => {
@@ -17,7 +15,7 @@ const AutoLoanSection = ({ navigate }) => {
             
             {/* Bottom/Foreground Element: Rugged White SUV with Pulsing Headlights */}
             <div className="auto-loan-car-container suv-container animate-float-reverse">
-              <img src={ruggedWhiteSuv} alt="LendoGO Rugged White SUV Auto Loan" className="auto-loan-vehicle-img suv-img" />
+              <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/rugged_white_suv_yvtrkd.png" alt="LendoGO Rugged White SUV Auto Loan" className="auto-loan-vehicle-img suv-img" />
               
               {/* Headlight 1 (Inner Left) */}
               <div className="car-headlight suv-headlight-1">
@@ -31,7 +29,7 @@ const AutoLoanSection = ({ navigate }) => {
 
             {/* Small Corner Accent Element: Sleek Blue Sedan with Pulsing Headlights */}
             <div className="auto-loan-car-container accent-car-container animate-float-slow">
-              <img src={sleekBlueSedan} alt="LendoGO Accent Blue Sedan Auto Loan" className="auto-loan-vehicle-img sedan-img" />
+              <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686369/sleek_blue_sedan_gy1kee.png" alt="LendoGO Accent Blue Sedan Auto Loan" className="auto-loan-vehicle-img sedan-img" />
               
               {/* Headlight 1 (Inner Left) */}
               <div className="car-headlight sedan-headlight-1">

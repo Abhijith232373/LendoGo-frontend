@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useAuthController } from '../../../../../controllers/auth/useAuthController';
 import "./KYCVerificationsTab.css";
 import { apiClient } from '../../../../../utils/apiClient';
 
 const KYCVerificationsTab = () => {
+  const { user } = useAuthController();
+  const p = user?.permissions || {};
+  const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+  const canUpdate = isAdmin || !!p['kyc_update'];
+
   const [kycList, setKycList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedKyc, setSelectedKyc] = useState(null);
@@ -663,26 +669,34 @@ const KYCVerificationsTab = () => {
 
             {/* Decisions Actions */}
             <div className="inspector-footer">
-              <button 
-                className="btn-decision reject"
-                disabled={selectedKyc.status === 'Verified'}
-                onClick={() => {
-                  onReject(selectedKyc.id, selectedKyc.name);
-                  setSelectedKyc(null);
-                }}
-              >
-                Reject KYC / Request Re-upload
-              </button>
-              <button 
-                className="btn-decision approve"
-                disabled={selectedKyc.status === 'Verified'}
-                onClick={() => {
-                  onApprove(selectedKyc.id, selectedKyc.name);
-                  setSelectedKyc(null);
-                }}
-              >
-                Approve & Verify KYC
-              </button>
+              {canUpdate ? (
+                <>
+                  <button 
+                    className="btn-decision reject"
+                    disabled={selectedKyc.status === 'Verified'}
+                    onClick={() => {
+                      onReject(selectedKyc.id, selectedKyc.name);
+                      setSelectedKyc(null);
+                    }}
+                  >
+                    Reject KYC / Request Re-upload
+                  </button>
+                  <button 
+                    className="btn-decision approve"
+                    disabled={selectedKyc.status === 'Verified'}
+                    onClick={() => {
+                      onApprove(selectedKyc.id, selectedKyc.name);
+                      setSelectedKyc(null);
+                    }}
+                  >
+                    Approve & Verify KYC
+                  </button>
+                </>
+              ) : (
+                <div style={{ width: '100%', textAlign: 'center', padding: '10px 0' }}>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--admin-text-light)', fontStyle: 'italic' }}>View Only Access (Updating Disabled)</span>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -19,6 +19,9 @@ import Step3KYC       from '../../views/pages/UserUI/LoanApplyPage/steps/Step3KY
 import Step4Terms     from '../../views/pages/UserUI/LoanApplyPage/steps/Step4Terms';
 import Step5Disbursal from '../../views/pages/UserUI/LoanApplyPage/steps/Step5Disbursal';
 
+import { ProtectedRoute } from '../ProtectedRoute';
+import { PublicRoute } from '../PublicRoute';
+
 /**
  * Root router — combines all domain route groups.
  * The /loan/apply/* steps share state via LoanApplicationProvider
@@ -29,25 +32,32 @@ import Step5Disbursal from '../../views/pages/UserUI/LoanApplyPage/steps/Step5Di
  */
 const AuthRoutes = (
   <>
-    <Route path="/"                     element={<SignInPage />}      />
-    <Route path="/signup"               element={<SignUpPage />}      />
-    <Route path="/signup/set-password"  element={<SetPasswordPage />} />
+    {/* Public Routes (Only accessible if NOT logged in) */}
+    <Route path="/"                     element={<PublicRoute><SignInPage /></PublicRoute>}      />
+    <Route path="/signup"               element={<PublicRoute><SignUpPage /></PublicRoute>}      />
+    <Route path="/signup/set-password"  element={<PublicRoute><SetPasswordPage /></PublicRoute>} />
+    
+    {/* Publicly accessible anyway */}
     <Route path="/careers"              element={<CareersPage />}     />
     <Route path="/careers/openings"     element={<JobListingsPage />} />
     <Route path="/careers/apply/:jobId" element={<JobApplyPage />}    />
     <Route path="/about"                element={<AboutPage />}       />
     <Route path="/blogs"                element={<BlogPage />}        />
-    <Route path="/admin"                element={<AdminPage />}       />
-    <Route path="/home"                 element={<HomePage />}        />
-    <Route path="/profile"              element={<HomePage />}        />
-    <Route path="/products/:type"       element={<ProductPage />}     />
+    
+    {/* Protected Admin Routes */}
+    <Route path="/admin"                element={<ProtectedRoute requireAdmin={true}><AdminPage /></ProtectedRoute>}       />
+    
+    {/* Protected User Routes */}
+    <Route path="/home"                 element={<ProtectedRoute><HomePage /></ProtectedRoute>}        />
+    <Route path="/profile"              element={<ProtectedRoute><HomePage /></ProtectedRoute>}        />
+    <Route path="/products/:type"       element={<ProtectedRoute><ProductPage /></ProtectedRoute>}     />
 
     {/* ── Loan Apply Multi-Step Flow ── */}
-    <Route path="/loan/apply/details"     element={<LoanApplicationProvider><Step1Details /></LoanApplicationProvider>}  />
-    <Route path="/loan/apply/offer"     element={<LoanApplicationProvider><Step2Offer /></LoanApplicationProvider>}     />
-    <Route path="/loan/apply/kyc"       element={<LoanApplicationProvider><Step3KYC /></LoanApplicationProvider>}      />
-    <Route path="/loan/apply/terms"     element={<LoanApplicationProvider><Step4Terms /></LoanApplicationProvider>}    />
-    <Route path="/loan/apply/disbursal" element={<LoanApplicationProvider><Step5Disbursal /></LoanApplicationProvider>}/>
+    <Route path="/loan/apply/details"     element={<ProtectedRoute><LoanApplicationProvider><Step1Details /></LoanApplicationProvider></ProtectedRoute>}  />
+    <Route path="/loan/apply/offer"     element={<ProtectedRoute><LoanApplicationProvider><Step2Offer /></LoanApplicationProvider></ProtectedRoute>}     />
+    <Route path="/loan/apply/kyc"       element={<ProtectedRoute><LoanApplicationProvider><Step3KYC /></LoanApplicationProvider></ProtectedRoute>}      />
+    <Route path="/loan/apply/terms"     element={<ProtectedRoute><LoanApplicationProvider><Step4Terms /></LoanApplicationProvider></ProtectedRoute>}    />
+    <Route path="/loan/apply/disbursal" element={<ProtectedRoute><LoanApplicationProvider><Step5Disbursal /></LoanApplicationProvider></ProtectedRoute>}/>
   </>
 );
 

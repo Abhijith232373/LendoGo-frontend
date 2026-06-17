@@ -92,10 +92,10 @@ const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode
   return (
     <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        <div className="sidebar-brand-group">
-          <div className="admin-logo-icon">L</div>
+        <div className="sidebar-brand-group" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781705723/image-removebg-preview_3_lcqqog.png" alt="LendoGO Logo" style={{ width: 'auto', height: '90px', objectFit: 'contain', margin: '-25px -10px', filter: 'drop-shadow(0 4px 6px rgba(0, 102, 255, 0.25))' }} />
           {!collapsed && (
-            <span className="admin-logo-text">LendoGO <span className="admin-badge-pill">Admin</span></span>
+            <span className="admin-badge-pill" style={{ marginLeft: '4px' }}>Admin</span>
           )}
         </div>
         <button 
@@ -175,20 +175,7 @@ const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode
         </ul>
       </nav>
 
-      {/* Theme Switcher Toggle */}
-      <div className="sidebar-theme-toggle">
-        {!collapsed && (
-          <span className="toggle-label">{darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-        )}
-        <label className="toggle-switch">
-          <input
-            type="checkbox"
-            checked={darkMode}
-            onChange={() => setDarkMode(!darkMode)}
-          />
-          <span className="slider-round" />
-        </label>
-      </div>
+
     </aside>
   );
 };

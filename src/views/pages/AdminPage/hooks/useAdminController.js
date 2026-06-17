@@ -5,7 +5,7 @@ import { useAuthController } from '../../../../controllers/auth/useAuthControlle
 
 export const useAdminController = () => {
   const navigate = useNavigate();
-  const { user } = useAuthController();
+  const { user, signOut } = useAuthController();
 
   // Theme & Navigation States
   const [darkMode, setDarkMode] = useState(true);
@@ -14,15 +14,17 @@ export const useAdminController = () => {
   const [activeTab, setActiveTab] = useState(() => {
     const p = user?.permissions || {};
     const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
-    if (isAdmin || p['Dashboard']) return 'Dashboard';
-    if (p['User Management']) return 'User Management';
-    if (p['Loan Applications']) return 'Loan Applications';
-    if (p['KYC Verifications']) return 'KYC Verifications';
-    if (p['Customer Care']) return 'Customer Care';
-    if (p['Careers']) return 'Careers Management';
-    if (p['Blog Management']) return 'Blog Management';
-    if (p['Due Date']) return 'Due Date Reminders';
-    return 'Dashboard'; // Fallback
+    if (isAdmin || p['dashboard_view']) return 'Dashboard';
+    if (p['loan_app_view']) return 'Loan Applications';
+    if (p['kyc_view']) return 'KYC Verifications';
+    if (p['user_read']) return 'User Management';
+    if (p['career_app_view']) return 'View Applications';
+    if (p['career_job_create'] || p['career_job_update']) return 'Post Job Openings';
+    if (p['cc_consult_view']) return 'Free Consultation';
+    if (p['cc_chat_view']) return 'Chat Support';
+    if (p['blog_read']) return 'Blog Management';
+    if (p['due_view']) return 'Due Date Reminders';
+    return 'Admin Settings'; // Fallback to personal settings if no permissions
   });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,12 +41,12 @@ export const useAdminController = () => {
   const [disbursedCapital, setDisbursedCapital] = useState(0);
 
   // Admin Personal Detail States
-  const [adminAvatar, setAdminAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
-  const [adminName, setAdminName] = useState(user?.name || 'Admin Flow');
-  const [adminEmail, setAdminEmail] = useState(user?.email || 'admin.flow@lendogo.com');
+  const [adminAvatar, setAdminAvatar] = useState(user?.avatar || '');
+  const [adminName, setAdminName] = useState(user?.name || '');
+  const [adminEmail, setAdminEmail] = useState(user?.email || '');
 
   // Input States for Settings Forms
-  const [emailInput, setEmailInput] = useState('admin.flow@lendogo.com');
+  const [emailInput, setEmailInput] = useState(user?.email || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -52,12 +54,7 @@ export const useAdminController = () => {
   const [transferKey, setTransferKey] = useState('');
 
   // 1. Audit Logs Dataset State
-  const [auditLogs, setAuditLogs] = useState([
-    { id: 1, timestamp: '2026-05-25 15:42:01', user: 'System Sentinel', action: 'KYC Auto-Sync completed successfully', type: 'info' },
-    { id: 2, timestamp: '2026-05-25 14:15:30', user: 'Lending Officer (Admin)', action: 'Interest rate minimum index set to 14%', type: 'info' },
-    { id: 3, timestamp: '2026-05-25 11:20:10', user: 'Security Bot', action: 'Failed login warning: 3 incorrect attempts for user test@lendo.go', type: 'warning' },
-    { id: 4, timestamp: '2026-05-25 09:05:12', user: 'System Sentinel', action: 'Cron Ledger backup archived to cloud container', type: 'success' }
-  ]);
+  const [auditLogs, setAuditLogs] = useState([]);
 
   const addAuditLog = (action, type = 'info') => {
     const now = new Date();
@@ -265,40 +262,132 @@ export const useAdminController = () => {
     }
   };
 
+  const fetchAuditLogs = async () => {
+    try {
+      const res = await apiClient('/admin/audit-logs');
+      const data = res?.data || res || [];
+      const mappedLogs = data.map(log => ({
+        id: log.id || log.ID,
+        timestamp: log.created_at ? new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19) : '',
+        user: log.actor_name,
+        action: log.description,
+        type: log.action_type ? log.action_type.toLowerCase() : 'info'
+      }));
+      setAuditLogs(mappedLogs);
+    } catch (err) {
+      console.error("Failed to fetch audit logs:", err);
+    }
+  };
+
+  const fetchCareerOpenings = async () => {
+    try {
+      const res = await apiClient('/careers/openings');
+      const data = res?.data || res || [];
+      const safeParse = (field) => Array.isArray(field) ? field : (typeof field === 'string' ? JSON.parse(field || '[]') : []);
+      const formatted = data.map(job => ({
+        id: job.id,
+        title: job.title,
+        dept: job.department,
+        type: job.employment_type,
+        status: job.status,
+        applicants: 0,
+        experience: job.experience_range,
+        location: job.location,
+        mode: job.work_mode,
+        skills: safeParse(job.skills),
+        briefNote: job.short_description,
+        aboutRole: job.about_role,
+        responsibilities: safeParse(job.responsibilities),
+        requirements: safeParse(job.requirements),
+        benefits: safeParse(job.benefits)
+      }));
+      setCareersOpenings(formatted);
+    } catch (e) {
+      console.error("Failed to fetch careers:", e);
+    }
+  };
+
   useEffect(() => {
     const p = user?.permissions || {};
     const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
     
-    if (isAdmin || p['User Management']) fetchUsers();
-    if (isAdmin || p['Loan Applications']) fetchApplications();
-    if (isAdmin || p['Dashboard']) fetchWalletBalance();
-    if (isAdmin || p['Customer Care']) fetchConsultations();
+    if (isAdmin || p['User Management'] || p['user_read']) fetchUsers();
+    if (isAdmin || p['Loan Applications'] || p['loan_app_view']) fetchApplications();
+    if (isAdmin || p['Dashboard'] || p['dashboard_view']) fetchWalletBalance();
+    if (isAdmin || p['Customer Care'] || p['cc_consult_view'] || p['cc_chat_view']) fetchConsultations();
+    if (isAdmin || p['user_read'] || p['audit_read']) fetchAuditLogs();
+    if (isAdmin || p['career_job_read']) {
+      fetchCareerOpenings();
+      fetchJobApplications();
+    }
     
     // Chats can be fetched by anyone who can see Customer Care or Dashboard
-    if (isAdmin || p['Customer Care'] || p['Dashboard']) fetchChatSessions();
+    if (isAdmin || p['Customer Care'] || p['Dashboard'] || p['cc_chat_view']) fetchChatSessions();
   }, [auditedScores, user]);
+
+  // Real-time Audit Logs WebSocket
+  useEffect(() => {
+    const p = user?.permissions || {};
+    const isAdmin = user?.role === 'admin' || user?.email === 'admin@gmail.com';
+    
+    if (isAdmin || p['audit_read'] || p['user_read']) {
+      // Connect to the new dedicated Admin WebSocket Hub!
+      const wsUrl = `ws://localhost:8080/api/admin/ws`;
+      const ws = new WebSocket(wsUrl);
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'NEW_AUDIT_LOG') {
+            const log = data.data;
+            setAuditLogs(prev => {
+              const newLog = {
+                id: log.ID || log.id || Date.now(),
+                timestamp: log.created_at ? new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19) : new Date().toISOString().replace('T', ' ').substring(0, 19),
+                user: log.actor_name,
+                action: log.description,
+                type: log.action_type ? log.action_type.toLowerCase() : 'info'
+              };
+              // avoid duplicate keys by filtering if it somehow already exists
+              if (prev.find(p => p.id === newLog.id)) return prev;
+              return [newLog, ...prev];
+            });
+          } else if (data.event === 'STAFF_PROVISIONED' || data.event === 'STAFF_STATUS_UPDATED' || data.event === 'STAFF_DELETED') {
+            window.dispatchEvent(new Event('admin-staff-updated'));
+          } else if (data.event === 'USER_CREATED' || data.event === 'USER_UPDATED' || data.event === 'USER_DELETED' || data.event === 'USER_STATUS_UPDATED') {
+            fetchUsers();
+          } else if (data.event === 'LOAN_STATUS_UPDATED' || data.event === 'LOAN_DISBURSED') {
+            fetchApplications();
+            if (data.event === 'LOAN_DISBURSED') {
+              fetchWalletBalance();
+            }
+          } else if (data.event === 'CAREER_OPENING_CREATED' || data.event === 'CAREER_OPENING_UPDATED') {
+            fetchCareerOpenings();
+          } else if (data.event === 'GLOBAL_PERMISSIONS_UPDATED') {
+            window.dispatchEvent(new Event('admin-permissions-updated'));
+          }
+        } catch(e) {}
+      };
+      return () => ws.close();
+    }
+  }, [user]);
 
   // No more local storage sync for live chats; it's handled by WS and REST API
 
   const handleToggleUserStatus = (userId, userName, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: nextStatus } : u));
-    addAuditLog(`User ${userName} (${userId}) status updated to ${nextStatus}`, nextStatus === 'Blocked' ? 'warning' : 'success');
   };
 
   const handleCreateUser = (newUser) => {
     setUsers(prev => [newUser, ...prev]);
-    addAuditLog(`User profile created for ${newUser.name} (${newUser.id})`, 'success');
   };
 
   const handleUpdateUser = (updatedUser) => {
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-    addAuditLog(`User profile updated for ${updatedUser.name} (${updatedUser.id})`, 'info');
   };
 
   const handleDeleteUser = (userId, userName) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    addAuditLog(`User ${userName} (${userId}) deleted from system`, 'warning');
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'Deleted' } : u));
   };
 
   // KYC Verification Dataset & Handlers (kept for interface match, though KYCVerificationsTab handles it internally)
@@ -340,11 +429,11 @@ export const useAdminController = () => {
         body: JSON.stringify({ status: 'APPROVED' })
       });
       
-      addAuditLog(`Sanctioned loan approval for ${request.name}. Reference: ${request.referenceNumber}`, 'success');
+      // Log is handled by backend WebSocket broadcast
       alert(`Loan successfully approved and moved to disbursements ledger.`);
       
       setLiveMarquee(prev => [
-        { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: '⚡' },
+        { name: `${request.name} (PAN: ${request.PAN})`, type: request.type, amount: `₹${request.amount.toLocaleString()}`, status: 'Approved' },
         ...prev
       ]);
 
@@ -364,7 +453,7 @@ export const useAdminController = () => {
         method: 'PATCH',
         body: JSON.stringify({ status: 'REJECTED' })
       });
-      addAuditLog(`Loan application request ${reqId} for ${name} rejected by administrator.`, 'warning');
+      // Log is handled by backend WebSocket broadcast
       alert(`Application ${reqId} rejected.`);
       fetchApplications();
       return true;
@@ -395,7 +484,6 @@ export const useAdminController = () => {
 
       await fetchWalletBalance();
 
-      addAuditLog(`Capital Disbursal Settled: Transferred ₹${netAmount.toLocaleString('en-IN')}.00 directly to ${loan.name}'s wallet after charging ₹${feeAmount.toLocaleString('en-IN')}.00 platform fee (Ref: ${loanId}).`, 'success');
       alert(`Loan disbursed successfully.`);
       fetchApplications();
       return true;
@@ -407,92 +495,64 @@ export const useAdminController = () => {
   };
 
   // 5. Careers & Recruiting Dataset
-  const [careersOpenings, setCareersOpenings] = useState([
-    { id: 'JOB-01', title: 'Senior Credit Analyst', dept: 'Credit & Risk', type: 'Full-Time', status: 'Open', applicants: 12, experience: '3-5 yrs', location: 'Ernakulam, Palarivattom', mode: 'Hybrid', skills: ['Credit Analysis', 'Underwriting'], briefNote: 'Assess borrower credit rating.', aboutRole: 'Analyze income statement profiles...' },
-    { id: 'JOB-02', title: 'Loan Officer', dept: 'Operations', type: 'Full-Time', status: 'Open', applicants: 8, experience: '1-3 yrs', location: 'Ernakulam, Palarivattom', mode: 'On-site', skills: ['Customer Support', 'Loan Origination'], briefNote: 'Process customer lending requests.', aboutRole: 'Verify applications details...' },
-    { id: 'JOB-03', title: 'Lead Compliance Architect', dept: 'Engineering', type: 'Full-Time', status: 'Closed', applicants: 4, experience: '5+ yrs', location: 'Ernakulam, Palarivattom', mode: 'Remote', skills: ['Regulatory Compliance', 'Fintech Architecture'], briefNote: 'Ensure architecture compliance.', aboutRole: 'Build compliant backend routing...' }
-  ]);
+  const [careersOpenings, setCareersOpenings] = useState([]);
 
-  const [jobApplications, setJobApplications] = useState([
-    { 
-      id: 'APP-901', 
-      name: 'Rohan Sharma', 
-      firstName: 'Rohan',
-      lastName: 'Sharma',
-      email: 'rohan.s@gmail.com', 
-      phone: '98765 43210',
-      address: '12B, Skyline Apartments, Palarivattom',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682025',
-      cvName: 'cv_rohan_sharma.pdf',
-      role: 'Senior Credit Analyst', 
-      dept: 'Credit & Risk', 
-      applied: '2026-05-24', 
-      status: 'Reviewing' 
-    },
-    { 
-      id: 'APP-402', 
-      name: 'Divya Iyer', 
-      firstName: 'Divya',
-      lastName: 'Iyer',
-      email: 'divya.iyer@outlook.com', 
-      phone: '94471 23456',
-      address: 'Apt 4G, Choice Marina, Kundannoor',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682304',
-      cvName: 'cv_divya_iyer.pdf',
-      role: 'Loan Officer', 
-      dept: 'Operations', 
-      applied: '2026-05-22', 
-      status: 'Shortlisted' 
-    },
-    { 
-      id: 'APP-105', 
-      name: 'Vikram Seth', 
-      firstName: 'Vikram',
-      lastName: 'Seth',
-      email: 'vikram.seth@yahoo.com', 
-      phone: '90012 34567',
-      address: 'Plot 88, Kaloor-Kadavanthra Rd',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682017',
-      cvName: 'resume_vikram_seth.pdf',
-      role: 'Senior Credit Analyst', 
-      dept: 'Credit & Risk', 
-      applied: '2026-05-20', 
-      status: 'Interviewing' 
-    },
-    { 
-      id: 'APP-339', 
-      name: 'Nisha Varma', 
-      firstName: 'Nisha',
-      lastName: 'Varma',
-      email: 'nisha.v@gmail.com', 
-      phone: '97441 55667',
-      address: '33C, Olive Heights, Kakkanad',
-      city: 'Ernakulam',
-      state: 'Kerala',
-      zip: '682030',
-      cvName: 'cv_nisha_varma.pdf',
-      role: 'Lead Compliance Architect', 
-      dept: 'Engineering', 
-      applied: '2026-05-18', 
-      status: 'Rejected' 
+  const [jobApplications, setJobApplications] = useState([]);
+
+  const fetchJobApplications = async () => {
+    try {
+      const data = await apiClient('/careers/admin/applications');
+      const apps = data.data || [];
+      const formatted = apps.map(app => ({
+        id: app.id,
+        firstName: app.first_name,
+        lastName: app.last_name,
+        name: `${app.first_name} ${app.last_name}`,
+        email: app.email,
+        phone: app.phone,
+        address: app.address,
+        city: app.city,
+        state: app.state,
+        zip: app.postal_code,
+        cvName: app.resume_path ? app.resume_path.split('/').pop() : 'resume.pdf',
+        cvUrl: app.resume_path ? (app.resume_path.startsWith('http') ? app.resume_path : `http://localhost:8080/${app.resume_path}`) : '',
+        role: app.CareerOpening ? app.CareerOpening.title : 'Unknown Role',
+        dept: app.CareerOpening ? app.CareerOpening.department : 'Unknown Dept',
+        applied: app.created_at ? new Date(app.created_at).toISOString().split('T')[0] : 'N/A',
+        status: (app.status === 'Under Review' ? 'Reviewing' : app.status) || 'Reviewing'
+      }));
+      setJobApplications(formatted);
+    } catch (e) {
+      console.error("Failed to fetch job applications:", e);
     }
-  ]);
-
-  const handleToggleJobStatus = (jobId, title, currentStatus) => {
-    const nextStatus = currentStatus === 'Open' ? 'Closed' : 'Open';
-    setCareersOpenings(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus } : j));
-    addAuditLog(`Job opening '${title}' (${jobId}) status set to ${nextStatus}`, 'info');
   };
 
-  const handleUpdateApplicantStatus = (appId, applicantName, nextStatus) => {
-    setJobApplications(prev => prev.map(a => a.id === appId ? { ...a, status: nextStatus } : a));
-    addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
+  const handleToggleJobStatus = async (jobId, title, currentStatus) => {
+    const nextStatus = currentStatus === 'Open' ? 'Closed' : 'Open';
+    try {
+      await apiClient(`/careers/admin/openings/${jobId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus })
+      });
+      fetchCareerOpenings();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update job status');
+    }
+  };
+
+  const handleUpdateApplicantStatus = async (appId, applicantName, nextStatus) => {
+    try {
+      await apiClient(`/careers/admin/applications/${appId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus })
+      });
+      setJobApplications(prev => prev.map(a => a.id === appId ? { ...a, status: nextStatus } : a));
+      addAuditLog(`Application ${appId} for ${applicantName} updated to ${nextStatus}`, 'info');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update application status');
+    }
   };
 
   const handleRechargeWallet = async (amount) => {
@@ -560,24 +620,32 @@ export const useAdminController = () => {
     }
   };
 
-  const handleCreateJobOpening = (job) => {
-    const newId = `JOB-0${careersOpenings.length + 1}`;
-    const newJob = {
-      id: newId,
-      title: job.title,
-      dept: job.dept,
-      type: job.type || 'Full-Time',
-      status: 'Open',
-      applicants: 0,
-      experience: job.experience || '1-3 yrs',
-      location: job.location || 'Ernakulam, Palarivattom',
-      mode: job.mode || 'Hybrid',
-      skills: job.skills || [],
-      briefNote: job.briefNote || '',
-      aboutRole: job.aboutRole || ''
-    };
-    setCareersOpenings(prev => [newJob, ...prev]);
-    addAuditLog(`Job opening '${job.title}' (${newId}) created successfully`, 'success');
+  const handleCreateJobOpening = async (job) => {
+    try {
+      await apiClient('/careers/admin/openings', {
+        method: 'POST',
+        body: JSON.stringify(job)
+      });
+      fetchCareerOpenings();
+      addAuditLog(`Job opening '${job.title}' created successfully`, 'success');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to create job opening: ' + err.message);
+    }
+  };
+
+  const handleUpdateJobOpening = async (jobId, job) => {
+    try {
+      await apiClient(`/careers/admin/openings/${jobId}`, {
+        method: 'PUT',
+        body: JSON.stringify(job)
+      });
+      fetchCareerOpenings();
+      addAuditLog(`Job opening '${job.title}' updated successfully`, 'success');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update job opening: ' + err.message);
+    }
   };
 
   const handleResolveTicket = (ticketId, customerName) => {
@@ -644,10 +712,10 @@ export const useAdminController = () => {
 
   // 8. Live Marquee approvals
   const [liveMarquee, setLiveMarquee] = useState([
-    { name: 'Rahul S. (PAN: A****32P)', type: 'Personal Loan', amount: '₹1,50,000', status: '⚡' },
-    { name: 'Aarav M. (PAN: B****91K)', type: 'Business Loan', amount: '₹5,00,000', status: '💼' },
-    { name: 'Priya K. (PAN: D****84D)', type: 'Auto Loan', amount: '₹3,50,000', status: '🚗' },
-    { name: 'Sneha R. (PAN: C****74S)', type: 'Home Loan', amount: '₹12,00,000', status: '🏠' }
+    { name: 'Rahul S. (PAN: A****32P)', type: 'Personal Loan', amount: '₹1,50,000', status: 'Approved' },
+    { name: 'Aarav M. (PAN: B****91K)', type: 'Business Loan', amount: '₹5,00,000', status: 'Approved' },
+    { name: 'Priya K. (PAN: D****84D)', type: 'Auto Loan', amount: '₹3,50,000', status: 'Approved' },
+    { name: 'Sneha R. (PAN: C****74S)', type: 'Home Loan', amount: '₹12,00,000', status: 'Approved' }
   ]);
 
   // Web Config save success alert
@@ -660,26 +728,68 @@ export const useAdminController = () => {
 
   // ─── SETTINGS HANDLERS ───
 
-  // 1. Simulated Custom Photo Upload
-  const handleSimulatePhotoUpload = (e) => {
+  // 1. Upload Admin Photo to AWS S3
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setAdminAvatar(uploadEvent.target.result);
-        addAuditLog('Admin updated profile picture via custom image upload', 'info');
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const res = await apiClient('/admin/profile/avatar', {
+          method: 'POST',
+          body: formData, // apiClient will automatically handle FormData and omit Content-Type header
+        });
+
+        if (res && res.avatar) {
+          setAdminAvatar(res.avatar);
+          // Update the user session in localStorage so it persists
+          const userDataStr = localStorage.getItem('lendogo_user');
+          if (userDataStr) {
+            const userData = JSON.parse(userDataStr);
+            userData.avatar = res.avatar;
+            localStorage.setItem('lendogo_user', JSON.stringify(userData));
+          }
+          addAuditLog('Admin updated profile picture via AWS S3 upload', 'info');
+          alert('Profile picture updated successfully!');
+        }
+      } catch (err) {
+        console.error("Failed to upload avatar:", err);
+        alert(`Failed to upload avatar: ${err.message}`);
+      }
     }
   };
 
-  // 2. Email Address Change
-  const handleUpdateAdminEmail = (e) => {
+  // 2. Profile Details Change (Name and Email)
+  const handleUpdateAdminEmail = async (e) => {
     e.preventDefault();
-    if (!emailInput.trim()) return;
-    setAdminEmail(emailInput);
-    addAuditLog(`Admin email updated to ${emailInput}`, 'info');
-    alert(`Lending Officer email successfully set to ${emailInput}.`);
+    if (!emailInput.trim() || !adminName.trim()) return;
+
+    try {
+      const res = await apiClient('/admin/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ full_name: adminName, email: emailInput })
+      });
+
+      setAdminEmail(emailInput);
+      
+      const userDataStr = localStorage.getItem('lendogo_user');
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userData.email = emailInput;
+        userData.full_name = adminName;
+        localStorage.setItem('lendogo_user', JSON.stringify(userData));
+      }
+
+      addAuditLog(`Admin profile updated (Name: ${adminName}, Email: ${emailInput})`, 'info');
+      alert(`Profile details updated successfully.`);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      alert(`Failed to update profile: ${err.message}`);
+    }
   };
 
   // 3. Password Reset
@@ -723,7 +833,7 @@ export const useAdminController = () => {
 
   // 5. System Logout
   const handleAdminLogout = () => {
-    localStorage.removeItem('lendogo_user');
+    signOut();
     alert('Logged out from Admin Dashboard successfully.');
     navigate('/');
   };
@@ -776,13 +886,14 @@ export const useAdminController = () => {
     handleDisburseMoney,
     handleToggleJobStatus,
     handleCreateJobOpening,
+    handleUpdateJobOpening,
     handleUpdateApplicantStatus,
     handleRechargeWallet,
     handleResolveTicket,
     handleAddStaff,
     handleUpdateStaffRole,
     handleSaveWebConfig,
-    handleSimulatePhotoUpload,
+    handlePhotoUpload,
     handleUpdateAdminEmail,
     handleUpdateAdminPassword,
     handleTransferOwnership,

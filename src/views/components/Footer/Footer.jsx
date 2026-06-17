@@ -10,9 +10,8 @@ const Footer = () => {
           
           {/* Column 1: Brand & Apps */}
           <div className="footer-col">
-            <div className="footer-logo">
-              <div className="logo-icon"></div>
-              <span className="logo-text">LendoGO</span>
+            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center' }}>
+              <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781705723/image-removebg-preview_3_lcqqog.png" alt="LendoGO Logo" style={{ width: 'auto', height: '110px', objectFit: 'contain', margin: '-30px -15px' }} />
             </div>
             <p className="company-name">LENDOGO PLATFORMS PRIVATE LIMITED</p>
             

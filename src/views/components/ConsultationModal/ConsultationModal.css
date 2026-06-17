@@ -82,7 +82,7 @@
 
 .cm-title {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #0f172a;
   margin: 0 0 0.35rem;
   letter-spacing: -0.3px;
@@ -109,7 +109,7 @@
 
 .cm-label {
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #374151;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -213,7 +213,7 @@
   border: none;
   border-radius: 10px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   margin-top: 0.25rem;
   transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
@@ -289,7 +289,7 @@
 
 .cm-success-title {
   font-size: 1.4rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #0f172a;
   margin: 0;
 }

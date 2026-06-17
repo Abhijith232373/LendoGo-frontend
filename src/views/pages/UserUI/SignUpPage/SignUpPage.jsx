@@ -4,7 +4,6 @@ import SignUpForm from '../../../components/SignUpForm/SignUpForm';
 import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import signupImg from '../../../../assets/signup.jpg';
 import './SignUpPage.css';
 
 const SignUpPage = () => {
@@ -27,7 +26,7 @@ const SignUpPage = () => {
           <ScrollReveal variant="fade-left" delay={0.15} className="signup-hero-right">
             <div className="signup-img-block">
               <img
-                src={signupImg}
+                src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/signup_nogthm.jpg"
                 alt="Join LendoGO — Your Trusted Loan Partner"
                 className="signup-hero-img"
               />
