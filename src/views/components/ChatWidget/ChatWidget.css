@@ -97,7 +97,7 @@
 
 .credy-chat-title {
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #00b050; /* Green from the screenshot */
   margin: 0 0 3px 0;
   line-height: 1.2;
@@ -105,7 +105,7 @@
 
 .credy-chat-subtitle {
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #0d9488; /* Teal color */
   margin: 0;
   line-height: 1.2;

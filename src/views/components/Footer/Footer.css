@@ -27,13 +27,13 @@
 .footer-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0px;
   margin-bottom: 1rem;
 }
 
 .company-name {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-dark);
   margin-bottom: 1.5rem;
   line-height: 1.4;
@@ -122,12 +122,12 @@
 
 .store-badge .large-text {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .footer-heading {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-dark);
   margin-bottom: 1.5rem;
 }
@@ -175,7 +175,7 @@
 .footer-careers-link {
   font-size: 0.9rem;
   color: #374151 !important;
-  font-weight: 600;
+  font-weight: 400;
   transition: opacity 0.2s;
 }
 
@@ -212,7 +212,7 @@
 
 .footer-hiring-link {
   color: var(--primary) !important;
-  font-weight: 600;
+  font-weight: 400;
   transition: opacity 0.2s;
 }
 

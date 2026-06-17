@@ -65,7 +65,7 @@
   padding: 0.4rem 1rem;
   border-radius: 50px;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   display: inline-block;
@@ -74,8 +74,8 @@
 
 .hero-headline {
   font-size: 3.2rem;
-  font-weight: 850;
-  color: #0f172a;
+  font-weight: 500;
+  color: #1e293b;
   line-height: 1.2;
   margin: 0 0 1.5rem 0;
   letter-spacing: -0.03em;
@@ -98,7 +98,7 @@
   padding: 18px 64px;
   min-width: 250px;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 400;
   border-radius: 14px;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 102, 255, 0.2);
@@ -136,7 +136,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   color: white;
   margin-left: -8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
@@ -159,7 +159,7 @@
 .metric-number,
 .rating-number {
   font-size: 1.1rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #0f172a;
   line-height: 1.1;
   margin-bottom: 2px;
@@ -169,7 +169,7 @@
 .rating-sub {
   font-size: 0.72rem;
   color: #64748b;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .proof-divider {
@@ -510,7 +510,7 @@
   padding: 0.4rem 0.6rem;
   border-radius: 8px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -548,13 +548,13 @@
 .metric-label {
   font-size: 0.85rem;
   color: #64748B;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 0.35rem;
 }
 
 .metric-value {
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #0F172A;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
@@ -585,7 +585,7 @@
   padding: 0.2rem 0.6rem;
   border-radius: 50px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   width: fit-content;
   margin-bottom: 0.6rem;
 }
@@ -617,7 +617,7 @@
 
 .score-rating {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #10B981;
   margin-left: 0.4rem;
 }
@@ -645,7 +645,7 @@
 
 .calc-title {
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #1E2F6E;
   margin-bottom: 1.8rem;
   border-bottom: 2px solid #F1F5F9;
@@ -672,13 +672,13 @@
 
 .slider-label {
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #334155;
 }
 
 .slider-value {
   font-size: 1.15rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #1E2F6E;
 }
 
@@ -714,7 +714,7 @@
   justify-content: space-between;
   font-size: 0.72rem;
   color: #94A3B8;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .rate-indicator-row {
@@ -730,13 +730,13 @@
 .rate-badge-title {
   font-size: 0.8rem;
   color: #64748B;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .rate-badge-value {
   font-size: 0.85rem;
   color: #10B981;
-  font-weight: 800;
+  font-weight: 400;
   background-color: #ECFDF5;
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
@@ -761,18 +761,18 @@
 .summary-label {
   font-size: 0.82rem;
   color: #64748B;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .summary-value {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #0F172A;
 }
 
 .summary-value.highlight-emi {
   font-size: 1.4rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #1E2F6E;
 }
 
@@ -788,7 +788,7 @@
   padding: 1rem;
   border-radius: 10px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -843,7 +843,7 @@
 
 .processing-title {
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #1E2F6E;
   margin-bottom: 0.6rem;
 }
@@ -859,7 +859,7 @@
 .processing-status-text {
   font-size: 0.9rem;
   color: #64748B;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .simulated-bar {
@@ -901,7 +901,7 @@
 
 .calc-success-title {
   font-size: 1.45rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #047857;
   margin-bottom: 0.6rem;
 }
@@ -960,7 +960,7 @@
 
 .ledger-title {
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #1E2F6E;
   margin-bottom: 1.8rem;
   border-bottom: 2px solid #F1F5F9;
@@ -981,7 +981,7 @@
 .ledger-table th {
   padding: 1rem 0.8rem;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
   color: #64748B;
   border-bottom: 1.5px solid #E2E8F0;
@@ -1010,7 +1010,7 @@
 }
 
 .tx-title {
-  font-weight: 700;
+  font-weight: 500;
   color: #0F172A;
   font-size: 0.88rem;
 }
@@ -1023,7 +1023,7 @@
 
 .status-badge {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.25rem 0.6rem;
   border-radius: 50px;
   display: inline-block;
@@ -1041,7 +1041,7 @@
 }
 
 .tx-amount {
-  font-weight: 800;
+  font-weight: 400;
   font-size: 0.92rem;
   text-align: right;
   white-space: nowrap;
@@ -1145,7 +1145,7 @@
 
 .home-emi-header h2 {
   font-size: 2.2rem;
-  font-weight: 850;
+  font-weight: 500;
   letter-spacing: -1px;
   font-family: 'Outfit', sans-serif;
   background: linear-gradient(135deg, var(--primary) 0%, #002b80 100%);
@@ -1208,7 +1208,7 @@
 
 .home-emi-slider-title {
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #334155;
   font-family: 'Outfit', sans-serif;
 }
@@ -1231,7 +1231,7 @@
 .home-emi-currency-symbol {
   font-size: 0.85rem;
   color: #64748b;
-  font-weight: 700;
+  font-weight: 500;
   margin-right: 4px;
 }
 
@@ -1240,7 +1240,7 @@
   border: none;
   color: #0f172a;
   font-size: 1.05rem;
-  font-weight: 850;
+  font-weight: 500;
   width: 90px;
   outline: none;
   text-align: right;
@@ -1287,7 +1287,7 @@
   justify-content: space-between;
   font-size: 0.72rem;
   color: #94a3b8;
-  font-weight: 600;
+  font-weight: 400;
   margin-top: 2px;
 }
 
@@ -1367,13 +1367,13 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: #64748b;
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 2px;
 }
 
 .home-donut-center-value {
   font-size: 1.35rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #0f172a;
   font-family: 'Outfit', sans-serif;
   margin-bottom: 2px;
@@ -1382,7 +1382,7 @@
 .home-donut-center-sub {
   font-size: 0.65rem;
   color: #94a3b8;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .home-emi-chart-legend {
@@ -1392,7 +1392,7 @@
   gap: 12px 20px;
   font-size: 0.78rem;
   color: #475569;
-  font-weight: 600;
+  font-weight: 400;
   margin-top: 8px;
 }
 
@@ -1465,12 +1465,12 @@
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: #64748b;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .home-emi-table-card .home-emi-row-value {
   font-size: 1.15rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #0f172a;
   font-family: 'Outfit', sans-serif;
 }
@@ -1733,7 +1733,7 @@
 
 .floating-card-value {
   font-size: 1.35rem;
-  font-weight: 850;
+  font-weight: 500;
   font-family: 'Outfit', sans-serif;
   line-height: 1.2;
 }
@@ -1748,7 +1748,7 @@
 
 .floating-card-unit {
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #94a3b8;
 }
 
@@ -1780,7 +1780,7 @@
 .auto-loan-footnote-disclaimer {
   font-size: 0.75rem;
   color: #94a3b8;
-  font-weight: 600;
+  font-weight: 400;
   margin-top: 24px;
   text-align: left;
 }
@@ -1799,7 +1799,7 @@
   padding: 0.4rem 1.1rem;
   border-radius: 50px;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   display: inline-block;
@@ -1808,7 +1808,7 @@
 
 .auto-loan-headline {
   font-size: 2.5rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #0f172a;
   line-height: 1.25;
   margin: 0 0 1.2rem 0;
@@ -1849,7 +1849,7 @@
 
 .feature-item-text {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #334155;
   font-family: 'Outfit', sans-serif;
 }
@@ -1861,7 +1861,7 @@
   border: none;
   padding: 16px 44px;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 400;
   border-radius: 50px;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
@@ -1989,7 +1989,7 @@
 
 .business-funding-headline {
   font-size: 2.7rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #0f172a;
   line-height: 1.2;
   margin: 0 0 1.5rem 0;
@@ -2011,7 +2011,7 @@
   border: none;
   padding: 18px 52px;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 400;
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 102, 255, 0.25);
@@ -2149,7 +2149,7 @@
 
 .slider-card-value {
   font-size: 1.6rem;
-  font-weight: 850;
+  font-weight: 500;
   color: #0f172a;
   font-family: 'Outfit', sans-serif;
 }
@@ -2262,7 +2262,7 @@
 
 .trust-bar-label {
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 400;
   color: #94a3b8;
   letter-spacing: 0.1em;
   white-space: nowrap;

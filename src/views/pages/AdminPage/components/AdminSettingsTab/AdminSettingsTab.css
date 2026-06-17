@@ -26,7 +26,7 @@
 
 .settings-group-card h3 {
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .settings-group-card p {
@@ -43,7 +43,7 @@
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   width: 100%;
   max-width: 320px;
   outline: none;
@@ -59,11 +59,11 @@
 .text-green { color: #10b981; }
 .text-orange { color: #f59e0b; }
 .text-red { color: #ef4444; }
-.font-weight-bold { font-weight: bold; }
+.font-weight-bold { font-weight: 500; }
 .contact-check {
   font-size: 0.82rem;
   color: #10b981;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 /* ─── Profile Avatar & Branding Styles ─── */
@@ -143,7 +143,7 @@
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -215,7 +215,7 @@
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -236,7 +236,7 @@
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   width: fit-content;
@@ -269,7 +269,7 @@
 
 .settings-sidebar-title {
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 400;
   margin-left: 0.5rem;
   color: var(--admin-text);
   letter-spacing: -0.3px;
@@ -295,7 +295,7 @@
   gap: 0.8rem;
   color: var(--admin-text-light);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -324,7 +324,7 @@
 
 .pane-header-title {
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: 400;
   border-bottom: 2px solid var(--admin-border);
   padding-bottom: 0.8rem;
   margin-bottom: 1rem;
@@ -373,7 +373,7 @@
   height: 100%;
   background: var(--primary);
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 500;
   border-radius: 50%;
   text-transform: uppercase;
   font-size: 0.95em;
@@ -410,7 +410,7 @@
   background-color: rgba(0, 102, 255, 0.08);
   color: var(--primary);
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   padding: 0.2rem 0.6rem;
   border-radius: 50px;
   width: fit-content;
@@ -420,7 +420,7 @@
 
 .hero-identity-wrap h2 {
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 400;
   margin: 0.2rem 0;
   letter-spacing: -0.3px;
 }
@@ -477,7 +477,7 @@
 
 .settings-card-header h3 {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 500;
   margin: 0;
   color: var(--admin-text);
 }
@@ -534,7 +534,7 @@
 
 .dense-hero .hero-identity-wrap h2 {
   font-size: 1.3rem;
-  font-weight: 800;
+  font-weight: 400;
   margin: 0.15rem 0;
 }
 
@@ -545,7 +545,7 @@
 .field-label-small {
   font-size: 0.78rem;
   color: var(--admin-text-light);
-  font-weight: 600;
+  font-weight: 400;
   display: block;
 }
 
@@ -569,7 +569,7 @@
 
 .integration-row .row-text h4 {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   margin: 0;
   color: var(--admin-text);
 }
@@ -627,7 +627,7 @@
 
 .logout-prompt-box h4 {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   margin: 0 0 0.5rem 0;
 }

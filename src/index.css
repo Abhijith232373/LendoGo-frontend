@@ -6,8 +6,8 @@
   :root {
     --primary: #0066FF; /* Sleek vibrant blue */
     --primary-hover: #0052CC;
-    --text-dark: #1F2937;
-    --text-light: #6B7280;
+    --text-dark: #334155; /* Softer professional slate */
+    --text-light: #64748B;
     --bg-color: #FAFAFA;
     --card-bg: #FFFFFF;
     --success-bg: #E8F5E9;
@@ -51,6 +51,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Typography Normalization */
+h1, h2, h3, h4, h5, h6, .hero-headline, .section-heading, .section-title {
+  font-weight: 700 !important;
+}
+
+strong, b {
+  font-weight: 600;
+}
+
+/* Ensure buttons and badges are professionally medium, not ultra bold */
+button, .btn, .badge, .pill, label {
+  font-weight: 500;
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -62,25 +76,80 @@ button {
   font-family: var(--font-main);
 }
 
-/* ====== GLOBAL MOBILE RESPONSIVENESS SAFEGUARDS ====== */
+/* ====== COMPREHENSIVE GLOBAL MOBILE RESPONSIVENESS ====== */
+@media (max-width: 1024px) {
+  /* Tablet / Small Desktop adjustments */
+  .hero-inner-container,
+  .about-hero-container,
+  .careers-hero-container,
+  .sppage-container,
+  .ja-container,
+  .signup-container,
+  .signin-container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
 @media (max-width: 768px) {
-  body {
+  body, html {
     overflow-x: hidden;
   }
   
-  /* Stack most grids on mobile */
-  [class*="-grid"]:not(.tenure-grid):not(.kyc-grid-2x2):not(.kyc-grid-3x3), 
-  [class*="grid-"] {
+  /* --- Grid Stacking --- */
+  /* Force all typical structural grids into a single column on mobile */
+  [class*="-grid"]:not(.tenure-grid):not(.kyc-grid-2x2):not(.kyc-grid-3x3):not(.metrics-grid), 
+  [class*="grid-"],
+  .dashboard-body-grid,
+  .pillars-grid,
+  .about-content-grid,
+  .why-us-grid,
+  .footer-container {
     grid-template-columns: 1fr !important;
+    display: grid !important;
   }
-  
+
   /* Some specific grids that can wrap properly instead of full stacking */
   .tenure-grid, .kyc-grid-2x2, .kyc-grid-3x3 {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* --- Flex Stacking --- */
+  /* Force all split left/right hero containers to stack vertically */
+  .product-hero-container,
+  .details-alt-row,
+  .hero-inner-container,
+  .about-hero-container,
+  .careers-hero-container,
+  .sppage-container,
+  .ja-container,
+  .signup-container,
+  .signin-container,
+  .admin-main-content,
+  .footer-container,
+  .admin-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2rem !important;
+  }
+
+  /* Re-align stacked flex rows */
+  .details-row-info,
+  .hero-left-content,
+  .about-hero-left,
+  .careers-hero-left,
+  .signup-hero-left,
+  .signin-hero-left {
+    align-items: center !important;
+    text-align: center !important;
   }
 
   /* Make sure large titles scale properly */
-  h1, .hero-headline, .product-hero-title, .pillars-title, .product-cta-title, .row-main-title {
+  h1, .hero-headline, .product-hero-title, .pillars-title, .product-cta-title, .row-main-title, .about-title, .careers-hero-title, .signup-hero-title {
     font-size: clamp(2rem, 8vw, 2.5rem) !important;
     line-height: 1.25 !important;
   }
@@ -92,22 +161,26 @@ button {
   .product-final-cta-section,
   .product-trust-pillars-section,
   .product-testimonial-section,
-  .product-thought-section {
+  .product-thought-section,
+  .hero-inner-container,
+  .about-hero-section,
+  .careers-hero-section {
     padding-left: 1.25rem !important;
     padding-right: 1.25rem !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
   }
 
-  /* Ensure containers stack */
-  .product-hero-container,
-  .details-alt-row {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 2rem !important;
-    text-align: center;
+  /* --- Admin & Specialized Layouts --- */
+  .admin-sidebar {
+    width: 100% !important;
+    position: relative !important;
+    height: auto !important;
   }
   
-  .details-row-info {
-    align-items: center !important;
+  .admin-main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
   }
 
   /* Images shouldn't overflow */
@@ -116,8 +189,36 @@ button {
     height: auto !important;
   }
   
+  .hero-banner-img,
+  .about-hero-image,
+  .careers-hero-image,
+  .signup-hero-img,
+  .sppage-hero-img,
+  .ja-illustration {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 350px !important;
+    object-fit: contain !important;
+  }
+
   /* Adjust modal widths and padding */
-  .loan-step-card {
+  .loan-step-card,
+  .admin-card,
+  .blog-card {
     padding: 1.5rem 1.25rem !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Force metrics grid to 1 column on very small phones */
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .btn-hero-apply,
+  .product-apply-cta-btn {
+    width: 100% !important;
+    min-width: unset !important;
   }
 }

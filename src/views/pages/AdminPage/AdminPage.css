@@ -58,7 +58,7 @@
 .marquee-label {
   background-color: #ef4444;
   color: #ffffff;
-  font-weight: 800;
+  font-weight: 400;
   padding: 0 16px;
   height: 100%;
   display: flex;
@@ -109,7 +109,7 @@
 
 .highlight-text {
   color: #60a5fa;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .badge-bullet {
@@ -217,7 +217,7 @@
   height: 36px;
   background: linear-gradient(135deg, var(--primary) 0%, #00d2ff 100%);
   color: #ffffff;
-  font-weight: 800;
+  font-weight: 400;
   font-size: 1.3rem;
   display: flex;
   justify-content: center;
@@ -228,7 +228,7 @@
 
 .admin-logo-text {
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: -0.5px;
   color: var(--admin-text);
   display: flex;
@@ -238,7 +238,7 @@
 
 .admin-badge-pill {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 500;
   background-color: rgba(0, 102, 255, 0.08);
   color: var(--primary);
   border: 1px solid rgba(0, 102, 255, 0.15);
@@ -290,7 +290,7 @@
   background: none;
   text-align: left;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
   transition: all 0.25s ease;
 }
@@ -346,7 +346,7 @@
 
 .sidebar-widget h4 {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   margin-bottom: 6px;
 }
@@ -363,7 +363,7 @@
   color: #ffffff;
   width: 100%;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 8px 12px;
   border-radius: 8px;
   transition: all 0.25s ease;
@@ -385,7 +385,7 @@
 
 .toggle-label {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
 }
 
@@ -471,7 +471,7 @@ input:checked + .slider-round:before {
 
 .metric-label {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -480,20 +480,20 @@ input:checked + .slider-round:before {
 
 .metric-value {
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text) !important;
 }
 
 .section-header-row h2 {
   font-size: 1.85rem !important;
-  font-weight: 800 !important;
+  font-weight: 400 !important;
   color: var(--admin-text) !important;
   letter-spacing: -0.5px !important;
 }
 
 .section-header-row h3 {
   font-size: 1.55rem !important;
-  font-weight: 800 !important;
+  font-weight: 400 !important;
   color: var(--admin-text) !important;
   letter-spacing: -0.5px !important;
 }
@@ -507,7 +507,7 @@ input:checked + .slider-round:before {
   background-color: var(--primary);
   color: #ffffff;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 10px 20px;
   border-radius: 10px;
   transition: all 0.25s ease;
@@ -524,7 +524,7 @@ input:checked + .slider-round:before {
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   padding: 10px 18px;
   border-radius: 10px;
   transition: all 0.25s ease;
@@ -613,7 +613,7 @@ input:checked + .slider-round:before {
 
 .profile-name {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
 }
 
@@ -647,7 +647,7 @@ input:checked + .slider-round:before {
 
 .welcome-banner h2 {
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
   margin-bottom: 6px;
   letter-spacing: -0.5px;
@@ -668,7 +668,7 @@ input:checked + .slider-round:before {
   background-color: var(--primary);
   color: #ffffff;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 10px 18px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 102, 255, 0.15);
@@ -681,7 +681,7 @@ input:checked + .slider-round:before {
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   outline: none;
 }
 
@@ -690,7 +690,7 @@ input:checked + .slider-round:before {
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   padding: 10px 16px;
   border-radius: 8px;
 }
@@ -763,7 +763,7 @@ input:checked + .slider-round:before {
 
 .card-header h4 {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -784,7 +784,7 @@ input:checked + .slider-round:before {
 
 .card-value-wrap h2 {
   font-size: 2.1rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
   letter-spacing: -0.5px;
 }
@@ -793,7 +793,7 @@ input:checked + .slider-round:before {
   display: inline-flex;
   align-items: center;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 10px;
   border-radius: 100px;
 }
@@ -852,14 +852,14 @@ input:checked + .slider-round:before {
 .legend-dot.home-auto { background-color: #10b981; }
 
 .dist-label {
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text);
 }
 
 .dist-val {
   margin-left: auto;
   color: var(--admin-text-light);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 /* Chart Styles */
@@ -875,7 +875,7 @@ input:checked + .slider-round:before {
   background: none;
   border: none;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 6px 12px;
   border-radius: 6px;
   color: var(--admin-text-light);
@@ -960,7 +960,7 @@ input:checked + .slider-round:before {
 
 .tooltip-year {
   display: block;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
   margin-bottom: 6px;
   border-bottom: 1px solid var(--admin-border);
@@ -988,7 +988,7 @@ input:checked + .slider-round:before {
   justify-content: space-between;
   padding: 0 40px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
 }
 
@@ -1022,7 +1022,7 @@ input:checked + .slider-round:before {
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
 }
 
@@ -1058,7 +1058,7 @@ input:checked + .slider-round:before {
 
 .robo-advisor-card h3 {
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 1.35;
   margin-bottom: 12px;
   letter-spacing: -0.3px;
@@ -1075,7 +1075,7 @@ input:checked + .slider-round:before {
   background-color: #ffffff;
   color: #091d36;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 10px 20px;
   border-radius: 8px;
   transition: all 0.25s ease;
@@ -1121,7 +1121,7 @@ input:checked + .slider-round:before {
 .result-score {
   display: block;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 4px;
 }
 
@@ -1261,7 +1261,7 @@ input:checked + .slider-round:before {
 .admin-data-table th {
   padding: 1.1rem 1rem;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
   color: var(--admin-text-light);
   border-bottom: 2px solid var(--admin-border);
@@ -1292,7 +1292,7 @@ input:checked + .slider-round:before {
 
 .risk-tag {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.25rem 0.65rem;
   border-radius: 50px;
 }
@@ -1314,7 +1314,7 @@ input:checked + .slider-round:before {
 
 .status-tag {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.25rem 0.65rem;
   border-radius: 50px;
   display: inline-block;
@@ -1344,7 +1344,7 @@ input:checked + .slider-round:before {
   padding: 0.45rem 0.9rem;
   border-radius: 6px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1405,7 +1405,7 @@ input:checked + .slider-round:before {
 
 .req-id-badge {
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text-light);
   background-color: var(--admin-input);
   padding: 0.2rem 0.5rem;
@@ -1414,7 +1414,7 @@ input:checked + .slider-round:before {
 
 .req-type-badge {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--primary);
   background-color: rgba(0, 102, 255, 0.08);
   padding: 0.2rem 0.6rem;
@@ -1423,7 +1423,7 @@ input:checked + .slider-round:before {
 
 .req-card-body h3 {
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 400;
   margin-bottom: 0.8rem;
 }
 
@@ -1438,13 +1438,13 @@ input:checked + .slider-round:before {
   display: block;
   font-size: 0.72rem;
   color: var(--admin-text-light);
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 0.2rem;
 }
 
 .detail-val {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .audit-state-box {
@@ -1497,12 +1497,12 @@ input:checked + .slider-round:before {
 
 .score-badge-circle strong {
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .score-badge-circle span {
   font-size: 0.55rem;
-  font-weight: 600;
+  font-weight: 400;
   opacity: 0.8;
 }
 
@@ -1514,7 +1514,7 @@ input:checked + .slider-round:before {
 
 .score-level {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .score-desc p {
@@ -1537,7 +1537,7 @@ input:checked + .slider-round:before {
   padding: 0.7rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1551,7 +1551,7 @@ input:checked + .slider-round:before {
   padding: 0.7rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1623,7 +1623,7 @@ input:checked + .slider-round:before {
 
 .sub-panel h3 {
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 400;
   border-bottom: 2px solid var(--admin-border);
   padding-bottom: 0.6rem;
   color: var(--admin-text);
@@ -1633,7 +1633,7 @@ input:checked + .slider-round:before {
   padding: 0.35rem 0.7rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   background-color: var(--admin-input);
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
@@ -1658,7 +1658,7 @@ input:checked + .slider-round:before {
 
 .recru-status {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -1675,7 +1675,7 @@ input:checked + .slider-round:before {
   padding: 0.35rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 400;
   outline: none;
 }
 
@@ -1694,7 +1694,7 @@ input:checked + .slider-round:before {
 
 .form-input-group label {
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
 }
 
@@ -1718,7 +1718,7 @@ input:checked + .slider-round:before {
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1749,7 +1749,7 @@ input:checked + .slider-round:before {
   padding: 0.8rem 1.2rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .config-row-item {
@@ -1771,7 +1771,7 @@ input:checked + .slider-round:before {
 
 .config-info-text h4 {
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 400;
   margin-bottom: 0.3rem;
 }
 
@@ -1813,7 +1813,7 @@ input:checked + .slider-round:before {
 
 .slider-score-indicator {
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--primary);
   width: 45px;
 }
@@ -1824,7 +1824,7 @@ input:checked + .slider-round:before {
   padding: 0.9rem;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1854,7 +1854,7 @@ input:checked + .slider-round:before {
   justify-content: space-between;
   align-items: center;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text-light);
   letter-spacing: 0.05em;
 }
@@ -1866,7 +1866,7 @@ input:checked + .slider-round:before {
   padding: 0.35rem 0.8rem;
   border-radius: 4px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -1902,7 +1902,7 @@ input:checked + .slider-round:before {
 
 .log-badge-type {
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 400;
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
   flex-shrink: 0;
@@ -1916,7 +1916,7 @@ input:checked + .slider-round:before {
 
 .log-operator {
   color: var(--primary);
-  font-weight: 700;
+  font-weight: 500;
   flex-shrink: 0;
 }
 
@@ -1959,7 +1959,7 @@ input:checked + .slider-round:before {
 
 .settings-group-card h3 {
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .settings-group-card p {
@@ -1976,7 +1976,7 @@ input:checked + .slider-round:before {
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   width: 100%;
   max-width: 320px;
   outline: none;
@@ -1992,11 +1992,11 @@ input:checked + .slider-round:before {
 .text-green { color: #10b981; }
 .text-orange { color: #f59e0b; }
 .text-red { color: #ef4444; }
-.font-weight-bold { font-weight: bold; }
+.font-weight-bold { font-weight: 500; }
 .contact-check {
   font-size: 0.82rem;
   color: #10b981;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 /* ─── Profile Avatar & Branding Styles ─── */
@@ -2076,7 +2076,7 @@ input:checked + .slider-round:before {
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2148,7 +2148,7 @@ input:checked + .slider-round:before {
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2169,7 +2169,7 @@ input:checked + .slider-round:before {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   width: fit-content;
@@ -2202,7 +2202,7 @@ input:checked + .slider-round:before {
 
 .settings-sidebar-title {
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 400;
   margin-left: 0.5rem;
   color: var(--admin-text);
   letter-spacing: -0.3px;
@@ -2228,7 +2228,7 @@ input:checked + .slider-round:before {
   gap: 0.8rem;
   color: var(--admin-text-light);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2257,7 +2257,7 @@ input:checked + .slider-round:before {
 
 .pane-header-title {
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: 400;
   border-bottom: 2px solid var(--admin-border);
   padding-bottom: 0.8rem;
   margin-bottom: 1rem;
@@ -2306,7 +2306,7 @@ input:checked + .slider-round:before {
   height: 100%;
   background: var(--primary);
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 500;
   border-radius: 50%;
   text-transform: uppercase;
   font-size: 0.95em;
@@ -2343,7 +2343,7 @@ input:checked + .slider-round:before {
   background-color: rgba(0, 102, 255, 0.08);
   color: var(--primary);
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   padding: 0.2rem 0.6rem;
   border-radius: 50px;
   width: fit-content;
@@ -2353,7 +2353,7 @@ input:checked + .slider-round:before {
 
 .hero-identity-wrap h2 {
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 400;
   margin: 0.2rem 0;
   letter-spacing: -0.3px;
 }
@@ -2410,7 +2410,7 @@ input:checked + .slider-round:before {
 
 .settings-card-header h3 {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 500;
   margin: 0;
   color: var(--admin-text);
 }
@@ -2467,7 +2467,7 @@ input:checked + .slider-round:before {
 
 .dense-hero .hero-identity-wrap h2 {
   font-size: 1.3rem;
-  font-weight: 800;
+  font-weight: 400;
   margin: 0.15rem 0;
 }
 
@@ -2478,7 +2478,7 @@ input:checked + .slider-round:before {
 .field-label-small {
   font-size: 0.78rem;
   color: var(--admin-text-light);
-  font-weight: 600;
+  font-weight: 400;
   display: block;
 }
 
@@ -2502,7 +2502,7 @@ input:checked + .slider-round:before {
 
 .integration-row .row-text h4 {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   margin: 0;
   color: var(--admin-text);
 }
@@ -2560,7 +2560,7 @@ input:checked + .slider-round:before {
 
 .logout-prompt-box h4 {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   margin: 0 0 0.5rem 0;
 }
@@ -2631,7 +2631,7 @@ input:checked + .slider-round:before {
 
 .wallet-amount-text {
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   letter-spacing: -0.2px;
 }
@@ -2687,7 +2687,7 @@ input:checked + .slider-round:before {
   outline: none;
   font-family: inherit;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
   padding: 8px 16px;
   border-radius: 8px;
@@ -2763,7 +2763,7 @@ input:checked + .slider-round:before {
 
 .inspector-header h3 {
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
   margin: 0;
 }
@@ -2771,7 +2771,7 @@ input:checked + .slider-round:before {
 .inspector-subtitle {
   font-size: 0.78rem;
   color: var(--admin-text-light);
-  font-weight: 600;
+  font-weight: 400;
   display: block;
   margin-top: 2px;
 }
@@ -2808,7 +2808,7 @@ input:checked + .slider-round:before {
 
 .inspector-section h4 {
   font-size: 0.85rem;
-  font-weight: 800;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--admin-text-light);
@@ -2834,13 +2834,13 @@ input:checked + .slider-round:before {
 .meta-lbl {
   font-size: 0.72rem;
   color: var(--admin-text-light);
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
 }
 
 .meta-val {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
 }
 
@@ -2928,7 +2928,7 @@ input:checked + .slider-round:before {
 .hover-action-icon {
   color: white;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2943,7 +2943,7 @@ input:checked + .slider-round:before {
 
 .doc-card-title {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   white-space: nowrap;
   overflow: hidden;
@@ -2953,7 +2953,7 @@ input:checked + .slider-round:before {
 .doc-card-format {
   font-size: 0.68rem;
   color: var(--admin-text-light);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .inspector-footer {
@@ -2970,7 +2970,7 @@ input:checked + .slider-round:before {
   padding: 12px;
   border-radius: 12px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
   border: none;
@@ -3055,7 +3055,7 @@ input:checked + .slider-round:before {
 
 .lightbox-header h3 {
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
   margin: 0;
 }
@@ -3124,7 +3124,7 @@ input:checked + .slider-round:before {
   align-items: center;
   gap: 8px;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #10b981;
   justify-content: center;
 }
@@ -3159,7 +3159,7 @@ input:checked + .slider-round:before {
 }
 
 .user-cell-name {
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
 }
 
@@ -3185,7 +3185,7 @@ input:checked + .slider-round:before {
   border: 1px solid transparent;
   text-align: left;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
   transition: all 0.25s ease;
   cursor: pointer;
@@ -3230,7 +3230,7 @@ input:checked + .slider-round:before {
   border: none;
   text-align: left;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #9ca3af;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -3246,7 +3246,7 @@ input:checked + .slider-round:before {
 .nav-sub-btn.active {
   background-color: var(--primary) !important;
   color: #ffffff !important;
-  font-weight: 800 !important;
+  font-weight: 400 !important;
   box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3) !important;
 }
 
@@ -3393,7 +3393,7 @@ input:disabled + .slider-round:before {
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   text-align: center;
 }
 
@@ -3429,7 +3429,7 @@ input:disabled + .slider-round:before {
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -3495,7 +3495,7 @@ input:disabled + .slider-round:before {
 
 .modal-header h3 {
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
 }
 
@@ -3538,7 +3538,7 @@ input:disabled + .slider-round:before {
 
 .form-group-admin label {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
 }
 
@@ -3571,7 +3571,7 @@ input:disabled + .slider-round:before {
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -3588,7 +3588,7 @@ input:disabled + .slider-round:before {
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -3618,13 +3618,13 @@ input:disabled + .slider-round:before {
   align-items: center;
   justify-content: center;
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 400;
   box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2);
 }
 
 .inspection-profile-summary h4 {
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 500;
   margin: 0;
   color: var(--admin-text);
 }
@@ -3658,7 +3658,7 @@ input:disabled + .slider-round:before {
 
 .detail-label {
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3666,7 +3666,7 @@ input:disabled + .slider-round:before {
 
 .detail-value {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
 }
 
@@ -3835,7 +3835,7 @@ input:disabled + .slider-round:before {
 .toast-message-content {
   flex: 1;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text);
   line-height: 1.4;
 }

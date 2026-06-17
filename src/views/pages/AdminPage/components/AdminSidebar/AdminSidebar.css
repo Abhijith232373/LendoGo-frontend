@@ -41,7 +41,7 @@
 .sidebar-brand-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0px;
 }
 
 .sidebar-toggle-btn {
@@ -88,7 +88,7 @@
   height: 36px;
   background: linear-gradient(135deg, var(--primary) 0%, #00d2ff 100%);
   color: #ffffff;
-  font-weight: 800;
+  font-weight: 400;
   font-size: 1.3rem;
   display: flex;
   justify-content: center;
@@ -99,17 +99,19 @@
 
 .admin-logo-text {
   font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--admin-text);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: #1f2937;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: 'Inter', sans-serif;
 }
 
 .admin-badge-pill {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 500;
   background-color: rgba(0, 102, 255, 0.08);
   color: var(--primary);
   border: 1px solid rgba(0, 102, 255, 0.15);
@@ -161,7 +163,7 @@
   background: none;
   text-align: left;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
   transition: all 0.25s ease;
 }
@@ -217,7 +219,7 @@
 
 .sidebar-widget h4 {
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text);
   margin-bottom: 6px;
 }
@@ -234,7 +236,7 @@
   color: #ffffff;
   width: 100%;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 8px 12px;
   border-radius: 8px;
   transition: all 0.25s ease;
@@ -256,7 +258,7 @@
 
 .toggle-label {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
 }
 
@@ -328,7 +330,7 @@ input:checked + .slider-round:before {
   border: 1px solid transparent;
   text-align: left;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
   transition: all 0.25s ease;
   cursor: pointer;
@@ -373,7 +375,7 @@ input:checked + .slider-round:before {
   border: none;
   text-align: left;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #9ca3af;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -389,7 +391,7 @@ input:checked + .slider-round:before {
 .nav-sub-btn.active {
   background-color: var(--primary) !important;
   color: #ffffff !important;
-  font-weight: 800 !important;
+  font-weight: 400 !important;
   box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3) !important;
 }
 
@@ -480,7 +482,7 @@ input:checked + .slider-round:before {
   background-color: #ef4444;
   color: #ffffff !important;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 400;
   padding: 1.5px 6px;
   border-radius: 10px;
   margin-left: auto;

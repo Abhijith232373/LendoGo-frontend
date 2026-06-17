@@ -92,10 +92,10 @@ const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode
   return (
     <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        <div className="sidebar-brand-group">
-          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686372/lendogoLogo_lh4jjw.png" alt="LendoGO Logo" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(0, 102, 255, 0.25)' }} />
+        <div className="sidebar-brand-group" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781705723/image-removebg-preview_3_lcqqog.png" alt="LendoGO Logo" style={{ width: 'auto', height: '90px', objectFit: 'contain', margin: '-25px -10px', filter: 'drop-shadow(0 4px 6px rgba(0, 102, 255, 0.25))' }} />
           {!collapsed && (
-            <span className="admin-logo-text">LendoGO <span className="admin-badge-pill">Admin</span></span>
+            <span className="admin-badge-pill" style={{ marginLeft: '4px' }}>Admin</span>
           )}
         </div>
         <button 

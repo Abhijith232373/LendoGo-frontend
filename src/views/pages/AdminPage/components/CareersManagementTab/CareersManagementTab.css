@@ -21,7 +21,7 @@
 
 .sub-panel h3 {
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 400;
   border-bottom: 2px solid var(--admin-border);
   padding-bottom: 0.6rem;
   color: var(--admin-text);
@@ -31,7 +31,7 @@
   padding: 0.35rem 0.7rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   background-color: var(--admin-input);
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
@@ -56,7 +56,7 @@
 
 .recru-status {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -73,7 +73,7 @@
   padding: 0.35rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 400;
   outline: none;
 }
 
@@ -92,7 +92,7 @@
 
 .form-input-group label {
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--admin-text-light);
 }
 
@@ -116,7 +116,7 @@
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -169,7 +169,7 @@
 
 .premium-modal-header h3 {
   font-size: 1.4rem;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--admin-text);
   margin: 0;
   display: flex;
@@ -206,7 +206,7 @@
 
 .premium-form-section-title {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #0066ff;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -238,7 +238,7 @@
 
 .premium-input-group label {
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--admin-text-light);
 }
 
@@ -301,7 +301,7 @@ textarea.premium-input {
   color: var(--admin-text);
   padding: 12px 24px;
   border-radius: 10px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -317,7 +317,7 @@ textarea.premium-input {
   color: #fff;
   padding: 12px 28px;
   border-radius: 10px;
-  font-weight: 800;
+  font-weight: 400;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.2s ease;

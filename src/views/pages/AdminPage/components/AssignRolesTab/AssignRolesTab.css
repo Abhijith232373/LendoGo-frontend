@@ -90,7 +90,7 @@ input:disabled + .slider-round:before {
 
 .staff-action-toast .toast-title {
   color: var(--admin-text);
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.9rem;
 }
 
@@ -183,7 +183,7 @@ input:disabled + .slider-round:before {
   background-color: transparent;
   border: 1px solid rgba(150, 150, 150, 0.4);
   color: var(--admin-text);
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: 0.2s ease-in-out;
 }
