@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "./AdminSidebar.css";
+import LogoImg from '../../../../../assets/lendogoLogo.png';
 
 const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode, collapsed, setCollapsed, pendingChatCount = 0, hasPermission = () => true }) => {
   const [expandedGroups, setExpandedGroups] = useState({ Administrative: true });
@@ -93,7 +94,7 @@ const AdminSidebar = ({ navItems, activeTab, setActiveTab, darkMode, setDarkMode
     <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
         <div className="sidebar-brand-group">
-          <div className="admin-logo-icon">L</div>
+          <img src={LogoImg} alt="LendoGO Logo" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(0, 102, 255, 0.25)' }} />
           {!collapsed && (
             <span className="admin-logo-text">LendoGO <span className="admin-badge-pill">Admin</span></span>
           )}

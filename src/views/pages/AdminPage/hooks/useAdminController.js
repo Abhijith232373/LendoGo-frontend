@@ -41,12 +41,12 @@ export const useAdminController = () => {
   const [disbursedCapital, setDisbursedCapital] = useState(0);
 
   // Admin Personal Detail States
-  const [adminAvatar, setAdminAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
-  const [adminName, setAdminName] = useState(user?.name || 'Admin Flow');
-  const [adminEmail, setAdminEmail] = useState(user?.email || 'admin.flow@lendogo.com');
+  const [adminAvatar, setAdminAvatar] = useState(user?.avatar || '');
+  const [adminName, setAdminName] = useState(user?.name || '');
+  const [adminEmail, setAdminEmail] = useState(user?.email || '');
 
   // Input States for Settings Forms
-  const [emailInput, setEmailInput] = useState('admin.flow@lendogo.com');
+  const [emailInput, setEmailInput] = useState(user?.email || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -729,7 +729,7 @@ export const useAdminController = () => {
   // ─── SETTINGS HANDLERS ───
 
   // 1. Upload Admin Photo to AWS S3
-  const handleSimulatePhotoUpload = async (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const formData = new FormData();
@@ -760,13 +760,36 @@ export const useAdminController = () => {
     }
   };
 
-  // 2. Email Address Change
-  const handleUpdateAdminEmail = (e) => {
+  // 2. Profile Details Change (Name and Email)
+  const handleUpdateAdminEmail = async (e) => {
     e.preventDefault();
-    if (!emailInput.trim()) return;
-    setAdminEmail(emailInput);
-    addAuditLog(`Admin email updated to ${emailInput}`, 'info');
-    alert(`Lending Officer email successfully set to ${emailInput}.`);
+    if (!emailInput.trim() || !adminName.trim()) return;
+
+    try {
+      const res = await apiClient('/admin/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ full_name: adminName, email: emailInput })
+      });
+
+      setAdminEmail(emailInput);
+      
+      const userDataStr = localStorage.getItem('lendogo_user');
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userData.email = emailInput;
+        userData.full_name = adminName;
+        localStorage.setItem('lendogo_user', JSON.stringify(userData));
+      }
+
+      addAuditLog(`Admin profile updated (Name: ${adminName}, Email: ${emailInput})`, 'info');
+      alert(`Profile details updated successfully.`);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      alert(`Failed to update profile: ${err.message}`);
+    }
   };
 
   // 3. Password Reset
@@ -870,7 +893,7 @@ export const useAdminController = () => {
     handleAddStaff,
     handleUpdateStaffRole,
     handleSaveWebConfig,
-    handleSimulatePhotoUpload,
+    handlePhotoUpload,
     handleUpdateAdminEmail,
     handleUpdateAdminPassword,
     handleTransferOwnership,

@@ -148,7 +148,7 @@ export const AuthProvider = ({ children }) => {
       const loggedInUser = new UserModel({
         id: backendUser.id || 'unknown',
         email: backendUser.email || email,
-        name: backendUser.fullName || backendUser.name || 'LendoGO User', // Map Go's snake_case
+        name: backendUser.full_name || backendUser.fullName || backendUser.name || 'LendoGO User', // Map Go's snake_case
         avatar: backendUser.avatar || '',
         role: backendUser.role || 'user',              // Capture the role!
         permissions: getEffectivePermissions(backendUser.permissions || {}),    // Capture permissions!

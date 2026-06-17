@@ -6,7 +6,7 @@ const AdminSettingsTab = ({
   adminName,
   setAdminName,
   adminEmail,
-  handleSimulatePhotoUpload,
+  handlePhotoUpload,
   handleUpdateAdminEmail,
   emailInput,
   setEmailInput,
@@ -61,7 +61,7 @@ const AdminSettingsTab = ({
                 <input 
                   type="file" 
                   accept="image/*" 
-                  onChange={handleSimulatePhotoUpload}
+                  onChange={handlePhotoUpload}
                   className="file-input-hidden"
                 />
               </label>

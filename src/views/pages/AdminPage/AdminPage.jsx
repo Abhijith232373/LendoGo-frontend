@@ -119,7 +119,7 @@ const AdminPage = () => {
     handleAddStaff,
     handleUpdateStaffRole,
     handleSaveWebConfig,
-    handleSimulatePhotoUpload,
+    handlePhotoUpload,
     handleUpdateAdminEmail,
     handleUpdateAdminPassword,
     handleTransferOwnership,
@@ -636,7 +636,7 @@ const AdminPage = () => {
                 adminName={adminName}
                 setAdminName={setAdminName}
                 adminEmail={adminEmail}
-                handleSimulatePhotoUpload={handleSimulatePhotoUpload}
+                handlePhotoUpload={handlePhotoUpload}
                 handleUpdateAdminEmail={handleUpdateAdminEmail}
                 emailInput={emailInput}
                 setEmailInput={setEmailInput}
