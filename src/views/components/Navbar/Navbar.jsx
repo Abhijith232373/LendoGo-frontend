@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './Navbar.css';
-import LogoImg from '../../../assets/lendogoLogo.png';
 import ConsultationModal from '../ConsultationModal/ConsultationModal';
 import TrustScoreView from './TrustScoreView';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
@@ -1422,7 +1421,7 @@ const Navbar = () => {
     <nav className={`navbar ${showNavbar ? '' : 'navbar--hidden'}`} ref={navbarRef}>
       <div className="navbar-container">
         <div className="navbar-logo" onClick={() => navigate(user.isAuthenticated ? '/home' : '/')} style={{ cursor: 'pointer' }}>
-          <img src={LogoImg} alt="LendoGO Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686372/lendogoLogo_lh4jjw.png" alt="LendoGO Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
           <span className="logo-text">LendoGO</span>
         </div>
 

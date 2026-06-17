@@ -5,20 +5,6 @@ import Footer from '../../../components/Footer/Footer';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
 import './ProductPage.css';
 
-// Import brand new custom-generated 3D visual assets
-import personalVisual from '../../../../assets/personal_loan_visual.png';
-import personalSecondary from '../../../../assets/personal_loan_secondary.png';
-import businessVisual from '../../../../assets/business_loan_visual.png';
-import businessSecondary from '../../../../assets/business_loan_secondary.png';
-import homeVisual from '../../../../assets/home_loan_visual.png';
-import homeSecondary from '../../../../assets/home_loan_secondary.png';
-import propertyVisual from '../../../../assets/property_loan_visual.png';
-import propertySecondary from '../../../../assets/property_loan_secondary.png';
-import instantVisual from '../../../../assets/instant_loan_visual.png';
-import instantSecondary from '../../../../assets/instant_loan_secondary.png';
-import creditBuilderVisual from '../../../../assets/credit_builder_visual.png';
-import creditBuilderSecondary from '../../../../assets/credit_builder_secondary.png';
-
 const PRODUCT_DATA_MAP = {
   personal: {
     title: "Elite Personal Funding",
@@ -33,8 +19,8 @@ const PRODUCT_DATA_MAP = {
       "Flexible repayments with tenures ranging up to 60 months",
       "100% digital trace-free compliance verification"
     ],
-    imgLeft: personalVisual,
-    imgRight: personalSecondary
+    imgLeft: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/personal_loan_visual_mei861.png',
+    imgRight: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686367/personal_loan_secondary_vr20ul.png'
   },
   business: {
     title: "Strategic Business Capital",
@@ -49,8 +35,8 @@ const PRODUCT_DATA_MAP = {
       "Tax savings advantages on asset-backed equipment loans",
       "Priority customer help desk with dedicated credit analysts"
     ],
-    imgLeft: businessVisual,
-    imgRight: businessSecondary
+    imgLeft: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/business_loan_visual_q5n2m9.png',
+    imgRight: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/business_loan_secondary_wf9gzd.png'
   },
   home: {
     title: "Premium Home Mortgages",
@@ -65,8 +51,8 @@ const PRODUCT_DATA_MAP = {
       "Up to 90% funding of the total property registration cost",
       "Home balance transfer coordinates with zero processing fees"
     ],
-    imgLeft: homeVisual,
-    imgRight: homeSecondary
+    imgLeft: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686370/home_loan_visual_ivaztw.png',
+    imgRight: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686369/home_loan_secondary_mt6fj4.png'
   },
   property: {
     title: "Sovereign Asset Liquidity",
@@ -81,8 +67,8 @@ const PRODUCT_DATA_MAP = {
       "Accepted coordinates: Commercial, residential, or raw plots",
       "Symmetric balance settlement schedules with flexible auto-debit"
     ],
-    imgLeft: propertyVisual,
-    imgRight: propertySecondary
+    imgLeft: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686369/property_loan_visual_uwdagy.png',
+    imgRight: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/property_loan_secondary_ory7cb.png'
   },
   instant: {
     title: "Nano Instant Credit",
@@ -97,8 +83,8 @@ const PRODUCT_DATA_MAP = {
       "Zero prepayment penalty fees after the first installment",
       "Auto-credit upgrade coordinate limits upon prompt repayment"
     ],
-    imgLeft: instantVisual,
-    imgRight: instantSecondary
+    imgLeft: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686370/instant_loan_visual_mjoce2.png',
+    imgRight: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686370/instant_loan_secondary_wdurpx.png'
   },
   'credit-builder': {
     title: "Credit Catalyst Builder",
@@ -113,8 +99,8 @@ const PRODUCT_DATA_MAP = {
       "Proven boost to credit score access coordinates within 90 days",
       "Refundable deposit terms with high-yield interest options"
     ],
-    imgLeft: creditBuilderVisual,
-    imgRight: creditBuilderSecondary
+    imgLeft: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/credit_builder_visual_jbzuju.png',
+    imgRight: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/credit_builder_secondary_z2kfvc.png'
   }
 };
 

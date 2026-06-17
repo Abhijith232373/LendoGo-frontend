@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { useAuthController } from '../../../controllers/auth/useAuthController';
 import { useWebConfig } from '../../../context/WebConfigContext';
 import './ChatWidget.css';
-import askCredyAvatar from '../../../assets/ask_credy_avatar.webp';
 
 const ChatWidget = () => {
   const { user } = useAuthController();
@@ -203,7 +202,7 @@ const ChatWidget = () => {
           title="Ask Credy Support"
           aria-label="Ask Credy Support"
         >
-          <img src={askCredyAvatar} alt="Credy Avatar" className="credy-chat-fab-img" />
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686366/ask_credy_avatar_tp1jsb.webp" alt="Credy Avatar" className="credy-chat-fab-img" />
         </button>
       )}
 
@@ -216,7 +215,7 @@ const ChatWidget = () => {
             <p className="credy-chat-subtitle">How can I help you today?</p>
             
             <div className="credy-chat-header-avatar">
-              <img src={askCredyAvatar} alt="Credy Avatar" />
+              <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686366/ask_credy_avatar_tp1jsb.webp" alt="Credy Avatar" />
             </div>
 
             <button 

@@ -4,7 +4,6 @@ import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import hiringImg from '../../../../assets/hiring.jpg';
 import { 
   TrendingUp, 
   Building, 
@@ -68,7 +67,7 @@ const CareersPage = () => {
         <ScrollReveal variant="fade-left" delay={0.15} className="careers-hero-image-wrap" style={{ position: 'relative', zIndex: 2 }}>
           <div className="careers-hero-image-glow" />
           <img
-            src={hiringImg}
+            src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686369/hiring_e1e1ee.jpg"
             alt="LendoGO is Hiring"
             className="careers-hero-image"
           />

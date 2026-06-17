@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
-import LogoImg from '../../../../assets/lendogoLogo.png';
 import './LoanApplyPage.css';
 
 const STEPS = [
@@ -75,7 +74,7 @@ const LoanApplyLayout = ({ children }) => {
           onClick={() => navigate('/home')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <img src={LogoImg} alt="LendoGO Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686372/lendogoLogo_lh4jjw.png" alt="LendoGO Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
           <div>Lendo<span>Go</span></div>
         </div>
 

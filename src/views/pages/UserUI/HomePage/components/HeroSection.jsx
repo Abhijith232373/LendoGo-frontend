@@ -1,5 +1,4 @@
 import React from 'react';
-import homeImg from '../../../../../assets/home.jpg';
 import ParallaxShapes from '../../../../components/ParallaxShapes/ParallaxShapes';
 
 const HeroSection = ({ navigate }) => {
@@ -50,7 +49,7 @@ const HeroSection = ({ navigate }) => {
 
         <div className="hero-right-image animate-fade-in-right">
           <div className="hero-image-backdrop" />
-          <img src={homeImg} alt="LendoGo Success Couple" className="hero-banner-img" />
+          <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686370/home_wodrko.jpg" alt="LendoGo Success Couple" className="hero-banner-img" />
         </div>
       </div>
     </section>

@@ -39,7 +39,7 @@ const BlogManagementTab = ({ showToast }) => {
       id: 1,
       title: 'How Lenders Verify Your Income Without Salary Slips',
       category: 'Loan Basics',
-      image: '/src/assets/personal_loan_visual.png',
+      image: 'https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686368/personal_loan_visual_mei861.png',
       summary: 'Modern lenders use automated bank statement analysis, GST/Tax filings, and AI-driven data verification tools to verify income streams, allowing self-employed individuals to qualify for credit without traditional salary slips. This guide covers how these digital validations work.',
       description: 'Securing credit without salary slips was once impossible. Today, digital verification technology allows lenders to assess creditworthiness using bank statement analyzers, business turnover audits, tax returns, and digital transaction history. By analyzing your cash flow directly, automated scoring engines can approve personal or business capital in real time. Self-employed borrowers can optimize their chances by maintaining clean transaction records and avoiding excessive bounce penalties.',
       date: '02 Jun 2026',

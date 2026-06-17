@@ -4,7 +4,6 @@ import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import jobAppImg from '../../../../assets/jobapplication.png';
 import './JobApplyPage.css';
 
 /* ── icons ── */
@@ -231,12 +230,12 @@ const JobApplyPage = () => {
         <ScrollReveal variant="fade-right" className="ja-image-col">
           <div style={{ height: '100%' }}>
             <img
-              src={jobAppImg}
+              src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686370/jobapplication_waeklq.png"
               alt="Job application illustration"
               className="ja-illustration"
             />
             <div className="ja-image-caption">
-              <h3 className="ja-caption-title">One step closer 🎯</h3>
+              <h3 className="ja-caption-title">One step closer</h3>
               <p className="ja-caption-text">
                 Upload your latest resume and let us know who you are.
                 We'll take it from here.

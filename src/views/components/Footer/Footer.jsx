@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
-import LogoImg from '../../../assets/lendogoLogo.png';
 
 const Footer = () => {
   return (
@@ -12,7 +11,7 @@ const Footer = () => {
           {/* Column 1: Brand & Apps */}
           <div className="footer-col">
             <div className="footer-logo">
-              <img src={LogoImg} alt="LendoGO Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+              <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686372/lendogoLogo_lh4jjw.png" alt="LendoGO Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <span className="logo-text">LendoGO</span>
             </div>
             <p className="company-name">LENDOGO PLATFORMS PRIVATE LIMITED</p>

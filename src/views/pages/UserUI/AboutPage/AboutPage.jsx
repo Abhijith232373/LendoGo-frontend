@@ -4,7 +4,6 @@ import { Zap, FileText, Percent, Lock, Target, ShieldCheck, Award, CheckCircle, 
 import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
-import aboutHeroImg from '../../../../assets/about_hero.png';
 import './AboutPage.css';
 
 const AboutPage = () => {
@@ -134,7 +133,7 @@ const AboutPage = () => {
 
           <div className="about-hero-right reveal-on-scroll fade-in-right">
             <div className="image-backdrop-gradient" />
-            <img src={aboutHeroImg} alt="LendoGo Fintech Team" className="about-hero-image" />
+            <img src="https://res.cloudinary.com/dfyhke26f/image/upload/q_auto/f_auto/v1781686366/about_hero_qvsjsk.png" alt="LendoGo Fintech Team" className="about-hero-image" />
           </div>
         </div>
       </section>
