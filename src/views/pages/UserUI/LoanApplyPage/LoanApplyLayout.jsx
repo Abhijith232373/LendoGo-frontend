@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
 import ScrollReveal from '../../../components/ScrollReveal/ScrollReveal';
 import './LoanApplyPage.css';
+import { apiClient } from '../../../../utils/apiClient';
 
 const STEPS = [
   { label: 'APPLICANT', path: '/loan/apply/details', icon: 'applicant' },
@@ -57,6 +58,48 @@ const StepIcon = ({ type }) => {
 const LoanApplyLayout = ({ children }) => {
   const location = useLocation();
   const navigate  = useNavigate();
+
+  useEffect(() => {
+    // If we are on the final status step, do not redirect
+    if (location.pathname === '/loan/apply/disbursal') return;
+
+    const checkActiveLoan = async () => {
+      try {
+        const res = await apiClient('/loans/my-loans');
+        if (res && res.loans) {
+          const active = res.loans.find(l => ['ACTIVE', 'APPROVED', 'DISBURSED', 'UNDER_REVIEW', 'PENDING'].includes(l.status));
+          if (active) {
+            if (active.status === 'APPROVED' || active.status === 'DISBURSED' || active.status === 'ACTIVE') {
+              window.dispatchEvent(new CustomEvent('lendogo-toast', {
+                detail: {
+                  message: `You already have an approved loan (${active.reference_number || active.id}). Redirecting to repayment area...`,
+                  type: 'info'
+                }
+              }));
+              navigate('/home');
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('open-user-sidebar', { detail: { view: 'repayment' } }));
+              }, 300);
+            } else {
+              window.dispatchEvent(new CustomEvent('lendogo-toast', {
+                detail: {
+                  message: `You already have a loan under review (${active.reference_number || active.id}). Redirecting to loan history...`,
+                  type: 'info'
+                }
+              }));
+              navigate('/home');
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('open-user-sidebar', { detail: { view: 'loan' } }));
+              }, 300);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error checking active loan:", err);
+      }
+    };
+    checkActiveLoan();
+  }, [location.pathname, navigate]);
 
   // Match current step ignoring query params
   const currentIndex = STEPS.findIndex(s =>
