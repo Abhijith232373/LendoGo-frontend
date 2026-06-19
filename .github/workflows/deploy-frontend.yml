@@ -22,6 +22,15 @@ jobs:
           npm install
           npm run build
 
+      - name: Ensure target directory exists on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/LendoGo-frontend/dist
+
       - name: Copy build to Frontend EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -29,7 +38,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           source: "dist/*"
-          target: "/home/ubuntu/LendoGo-frontend"
+          target: "/home/ubuntu/LendoGo-frontend/dist/"
           strip_components: 1
 
       - name: Reload Nginx
@@ -40,5 +49,3 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
             sudo systemctl reload nginx
-
-
