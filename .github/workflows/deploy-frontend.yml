@@ -9,51 +9,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies and build
-        run: |
-          npm install
-          npm run build
-
-      - name: Add EC2 to known_hosts (fix host key verification)
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H 13.62.123.127 >> ~/.ssh/known_hosts
-
-      - name: Ensure target directory exists and set permissions
+      - name: Deploy to Frontend EC2
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.FRONTEND_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            mkdir -p /home/ubuntu/LendoGo-frontend/dist
-            sudo chown -R ubuntu:ubuntu /home/ubuntu/LendoGo-frontend
-            chmod 755 /home/ubuntu/LendoGo-frontend/dist
-
-      - name: Copy build to Frontend EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.FRONTEND_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: "dist/*"
-          target: "/home/ubuntu/LendoGo-frontend/dist/"
-          strip_components: 1
-          useInsecureCipher: true   # Skip host key check
-
-      - name: Reload Nginx
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.FRONTEND_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
+            cd /home/ubuntu/LendoGo-frontend
+            git pull origin main
+            npm install
+            npm run build
             sudo systemctl reload nginx
