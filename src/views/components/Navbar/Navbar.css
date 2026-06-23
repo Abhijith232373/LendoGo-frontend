@@ -193,34 +193,47 @@
   border-top: 1px solid var(--border-color);
   padding: 0;
   max-height: 0;
-  overflow: hidden;
+  overflow-y: hidden;
   transition: max-height 0.4s ease, padding 0.3s ease;
 }
 
 .mobile-menu--open {
-  max-height: 100vh;
+  max-height: calc(100vh - 75px);
   padding: 1rem 0 1.5rem;
+  overflow-y: auto;
 }
 
 .mobile-link {
-  display: block;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text-dark);
+  color: #334155;
   text-decoration: none;
   border: none;
+  border-bottom: 1px solid #f1f5f9;
   background: transparent;
   width: 100%;
   text-align: left;
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.mobile-link:last-child {
+  border-bottom: none;
 }
 
 .mobile-link:hover,
 .mobile-link.active {
   color: var(--primary);
-  background-color: rgba(0, 102, 255, 0.04);
+  background-color: #f8fafc;
+}
+
+.mobile-link-primary {
+  color: var(--primary);
+  font-weight: 600;
+  background-color: rgba(0, 102, 255, 0.02);
 }
 
 .mobile-link--toggle {
@@ -256,16 +269,53 @@
 
 .mobile-actions {
   display: flex;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem 0;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 0.5rem;
 }
 
 .mobile-actions .btn-outline,
 .mobile-actions .btn-primary {
-  flex: 1;
+  width: 100%;
+  padding: 0.8rem;
   text-align: center;
-  min-width: 120px;
+}
+
+.mobile-divider {
+  display: none;
+}
+
+.mobile-user-header {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  margin-top: 0.5rem;
+}
+
+.mobile-user-header .mobile-username {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mobile-user-header .mobile-useremail {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.mobile-link.mobile-sign-out {
+  color: #ef4444;
+}
+
+.mobile-link.mobile-sign-out:hover {
+  color: #dc2626;
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 /* ─── Responsive breakpoints ─────────────────────────────── */
@@ -288,6 +338,21 @@
 
   .navbar-container {
     padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-logo img {
+    display: none !important;
+  }
+  
+  .navbar-logo::after {
+    content: "LendoGo";
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 

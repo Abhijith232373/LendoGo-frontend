@@ -238,29 +238,35 @@
   }
   
   .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    text-align: center;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1.5rem;
+    text-align: left;
+  }
+
+  .footer-col:first-child {
+    grid-column: span 2;
   }
 
   .footer-col {
-    align-items: center;
+    align-items: flex-start;
   }
 
   .footer-logo {
-    justify-content: center;
+    display: none !important;
   }
 
   .social-icons {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .app-badges {
-    align-items: center;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .footer-links {
-    align-items: center;
+    align-items: flex-start;
   }
 
   .footer-bottom {

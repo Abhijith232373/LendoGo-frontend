@@ -1301,6 +1301,17 @@ const Navbar = () => {
     return () => window.removeEventListener('lendogo-toast', handleToastEvent);
   }, []);
 
+  useEffect(() => {
+    const handleOpenSidebar = (e) => {
+      if (e.detail && e.detail.view) {
+        setSidebarInitialView(e.detail.view);
+      }
+      setProfileDropdownOpen(true);
+    };
+    window.addEventListener('open-user-sidebar', handleOpenSidebar);
+    return () => window.removeEventListener('open-user-sidebar', handleOpenSidebar);
+  }, []);
+
   const [profileDp, setProfileDp] = useState(() => {
     return getCleanDpUrl(localStorage.getItem('user_dp'));
   });
@@ -1640,60 +1651,55 @@ const Navbar = () => {
           )}
         </div>
 
-        <div className="mobile-actions">
-          <button className="btn-outline" onClick={() => {
-            if (webConfig && webConfig.free_consultation_enabled === false) {
-              setMenuOpen(false);
-              showToast("This feature is currently temporarily disabled by the administrator.", "warning");
-            } else {
-              setModalOpen(true);
-              setMenuOpen(false);
-            }
-          }}>Free Consultation</button>
-          
-          {user.isAuthenticated ? (
-            <div className="mobile-profile-info">
-              <div className="mobile-avatar-badge" style={{ overflow: 'hidden', padding: 0 }}>
-                <img 
-                  src={profileDp} 
-                  alt="User Avatar" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-              </div>
-              <div className="mobile-user-details">
-                <span className="mobile-username">{fullName || getFallbackName()}</span>
-                <span className="mobile-useremail">{user.email}</span>
-              </div>
-              <div className="mobile-profile-links">
-                <Link to="/home" className="mobile-profile-link-item" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-                <button 
-                  type="button" 
-                  className="mobile-profile-link-item"
-                  onClick={() => {
-                    setSidebarInitialView('profile');
-                    setProfileDropdownOpen(true);
-                    setMenuOpen(false);
-                  }}
-                >
-                  My Profile
-                </button>
-                <button 
-                  type="button"
-                  className="mobile-profile-link-item mobile-sign-out" 
-                  onClick={() => {
-                    signOut();
-                    setMenuOpen(false);
-                    navigate('/');
-                  }}
-                >
-                  Sign Out
-                </button>
-              </div>
+        <button className="mobile-link mobile-link-primary" onClick={() => {
+          if (webConfig && webConfig.free_consultation_enabled === false) {
+            setMenuOpen(false);
+            showToast("This feature is currently temporarily disabled by the administrator.", "warning");
+          } else {
+            setModalOpen(true);
+            setMenuOpen(false);
+          }
+        }}>
+          Free Consultation
+        </button>
+
+        <div className="mobile-divider"></div>
+
+        {user.isAuthenticated ? (
+          <>
+            <div className="mobile-user-header">
+              <span className="mobile-username">{fullName || getFallbackName()}</span>
+              <span className="mobile-useremail">{user.email}</span>
             </div>
-          ) : (
-            <button className="btn-primary" onClick={() => { navigate('/'); setMenuOpen(false); }}>Sign In</button>
-          )}
-        </div>
+            <Link to="/home" className="mobile-link" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            <button 
+              type="button" 
+              className="mobile-link"
+              onClick={() => {
+                setSidebarInitialView('profile');
+                setProfileDropdownOpen(true);
+                setMenuOpen(false);
+              }}
+            >
+              My Profile
+            </button>
+            <button 
+              type="button"
+              className="mobile-link mobile-sign-out" 
+              onClick={() => {
+                signOut();
+                setMenuOpen(false);
+                navigate('/');
+              }}
+            >
+              Sign Out
+            </button>
+          </>
+        ) : (
+          <div className="mobile-actions" style={{ marginTop: '1rem', borderTop: 'none', padding: '0 1.5rem 1rem' }}>
+            <button className="btn-primary" style={{ width: '100%' }} onClick={() => { navigate('/'); setMenuOpen(false); }}>Sign In</button>
+          </div>
+        )}
       </div>
     </nav>
 

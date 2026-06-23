@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import ParallaxShapes from '../../../components/ParallaxShapes/ParallaxShapes';
+import { apiClient } from '../../../../utils/apiClient';
 import './ProductPage.css';
 
 const PRODUCT_DATA_MAP = {
@@ -151,24 +152,35 @@ const ProductPage = () => {
     };
   }, [type]);
 
-  const handleApplyClick = () => {
-    // Check if there is an active loan that is not closed
-    const activeLoanStr = localStorage.getItem('lendogo_active_loan');
-    if (activeLoanStr) {
-      try {
-        const activeLoan = JSON.parse(activeLoanStr);
-        if (activeLoan && activeLoan.status === 'ACTIVE') {
-          window.dispatchEvent(new CustomEvent('lendogo-toast', {
-            detail: {
-              message: `You already have an active loan (${activeLoan.id}). Please pay it off entirely to unlock the ability to apply for a new loan!`,
-              type: 'error'
-            }
-          }));
-          return;
+  const handleApplyClick = async () => {
+    try {
+      const res = await apiClient('/loans/my-loans');
+      if (res && res.loans) {
+        const active = res.loans.find(l => ['ACTIVE', 'APPROVED', 'DISBURSED', 'UNDER_REVIEW', 'PENDING'].includes(l.status));
+        if (active) {
+          if (active.status === 'APPROVED' || active.status === 'DISBURSED' || active.status === 'ACTIVE') {
+            window.dispatchEvent(new CustomEvent('lendogo-toast', {
+              detail: {
+                message: `You already have an approved loan (${active.reference_number || active.id}). Redirecting to repayment area...`,
+                type: 'info'
+              }
+            }));
+            window.dispatchEvent(new CustomEvent('open-user-sidebar', { detail: { view: 'repayment' } }));
+            return;
+          } else {
+            window.dispatchEvent(new CustomEvent('lendogo-toast', {
+              detail: {
+                message: `You already have a loan under review (${active.reference_number || active.id}). Redirecting to loan history...`,
+                type: 'info'
+              }
+            }));
+            window.dispatchEvent(new CustomEvent('open-user-sidebar', { detail: { view: 'loan' } }));
+            return;
+          }
         }
-      } catch (err) {
-        console.error("Error reading active loan state:", err);
       }
+    } catch (err) {
+      console.error("Error fetching active loan state:", err);
     }
     // Navigates directly to our core 5-step wizard with the corresponding product query param
     navigate(`/loan/apply/details?type=${productKey}`);
